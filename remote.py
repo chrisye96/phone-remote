@@ -3,6 +3,7 @@
 只用 Python 标准库，Windows 和 macOS 通用。
 用法：python remote.py
 """
+import base64
 import ctypes
 import json
 import os
@@ -11,6 +12,7 @@ import socket
 import struct
 import subprocess
 import sys
+import threading
 import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -40,6 +42,10 @@ for digit, code in enumerate(MAC_DIGITS):
     KEYS[str(digit)] = (0x30 + digit, code)
 for n, code in enumerate(MAC_FKEYS):
     KEYS["f%d" % (n + 1)] = (0x70 + n, code)
+
+
+# 电脑上的播放状态：playing 为 True / False，读不到时为 None
+MEDIA = {"playing": None, "title": ""}
 
 
 def parse_combo(combo):
@@ -202,6 +208,54 @@ if sys.platform == "win32":
             user32.SetForegroundWindow(hwnd)
             user32.AttachThreadInput(ours, theirs, False)
 
+    # 用系统的“媒体控制”接口读播放状态（浏览器和大多数播放器都会上报）。
+    # 这个接口只能从 PowerShell 里方便地调用，所以常驻一个子进程，状态变了就输出一行。
+    MEDIA_SCRIPT = r"""
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1' })[0]
+function Await($op, $type) { $t = $asTask.MakeGenericMethod($type).Invoke($null, @($op)); $t.Wait(-1) | Out-Null; $t.Result }
+$mgrType = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager, Windows.Media.Control, ContentType=WindowsRuntime]
+$propsType = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionMediaProperties, Windows.Media.Control, ContentType=WindowsRuntime]
+$mgr = Await ($mgrType::RequestAsync()) $mgrType
+$last = ''
+while (Get-Process -Id PARENT_PID -ErrorAction SilentlyContinue) {
+  $line = 'None'
+  try {
+    $pick = $mgr.GetCurrentSession()
+    foreach ($s in $mgr.GetSessions()) { if ("$($s.GetPlaybackInfo().PlaybackStatus)" -eq 'Playing') { $pick = $s; break } }
+    if ($pick) {
+      $title = ''
+      try { $title = (Await ($pick.TryGetMediaPropertiesAsync()) $propsType).Title } catch {}
+      $line = "$($pick.GetPlaybackInfo().PlaybackStatus)`t$title"
+    }
+  } catch {}
+  if ($line -ne $last) { [Console]::Out.WriteLine($line); $last = $line }
+  Start-Sleep -Milliseconds 600
+}
+"""
+
+    def start_media_watch():
+        script = MEDIA_SCRIPT.replace("PARENT_PID", str(os.getpid()))
+        exe = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"),
+                           "System32", "WindowsPowerShell", "v1.0", "powershell.exe")
+        encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
+        try:
+            proc = subprocess.Popen(
+                [exe, "-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded],
+                stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                encoding="utf-8", errors="replace", creationflags=0x08000000)
+        except OSError:
+            return
+
+        def read():
+            for line in proc.stdout:
+                status, _, title = line.rstrip("\r\n").partition("\t")
+                MEDIA["playing"] = {"Playing": True, "Paused": False, "Stopped": False}.get(status)
+                MEDIA["title"] = title
+
+        threading.Thread(target=read, daemon=True).start()
+
     def check_permission():
         return True
 
@@ -325,6 +379,9 @@ elif sys.platform == "darwin":
                    'tell application "System Events" to set frontmost of process (item 1 of argv) to true',
                    "end run", args=[name])
 
+    def start_media_watch():
+        pass  # macOS 没有公开的接口读“正在播放”，状态保持未知
+
     def check_permission():
         return cg.AXIsProcessTrusted()
 
@@ -340,6 +397,8 @@ def handle_action(msg):
     action = msg.get("a")
     if action == "ping":
         pass
+    elif action == "state":
+        return MEDIA
     elif action == "windows":
         return list_windows()
     elif action == "focus":
@@ -450,6 +509,7 @@ def main():
         print("\n还没有控制权限：打开 系统设置 > 隐私与安全性 > 辅助功能，")
         print("把运行本程序的“终端”打开，然后重新启动本程序。")
     print("\n用的时候保持这个窗口开着，关掉窗口就是退出。")
+    start_media_watch()
     if "--no-browser" not in sys.argv:
         webbrowser.open("http://127.0.0.1:%d/pair" % PORT)
     try:
