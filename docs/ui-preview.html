@@ -63,6 +63,26 @@
   .new .bar .play { width:60px; height:60px; border-radius:50%; background:var(--play); justify-self:center; box-shadow:0 0 0 5px rgba(91,140,255,.22); } .new .bar .play .ti { font-size:28px; color:#fff; margin:0; }
   .new .nav { display:flex; margin:0 -14px; padding:6px 14px 10px; background:var(--panel); border-top:1px solid var(--line); } .new .nav button { flex:1; background:transparent; border:0; box-shadow:none; color:var(--dim); font-size:11px; height:46px; border-radius:12px; }
   .new .nav .ti { font-size:21px; } .new .nav .sel { color:#fff; background:#243357; } .new .nav .sel .ti { color:#8fb0ff; }
+
+  /* ---------- 方案二：分组、胶囊键、大小主次 ---------- */
+  .v2 .rocker { display:flex; background:var(--key); border-radius:14px; border-top:1px solid rgba(255,255,255,.14); box-shadow:0 2px 0 rgba(0,0,0,.45); overflow:hidden; }
+  .v2 .rocker button { flex:1; background:transparent; border:0; box-shadow:none; border-radius:0; }
+  .v2 .rocker button + button { border-left:1px solid rgba(255,255,255,.16); }
+  .v2 .rocker.col { flex-direction:column; width:48px; } .v2 .rocker.col button { height:auto; } .v2 .rocker.col button + button { border-left:0; border-top:1px solid rgba(255,255,255,.16); }
+  .v2 .rocker.c-play { background:#243357; } .v2 .rocker.c-vol { background:#17403b; } .v2 .rocker.c-vol .ti { color:#5fe0c5; } .v2 .rocker.c-play .ti { color:#8fb0ff; }
+  .v2 .rocker .mid { flex:.8; font-size:11px; color:#bfeee3; }
+  .v2 .row { display:grid; gap:8px; }
+  .v2 .group { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:9px; display:flex; flex-direction:column; gap:8px; }
+  .v2 .group.bili { border-color:rgba(251,114,153,.45); }
+  .v2 .big { font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px; } .v2 .big .ti { display:inline; font-size:21px; margin:0; }
+  .v2 .tabs { display:flex; gap:4px; margin:-1px 0 0; } .v2 .tabs button { flex:1; height:28px; font-size:12px; border-radius:14px; background:transparent; border:0; box-shadow:none; color:var(--dim); display:flex; align-items:center; justify-content:center; gap:5px; }
+  .v2 .tabs em { width:7px; height:7px; border-radius:50%; display:inline-block; } .v2 .tabs .sel { background:#3b2030; color:#fff; }
+  .v2 .bar2 { display:grid; grid-template-columns:104px 1fr 50px; gap:8px; align-items:center; }
+  .v2 .seek { display:grid; grid-template-columns:1fr 64px 1fr; align-items:center; height:68px; border-radius:34px; background:var(--panel); border:1px solid var(--line); }
+  .v2 .seek button { background:transparent; border:0; box-shadow:none; } .v2 .seek button .ti { font-size:24px; margin:0; }
+  .v2 .seek .play { width:60px; height:60px; border-radius:50%; background:var(--play); box-shadow:0 0 0 5px rgba(91,140,255,.22); } .v2 .seek .play .ti { font-size:28px; color:#fff; }
+  .v2 .bar2 .rocker { height:54px; } .v2 .bar2 .rocker button { height:54px; } .v2 .bar2 .rocker .ti { font-size:22px; margin:0; }
+  .v2 .mute { height:54px; }
   .legend { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:22px; font-size:13px; color:#c6cbd6; }
   .legend span::before { content:""; display:inline-block; width:12px; height:12px; border-radius:4px; margin-right:6px; vertical-align:-1px; background:var(--c); }
 </style>
@@ -88,7 +108,7 @@
   </figure>
 
   <figure>
-    <figcaption>方案</figcaption>
+    <figcaption>方案一：上色加图标，仍是平铺</figcaption>
     <div class="phone new">
       <div class="head"><span class="dot"></span><span>Luna</span><span class="vol"><i class="ti ti-volume"></i> 30</span></div>
       <div class="card">
@@ -122,6 +142,44 @@
         <button class="play"><i class="ti ti-player-pause"></i></button>
         <button><i class="ti ti-player-track-next"></i>快进</button>
         <button class="v"><i class="ti ti-volume"></i>音量 +</button>
+      </div>
+      <div class="nav"><button class="sel"><i class="ti ti-device-tv"></i><br>播放</button><button><i class="ti ti-world"></i><br>浏览</button><button><i class="ti ti-keyboard"></i><br>输入</button><button><i class="ti ti-app-window"></i><br>窗口</button></div>
+    </div>
+  </figure>
+
+  <figure>
+    <figcaption>方案二：分组、胶囊键、大小主次</figcaption>
+    <div class="phone new v2">
+      <div class="head"><span class="dot"></span><span>Luna</span><span class="vol"><i class="ti ti-volume"></i> 30</span></div>
+      <div class="card">
+        <div class="now">群论之美宣传片_哔哩哔哩</div>
+        <div class="time"><span>4:46</span><div class="prog"><i></i><b></b></div><span>13:38</span></div>
+      </div>
+      <div class="padrow">
+        <div class="pad"><i class="ti ti-hand-finger"></i>触控板</div>
+        <div class="rocker col"><button><i class="ti ti-chevron-up"></i></button><button><i class="ti ti-chevron-down"></i></button></div>
+      </div>
+      <div class="row" style="grid-template-columns:2fr 1fr 1fr">
+        <button class="c-play big"><i class="ti ti-maximize"></i>全屏</button>
+        <button class="c-exit"><i class="ti ti-arrow-back-up"></i>退出</button>
+        <button class="c-nav"><i class="ti ti-corner-down-left"></i>确定</button>
+      </div>
+      <div class="group bili">
+        <div class="tabs"><button>通用</button><button class="sel"><em style="background:#fb7299"></em>B站</button><button><em style="background:#ff4e45"></em>YouTube</button><button><em style="background:#1ed760"></em>音乐</button></div>
+        <div class="row" style="grid-template-columns:2fr 1fr 1fr">
+          <div class="rocker c-play"><button><i class="ti ti-player-skip-back"></i>上一集</button><button><i class="ti ti-player-skip-forward"></i>下一集</button></div>
+          <button><i class="ti ti-message-2"></i>弹幕</button>
+          <button><i class="ti ti-thumb-up"></i>点赞</button>
+        </div>
+        <div class="row" style="grid-template-columns:3fr 1fr">
+          <div class="rocker c-vol"><button><i class="ti ti-minus"></i>播放器音量</button><button class="mid"><i class="ti ti-volume-off"></i>静音</button><button><i class="ti ti-plus"></i>播放器音量</button></div>
+          <button><i class="ti ti-star"></i>收藏</button>
+        </div>
+      </div>
+      <div class="bar2">
+        <div class="rocker c-vol"><button><i class="ti ti-volume-2"></i></button><button><i class="ti ti-volume"></i></button></div>
+        <div class="seek"><button><i class="ti ti-player-track-prev"></i></button><button class="play"><i class="ti ti-player-pause"></i></button><button><i class="ti ti-player-track-next"></i></button></div>
+        <button class="c-vol mute"><i class="ti ti-volume-off"></i></button>
       </div>
       <div class="nav"><button class="sel"><i class="ti ti-device-tv"></i><br>播放</button><button><i class="ti ti-world"></i><br>浏览</button><button><i class="ti ti-keyboard"></i><br>输入</button><button><i class="ti ti-app-window"></i><br>窗口</button></div>
     </div>
