@@ -1,0 +1,6 @@
+# 配对码，每台电脑各自生成，不要提交
+token.txt
+
+__pycache__/
+*.pyc
+*.log
