@@ -10,6 +10,12 @@ if not exist ".venv\Scripts\python.exe" (
   echo First run: installing into .venv, this takes a minute...
   python -m venv .venv
   ".venv\Scripts\python.exe" -m pip install -q -e .
+  if errorlevel 1 (
+    echo Install failed. Check the network connection and run this file again.
+    rmdir /s /q .venv
+    pause
+    exit /b 1
+  )
 )
-".venv\Scripts\python.exe" -m phone_remote
-pause
+rem pythonw runs without a console window; the program lives in the system tray.
+start "" ".venv\Scripts\pythonw.exe" -m phone_remote %*

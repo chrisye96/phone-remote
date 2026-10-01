@@ -38,7 +38,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/pair":
             if self.client_address[0] not in LOCAL_ADDRESSES:
                 return self.reply(404)
-            page = pair_page(self.server.phone_url)
+            page = pair_page(self.server.phone_url, self.server.tray_mode)
             return self.reply(200, page.encode("utf-8"), STATIC_TYPES[".html"])
         self.reply_static("index.html" if path == "/" else path.lstrip("/"))
 
@@ -72,9 +72,15 @@ class Handler(BaseHTTPRequestHandler):
         self.reply(200, json.dumps(result).encode("utf-8"), "application/json")
 
 
+class Server(ThreadingHTTPServer):
+    # 默认会允许重复占用端口，在 Windows 上这意味着能同时启动两个，手机会随机连到其中一个
+    allow_reuse_address = False
+
+
 def make_server(port, token, dispatcher, phone_url=""):
-    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    server = Server(("0.0.0.0", port), Handler)
     server.token = token
     server.dispatcher = dispatcher
     server.phone_url = phone_url
+    server.tray_mode = False  # 决定二维码页面上提示“托盘”还是“命令行窗口”
     return server

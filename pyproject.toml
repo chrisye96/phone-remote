@@ -8,6 +8,9 @@ dynamic = ["version"]
 description = "用手机浏览器遥控电脑上的视频播放"
 requires-python = ">=3.9"
 dependencies = [
+    "pystray",
+    "Pillow",
+    "segno",
     "winrt-runtime; sys_platform == 'win32'",
     "winrt-Windows.Media.Control; sys_platform == 'win32'",
     "winrt-Windows.Foundation; sys_platform == 'win32'",
