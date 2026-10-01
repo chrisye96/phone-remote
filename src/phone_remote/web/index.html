@@ -33,6 +33,7 @@
 <!--
   按钮上的属性：
   data-k        按键组合；mod 表示 Windows 的 Ctrl / Mac 的 Command
+  data-cmd      不是按键的指令，比如 playpause
   data-mac      Mac 上写法不同时用的按键组合
   data-repeat   长按连发
   data-only     只在这个系统上显示（win / mac）
@@ -62,13 +63,14 @@
     <button data-site="any">通用</button>
     <button data-site="bili">B站</button>
     <button data-site="yt">YouTube</button>
+    <button data-site="music">音乐</button>
   </div>
 
   <div class="grid site" id="any">
     <button data-k="up" data-repeat>↑</button>
     <button data-k="down" data-repeat>↓</button>
     <button data-k="c">字幕<small>C</small></button>
-    <button data-k="media">播放键<small>后台也有效</small></button>
+    <button data-k="space">空格<small>当前窗口</small></button>
     <button data-rel="-30" data-feature="progress">−30 秒</button>
     <button data-rel="30" data-feature="progress">+30 秒</button>
     <button data-rel="90" data-feature="progress">跳片头<small>+90 秒</small></button>
@@ -93,6 +95,12 @@
     <button data-k="shift+.">加速</button>
     <button data-k="c">字幕</button>
     <button data-k="t">影院模式</button>
+  </div>
+  <div class="grid site" id="music" data-feature="site_keys">
+    <button data-k="prev" data-only="win">上一首</button>
+    <button data-k="next" data-only="win">下一首</button>
+    <button data-rel="-10" data-feature="progress">−10 秒</button>
+    <button data-rel="10" data-feature="progress">+10 秒</button>
   </div>
 </section>
 
@@ -168,7 +176,7 @@
 <div class="bar">
   <button data-k="voldown" data-repeat><svg><use href="#i-voldown"/></svg></button>
   <button data-k="left" data-repeat><svg><use href="#i-rew"/></svg></button>
-  <button class="playbtn" data-k="space" data-state="unknown"><svg class="s-unknown"><use href="#i-play"/></svg><svg class="s-play"><use href="#i-playonly"/></svg><svg class="s-pause"><use href="#i-pause"/></svg></button>
+  <button class="playbtn" data-cmd="playpause" data-state="unknown"><svg class="s-unknown"><use href="#i-play"/></svg><svg class="s-play"><use href="#i-playonly"/></svg><svg class="s-pause"><use href="#i-pause"/></svg></button>
   <button data-k="right" data-repeat><svg><use href="#i-ff"/></svg></button>
   <button data-k="volup" data-repeat><svg><use href="#i-volup"/></svg></button>
 </div>

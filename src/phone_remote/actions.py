@@ -63,6 +63,11 @@ class Dispatcher:
         state["timer"] = self.timer.remaining()
         return state
 
+    def _do_playpause(self, msg):
+        # 优先让系统去通知正在播放的程序，这样音乐软件在后台、视频没被点中时也有效
+        if not self.platform.media_toggle():
+            self.platform.press([], "space")
+
     def _do_seek(self, msg):
         self.platform.media_seek(float(msg.get("to", 0)))
 

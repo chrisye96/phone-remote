@@ -39,6 +39,19 @@ class MediaWatcher:
     def state(self):
         return self._state
 
+    def toggle(self):
+        """播放 / 暂停当前的媒体。系统直接通知那个程序，所以它在后台也有效。"""
+        if not (self._loop and self._session):
+            return False
+        asyncio.run_coroutine_threadsafe(self._toggle(), self._loop)
+        return True
+
+    async def _toggle(self):
+        try:
+            await self._session.try_toggle_play_pause_async()
+        except OSError:
+            pass
+
     def seek(self, seconds):
         if self._loop and self._session:
             asyncio.run_coroutine_threadsafe(self._seek(seconds), self._loop)

@@ -1,6 +1,6 @@
 """按键名表和组合键解析，和操作系统无关。"""
 
-SYSTEM_KEYS = ("volup", "voldown", "mute", "media")
+SYSTEM_KEYS = ("volup", "voldown", "mute", "media", "next", "prev")
 MODIFIERS = ("ctrl", "shift", "alt", "win", "mod")  # mod = Windows 的 Ctrl / Mac 的 Command
 
 # 按键名: (Windows 虚拟键码, macOS 键码)
