@@ -5,11 +5,14 @@ import { toast } from "./status.js";
 
 const STEPS = [15, 30, 60, 90, 0];
 const button = document.getElementById("timer");
-const label = button.querySelector("small");
+const label = button.querySelector("span");
 let step = -1;
 
 export function initTimer() {
-  onState(state => { label.textContent = state.timer ? "剩 " + Math.ceil(state.timer / 60) + " 分钟" : "关"; });
+  onState(state => {
+    label.textContent = state.timer ? "剩 " + Math.ceil(state.timer / 60) + " 分钟" : "定时暂停";
+    button.classList.toggle("c-play", !!state.timer);
+  });
   button.addEventListener("pointerdown", () => {
     button.classList.add("on");
     step = (step + 1) % STEPS.length;

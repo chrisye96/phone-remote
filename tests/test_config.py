@@ -48,6 +48,28 @@ class ConfigTest(unittest.TestCase):
         self.assertTrue(loaded.features["touchpad"])
         self.assertNotIn("made_up", loaded.features)
 
+    def test_shortcuts_have_defaults_and_are_saved(self):
+        loaded = config.load()
+        self.assertEqual([s["name"] for s in loaded.shortcuts], ["B站", "YouTube"])
+        loaded.shortcuts.append({"name": "爱壹帆", "url": "https://example.com", "color": "#112233"})
+        config.save(loaded)
+        self.assertEqual(config.load().shortcuts[2]["name"], "爱壹帆")
+
+    def test_bad_shortcuts_in_the_file_are_dropped(self):
+        self.data.mkdir()
+        entries = [{"name": "ok", "url": "https://ok.example"}, {"name": "bad", "url": "javascript:x"}, "junk"]
+        entries += [{"name": str(n), "url": "https://%d.example" % n} for n in range(6)]
+        (self.data / "config.json").write_text(json.dumps({"shortcuts": entries}), encoding="utf-8")
+        loaded = config.load()
+        self.assertEqual(len(loaded.shortcuts), config.MAX_SHORTCUTS)
+        self.assertEqual(loaded.shortcuts[0]["name"], "ok")
+        self.assertNotIn("bad", [s["name"] for s in loaded.shortcuts])
+
+    def test_environment_port_is_not_written_to_the_file(self):
+        with mock.patch.dict(os.environ, {"REMOTE_PORT": "8766"}):
+            config.save(config.load())
+        self.assertEqual(config.load().port, config.DEFAULT_PORT)
+
     def test_broken_config_file_falls_back_to_defaults(self):
         self.data.mkdir()
         (self.data / "config.json").write_text("{not json", encoding="utf-8")

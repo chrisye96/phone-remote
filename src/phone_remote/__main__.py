@@ -36,7 +36,9 @@ def main():
     platform = get_platform()
     url = phone_url(config.port, config.token)
     try:
-        server = make_server(config.port, config.token, Dispatcher(platform, config.features), url)
+        dispatcher = Dispatcher(platform, config.features, shortcuts=config.shortcuts,
+                                on_change=lambda: config_module.save(config))
+        server = make_server(config.port, config.token, dispatcher, url)
     except OSError:
         # 端口被占用，多半是已经有一个在运行了，那就只把二维码页面打开
         log.warning("port %d is in use, assuming another instance is running", config.port)

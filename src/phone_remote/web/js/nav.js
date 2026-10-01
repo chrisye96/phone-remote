@@ -20,13 +20,19 @@ export function go(screen) {
 
 export function setSite(site) {
   if (!document.getElementById(site)) site = "any";
-  pick(".chips button[data-site]", "site", site, "site");
+  pick(".tabs button[data-site]", "site", site, "site");
   document.querySelectorAll(".site").forEach(d => d.classList.toggle("sel", d.id === site));
+  // 整块面板的边框跟着选中的网站变色
+  const color = document.getElementById(site).style.getPropertyValue("--site");
+  document.getElementById("sitegroup").style.setProperty("--site", color || "transparent");
 }
 
 export function initNav() {
   document.querySelectorAll("nav button").forEach(b => b.addEventListener("pointerdown", () => go(b.dataset.go)));
-  document.querySelectorAll(".chips button[data-site]").forEach(b => b.addEventListener("pointerdown", () => setSite(b.dataset.site)));
-  go(document.getElementById(store.get("screen") || "") ? store.get("screen") : "play");
-  setSite(store.get("site") || "any");
+  document.querySelectorAll(".tabs button[data-site]").forEach(b => b.addEventListener("pointerdown", () => setSite(b.dataset.site)));
+  // 网址里可以带 ?screen=browse&site=bili 直接打开某一页
+  const query = new URLSearchParams(location.search);
+  const screen = query.get("screen") || store.get("screen") || "";
+  go(document.querySelector("section.screen#" + CSS.escape(screen)) ? screen : "play");
+  setSite(query.get("site") || store.get("site") || "any");
 }

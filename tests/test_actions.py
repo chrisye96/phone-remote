@@ -5,12 +5,19 @@ from phone_remote.actions import Dispatcher, FeatureDisabled
 from phone_remote.config import FEATURES
 
 
+def fake_site_info(url):
+    return {"name": "Site", "color": "#123456"}
+
+
 def make(**overrides):
     platform = FakePlatform()
     opened = []
     features = dict.fromkeys(FEATURES, True)
     features.update(overrides)
-    return Dispatcher(platform, features, opener=opened.append), platform, opened
+    shortcuts = [{"name": "B站", "url": "https://www.bilibili.com", "color": "#fb7299"}]
+    dispatcher = Dispatcher(platform, features, opener=opened.append, shortcuts=shortcuts,
+                            site_info=fake_site_info)
+    return dispatcher, platform, opened
 
 
 class DispatcherTest(unittest.TestCase):
@@ -45,13 +52,43 @@ class DispatcherTest(unittest.TestCase):
         dispatcher.handle({"a": "text", "t": "x" * 5000})
         self.assertEqual(len(platform.calls[0][1]), 2000)
 
-    def test_open_only_accepts_web_urls(self):
+    def test_open_only_opens_saved_shortcuts(self):
         dispatcher, _, opened = make()
-        dispatcher.handle({"a": "open", "url": "https://www.bilibili.com"})
-        for bad in ("file:///c:/x", "javascript:alert(1)", ""):
+        dispatcher.handle({"a": "open", "i": 0})
+        for bad in ({"i": 5}, {"i": -1}, {"i": "0"}, {"i": True}, {"url": "https://evil.example"}, {}):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                dispatcher.handle({"a": "open", "url": bad})
+                dispatcher.handle(dict(bad, a="open"))
         self.assertEqual(opened, ["https://www.bilibili.com"])
+
+    def test_shortcut_add_reads_name_and_color_from_the_site(self):
+        dispatcher, _, _ = make()
+        saved = []
+        dispatcher._on_change = lambda: saved.append(1)
+        result = dispatcher.handle({"a": "shortcut_save", "url": "example.com"})
+        self.assertEqual(result[1], {"name": "Site", "url": "https://example.com", "color": "#123456"})
+        self.assertEqual(saved, [1])
+
+    def test_shortcut_name_can_be_set_and_edited(self):
+        dispatcher, _, _ = make()
+        dispatcher.handle({"a": "shortcut_save", "i": 0, "url": "https://b.example", "name": "  我的  站  "})
+        self.assertEqual(dispatcher.shortcuts, [{"name": "我的 站", "url": "https://b.example", "color": "#123456"}])
+
+    def test_shortcut_limit_and_bad_urls(self):
+        dispatcher, _, _ = make()
+        for bad in ("javascript:alert(1)", "file:///c:/x", "", "https://a b.com", "ftp://x.com"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                dispatcher.handle({"a": "shortcut_save", "url": bad})
+        for n in range(3):
+            dispatcher.handle({"a": "shortcut_save", "url": "https://s%d.example" % n})
+        self.assertEqual(len(dispatcher.shortcuts), 4)
+        with self.assertRaises(ValueError):
+            dispatcher.handle({"a": "shortcut_save", "url": "https://fifth.example"})
+
+    def test_shortcut_delete(self):
+        dispatcher, _, _ = make()
+        self.assertEqual(dispatcher.handle({"a": "shortcut_delete", "i": 0}), [])
+        with self.assertRaises(ValueError):
+            dispatcher.handle({"a": "shortcut_delete", "i": 0})
 
     def test_timer_range(self):
         dispatcher, _, _ = make()
@@ -110,7 +147,8 @@ class FeatureSwitchTest(unittest.TestCase):
             "windows": [{"a": "windows"}, {"a": "focus", "id": 1}],
             "progress": [{"a": "seek", "to": 1}],
             "sleep_timer": [{"a": "timer", "min": 1}],
-            "open_sites": [{"a": "open", "url": "https://example.com"}],
+            "open_sites": [{"a": "open", "i": 0}, {"a": "shortcut_save", "url": "https://example.com"},
+                           {"a": "shortcut_delete", "i": 0}],
         }
         for feature, messages in cases.items():
             dispatcher, platform, opened = make(**{feature: False})
