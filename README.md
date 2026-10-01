@@ -30,6 +30,10 @@ python3 -m venv .venv
 
 想在命令行窗口里运行（方便看输出）：`.venv\Scripts\python -m phone_remote --console`。
 
+## 打包成免安装的程序
+
+双击 `scripts\build-windows.bat`，会在 `dist\` 里生成一个 `PhoneRemote.exe`（约 20 MB）。把它拷到别的 Windows 电脑上双击就能用，不需要装 Python。
+
 ## 遥控器的四个页面
 
 - **播放**：圆盘控制音量、快进快退、播放暂停；下面是全屏等常用键，以及通用 / B 站 / YouTube 的专用键。
@@ -75,6 +79,7 @@ src/phone_remote/
     macos/         input.py  windows.py  media.py
   web/             手机页面：index.html、css/、js/（按功能分模块）
 tests/             自动测试，不碰真实的键盘鼠标
+scripts/           打包脚本
 docs/              重构计划
 ```
 
