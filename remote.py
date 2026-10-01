@@ -3,6 +3,7 @@
 只用 Python 标准库，Windows 和 macOS 通用。
 用法：python remote.py
 """
+import base64
 import ctypes
 import json
 import os
@@ -11,10 +12,12 @@ import socket
 import struct
 import subprocess
 import sys
+import threading
+import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-PORT = 8765
+PORT = int(os.environ.get("REMOTE_PORT", 8765))
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOKEN_FILE = os.path.join(HERE, "token.txt")
 SYSTEM_KEYS = ("volup", "voldown", "mute", "media")
@@ -39,6 +42,10 @@ for digit, code in enumerate(MAC_DIGITS):
     KEYS[str(digit)] = (0x30 + digit, code)
 for n, code in enumerate(MAC_FKEYS):
     KEYS["f%d" % (n + 1)] = (0x70 + n, code)
+
+
+# 电脑上的播放状态：playing 为 True / False，读不到时为 None；pos 和 dur 是秒，vol 是 0-100
+MEDIA = {"playing": None, "title": "", "pos": 0, "dur": 0, "vol": None, "muted": False}
 
 
 def parse_combo(combo):
@@ -111,13 +118,224 @@ if sys.platform == "win32":
     def mouse_move(dx, dy):
         user32.mouse_event(0x0001, dx, dy, 0, 0)
 
-    def mouse_click():
-        user32.mouse_event(0x0002, 0, 0, 0, 0)
-        user32.mouse_event(0x0004, 0, 0, 0, 0)
+    def mouse_click(right=False):
+        down, up = (0x0008, 0x0010) if right else (0x0002, 0x0004)
+        user32.mouse_event(down, 0, 0, 0, 0)
+        user32.mouse_event(up, 0, 0, 0, 0)
 
     def mouse_scroll(dy):
         # 滚轮一格是 120，大约对应 100 像素
         user32.mouse_event(0x0800, 0, 0, int(dy * 1.2), 0)
+
+    kernel32 = ctypes.windll.kernel32
+    dwmapi = ctypes.windll.dwmapi
+    HWND = ctypes.c_void_p
+    ENUM_PROC = ctypes.WINFUNCTYPE(ctypes.c_bool, HWND, ctypes.c_void_p)
+    for fn in ("IsWindowVisible", "IsWindow", "IsIconic", "SetForegroundWindow",
+               "BringWindowToTop", "GetWindowTextLengthW"):
+        getattr(user32, fn).argtypes = [HWND]
+    user32.GetForegroundWindow.restype = HWND
+    user32.GetWindow.restype = HWND
+    user32.GetWindow.argtypes = [HWND, ctypes.c_uint]
+    user32.GetWindowLongW.argtypes = [HWND, ctypes.c_int]
+    user32.GetWindowTextW.argtypes = [HWND, ctypes.c_wchar_p, ctypes.c_int]
+    user32.GetClassNameW.argtypes = [HWND, ctypes.c_wchar_p, ctypes.c_int]
+    user32.ShowWindow.argtypes = [HWND, ctypes.c_int]
+    user32.GetWindowThreadProcessId.argtypes = [HWND, ctypes.POINTER(ctypes.c_ulong)]
+    user32.EnumWindows.argtypes = [ENUM_PROC, ctypes.c_void_p]
+    user32.AttachThreadInput.argtypes = [ctypes.c_ulong, ctypes.c_ulong, ctypes.c_bool]
+    dwmapi.DwmGetWindowAttribute.argtypes = [HWND, ctypes.c_ulong, ctypes.c_void_p, ctypes.c_ulong]
+    kernel32.OpenProcess.restype = ctypes.c_void_p
+    kernel32.OpenProcess.argtypes = [ctypes.c_ulong, ctypes.c_bool, ctypes.c_ulong]
+    kernel32.CloseHandle.argtypes = [ctypes.c_void_p]
+    kernel32.QueryFullProcessImageNameW.argtypes = [
+        ctypes.c_void_p, ctypes.c_ulong, ctypes.c_wchar_p, ctypes.POINTER(ctypes.c_ulong)]
+
+    def _app_name(hwnd):
+        pid = ctypes.c_ulong()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        handle = kernel32.OpenProcess(0x1000, False, pid.value)
+        if not handle:
+            return ""
+        buf = ctypes.create_unicode_buffer(520)
+        size = ctypes.c_ulong(520)
+        ok = kernel32.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size))
+        kernel32.CloseHandle(handle)
+        return os.path.splitext(os.path.basename(buf.value))[0] if ok else ""
+
+    def list_windows():
+        """任务栏上能看到的窗口，按从前到后的顺序。"""
+        found = []
+        front = user32.GetForegroundWindow()
+
+        def visit(hwnd, _):
+            if not user32.IsWindowVisible(hwnd) or user32.GetWindow(hwnd, 4):
+                return True
+            if user32.GetWindowLongW(hwnd, -20) & 0x80:  # 工具窗口
+                return True
+            cloaked = ctypes.c_int(0)
+            dwmapi.DwmGetWindowAttribute(hwnd, 14, ctypes.byref(cloaked), 4)
+            length = user32.GetWindowTextLengthW(hwnd)
+            if cloaked.value or not length:
+                return True
+            title = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, title, length + 1)
+            cls = ctypes.create_unicode_buffer(64)
+            user32.GetClassNameW(hwnd, cls, 64)
+            if cls.value != "Progman":
+                found.append({"id": hwnd, "title": title.value, "app": _app_name(hwnd),
+                              "active": hwnd == front})
+            return True
+
+        user32.EnumWindows(ENUM_PROC(visit), None)
+        return found
+
+    def focus_window(hwnd):
+        hwnd = int(hwnd)
+        if not user32.IsWindow(hwnd):
+            raise ValueError("no such window")
+        if user32.IsIconic(hwnd):
+            user32.ShowWindow(hwnd, 9)
+        # Windows 只让“刚收到过输入”的进程抢前台，先发一个没有任何作用的按键
+        user32.keybd_event(0xE8, 0, 0, 0)
+        user32.keybd_event(0xE8, 0, KEYUP, 0)
+        user32.SetForegroundWindow(hwnd)
+        if user32.GetForegroundWindow() != hwnd:
+            ours = kernel32.GetCurrentThreadId()
+            theirs = user32.GetWindowThreadProcessId(user32.GetForegroundWindow(), None)
+            user32.AttachThreadInput(ours, theirs, True)
+            user32.BringWindowToTop(hwnd)
+            user32.SetForegroundWindow(hwnd)
+            user32.AttachThreadInput(ours, theirs, False)
+
+    # 用系统的“媒体控制”接口读播放状态、进度和音量，并跳转进度（浏览器和大多数播放器都支持）。
+    # 这些接口只能从 PowerShell 里方便地调用，所以常驻一个子进程：
+    # 它每半秒输出一行 JSON 状态，并从标准输入读指令（seek 秒数）。
+    # 注意：浏览器上报“播放 / 暂停”可能晚十秒左右，跳转则一秒内就能读到。
+    MEDIA_SCRIPT = r"""
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1' })[0]
+function Await($op, $type) { $t = $asTask.MakeGenericMethod($type).Invoke($null, @($op)); $t.Wait(-1) | Out-Null; $t.Result }
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+[Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+interface IAudioEndpointVolume {
+  int f(); int g(); int h(); int i();
+  int SetMasterVolumeLevelScalar(float level, Guid context);
+  int j();
+  int GetMasterVolumeLevelScalar(out float level);
+  int k(); int l(); int m(); int n();
+  int SetMute([MarshalAs(UnmanagedType.Bool)] bool mute, Guid context);
+  int GetMute(out bool mute);
+}
+[Guid("D666063F-1587-4E43-81F1-B948E807363F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+interface IMMDevice { int Activate(ref Guid id, int clsCtx, int activationParams, out IAudioEndpointVolume volume); }
+[Guid("A95664D2-9614-4F35-A746-DE8DB63617E6"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+interface IMMDeviceEnumerator { int f(); int GetDefaultAudioEndpoint(int dataFlow, int role, out IMMDevice endpoint); }
+[ComImport, Guid("BCDE0395-E52F-467C-8E3D-C4579291692E")] class MMDeviceEnumeratorComObject { }
+public class Audio {
+  static IAudioEndpointVolume Endpoint() {
+    var enumerator = new MMDeviceEnumeratorComObject() as IMMDeviceEnumerator;
+    IMMDevice device; Marshal.ThrowExceptionForHR(enumerator.GetDefaultAudioEndpoint(0, 1, out device));
+    IAudioEndpointVolume volume; var id = typeof(IAudioEndpointVolume).GUID;
+    Marshal.ThrowExceptionForHR(device.Activate(ref id, 23, 0, out volume));
+    return volume;
+  }
+  public static float Volume { get { float v; Marshal.ThrowExceptionForHR(Endpoint().GetMasterVolumeLevelScalar(out v)); return v; } }
+  public static bool Muted { get { bool m; Marshal.ThrowExceptionForHR(Endpoint().GetMute(out m)); return m; } }
+}
+'@
+$mgrType = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager, Windows.Media.Control, ContentType=WindowsRuntime]
+$propsType = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionMediaProperties, Windows.Media.Control, ContentType=WindowsRuntime]
+$mgr = Await ($mgrType::RequestAsync()) $mgrType
+# [Console]::In 的异步读其实是同步的，会卡住循环，所以自己包一层
+$reader = New-Object System.IO.StreamReader([Console]::OpenStandardInput())
+$pending = $reader.ReadLineAsync()
+$pick = $null; $last = ''; $tick = 0; $pos = 0; $dur = 0
+while ($true) {
+  if ($pending.IsCompleted) {
+    $cmd = $pending.Result
+    if ($null -eq $cmd) { break }
+    $pending = $reader.ReadLineAsync()
+    try {
+      $parts = $cmd -split ' '
+      if ($pick -and $dur -gt 0 -and $parts[0] -eq 'seek') {
+        $target = [math]::Max(0, [math]::Min($dur - 1, [double]$parts[1]))
+        Await ($pick.TryChangePlaybackPositionAsync([long]($target * 10000000))) ([bool]) | Out-Null
+      }
+    } catch {}
+    Start-Sleep -Milliseconds 150
+    $tick = 0
+  }
+  if ($tick % 5 -eq 0) {
+    $state = @{ s = 'None'; t = ''; p = 0; d = 0; v = -1; m = $false }
+    try { $state.v = [int][math]::Round([Audio]::Volume * 100); $state.m = [Audio]::Muted } catch {}
+    try {
+      $pick = $mgr.GetCurrentSession()
+      foreach ($s in $mgr.GetSessions()) { if ("$($s.GetPlaybackInfo().PlaybackStatus)" -eq 'Playing') { $pick = $s; break } }
+      if ($pick) {
+        $info = $pick.GetPlaybackInfo()
+        $state.s = "$($info.PlaybackStatus)"
+        try { $state.t = (Await ($pick.TryGetMediaPropertiesAsync()) $propsType).Title } catch {}
+        $line = $pick.GetTimelineProperties()
+        $dur = $line.EndTime.TotalSeconds
+        $pos = $line.Position.TotalSeconds
+        if ($dur -gt 0 -and $state.s -eq 'Playing') {
+          $rate = $info.PlaybackRate; if (-not $rate) { $rate = 1 }
+          $pos += ([DateTimeOffset]::Now - $line.LastUpdatedTime).TotalSeconds * $rate
+        }
+        $pos = [math]::Max(0, [math]::Min($dur, $pos))
+        $state.p = [math]::Round($pos, 1); $state.d = [math]::Round($dur, 1)
+      } else { $dur = 0 }
+    } catch {}
+    $json = $state | ConvertTo-Json -Compress
+    if ($json -ne $last) { [Console]::Out.WriteLine($json); $last = $json }
+  }
+  $tick++
+  Start-Sleep -Milliseconds 100
+}
+"""
+    _helper = [None]
+
+    def start_media_watch():
+        exe = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"),
+                           "System32", "WindowsPowerShell", "v1.0", "powershell.exe")
+        encoded = base64.b64encode(MEDIA_SCRIPT.encode("utf-16-le")).decode("ascii")
+        try:
+            proc = subprocess.Popen(
+                [exe, "-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                encoding="utf-8", errors="replace", creationflags=0x08000000)
+        except OSError:
+            return
+        _helper[0] = proc
+
+        def read():
+            for line in proc.stdout:
+                try:
+                    state = json.loads(line)
+                except ValueError:
+                    continue
+                MEDIA.update(
+                    playing={"Playing": True, "Paused": False, "Stopped": False}.get(state["s"]),
+                    title=state["t"] or "", pos=state["p"], dur=state["d"],
+                    vol=state["v"] if state["v"] >= 0 else None, muted=bool(state["m"]))
+
+        threading.Thread(target=read, daemon=True).start()
+
+    def media_seek(seconds):
+        proc = _helper[0]
+        if proc and proc.poll() is None:
+            try:
+                proc.stdin.write("seek %.1f\n" % seconds)
+                proc.stdin.flush()
+            except OSError:
+                pass
+
+    def refresh_volume():
+        pass
 
     def check_permission():
         return True
@@ -137,6 +355,7 @@ elif sys.platform == "darwin":
     cg.CGEventSetFlags.argtypes = [vp, ctypes.c_uint64]
     cg.CGEventKeyboardSetUnicodeString.argtypes = [
         vp, ctypes.c_ulong, ctypes.POINTER(ctypes.c_uint16)]
+    cg.CGEventSetIntegerValueField.argtypes = [vp, ctypes.c_uint32, ctypes.c_int64]
     cg.CGEventPost.argtypes = [ctypes.c_uint32, vp]
     cg.CFRelease.argtypes = [vp]
     cg.CGEventCreate.restype = vp
@@ -201,13 +420,62 @@ elif sys.platform == "darwin":
         point.y += dy
         _post(cg.CGEventCreateMouseEvent(None, 5, point, 0))
 
-    def mouse_click():
+    _last_click = [0.0]
+
+    def mouse_click(right=False):
         point = _cursor()
-        _post(cg.CGEventCreateMouseEvent(None, 1, point, 0))
-        _post(cg.CGEventCreateMouseEvent(None, 2, point, 0))
+        down, up, button = (3, 4, 1) if right else (1, 2, 0)
+        # macOS 靠事件里的点击计数识别双击，两次单击不会自动算双击
+        now = time.monotonic()
+        count = 2 if not right and now - _last_click[0] < 0.4 else 1
+        _last_click[0] = 0.0 if count == 2 else now
+        for kind in (down, up):
+            event = cg.CGEventCreateMouseEvent(None, kind, point, button)
+            cg.CGEventSetIntegerValueField(event, 1, count)
+            _post(event)
 
     def mouse_scroll(dy):
         _post(cg.CGEventCreateScrollWheelEvent2(None, 0, 1, dy, 0, 0))
+
+    def _osascript(*lines, args=()):
+        cmd = ["osascript"]
+        for line in lines:
+            cmd += ["-e", line]
+        result = subprocess.run(cmd + list(args), capture_output=True, text=True, timeout=5)
+        return result.stdout.strip()
+
+    def list_windows():
+        """Mac 上按应用切换：列出有界面的应用。"""
+        names = _osascript('tell application "System Events" to get name of every process '
+                           'whose background only is false')
+        front = _osascript('tell application "System Events" to get name of first process '
+                           'whose frontmost is true')
+        return [{"id": name, "title": name, "app": "", "active": name == front}
+                for name in (n.strip() for n in names.split(",")) if name]
+
+    def focus_window(name):
+        if name not in [w["id"] for w in list_windows()]:
+            raise ValueError("no such app")
+        _osascript("on run argv",
+                   'tell application "System Events" to set frontmost of process (item 1 of argv) to true',
+                   "end run", args=[name])
+
+    def start_media_watch():
+        pass  # macOS 没有公开的接口读“正在播放”，播放状态和进度保持未知
+
+    def media_seek(seconds):
+        pass
+
+    _volume_read = [0.0]
+
+    def refresh_volume():
+        if time.monotonic() - _volume_read[0] < 1:
+            return
+        _volume_read[0] = time.monotonic()
+        settings = _osascript("get volume settings")  # output volume:50, ..., output muted:false
+        fields = dict(part.strip().split(":", 1) for part in settings.split(",") if ":" in part)
+        if fields.get("output volume", "").isdigit():
+            MEDIA.update(vol=int(fields["output volume"]), muted=fields.get("output muted") == "true")
 
     def check_permission():
         return cg.AXIsProcessTrusted()
@@ -216,13 +484,54 @@ else:
     sys.exit("只支持 Windows 和 macOS。")
 
 
+# 定时暂停：到点后如果还在播放，就按一下系统播放键
+TIMER = {"until": 0.0, "handle": None}
+
+
+def timer_fired():
+    TIMER.update(until=0.0, handle=None)
+    if MEDIA["playing"] is not False:
+        press("media")
+
+
+def set_timer(minutes):
+    if not 0 <= minutes <= 600:
+        raise ValueError("bad timer")
+    if TIMER["handle"]:
+        TIMER["handle"].cancel()
+    TIMER.update(until=0.0, handle=None)
+    if minutes:
+        handle = threading.Timer(minutes * 60, timer_fired)
+        handle.daemon = True
+        handle.start()
+        TIMER.update(until=time.time() + minutes * 60, handle=handle)
+
+
 def clamp(value, limit):
     return max(-limit, min(limit, int(value)))
 
 
 def handle_action(msg):
     action = msg.get("a")
-    if action == "key":
+    if action == "ping":
+        pass
+    elif action == "state":
+        refresh_volume()
+        return dict(MEDIA, timer=max(0, int(TIMER["until"] - time.time())))
+    elif action == "seek":
+        media_seek(float(msg.get("to", 0)))
+    elif action == "timer":
+        set_timer(float(msg.get("min", 0)))
+    elif action == "open":
+        url = str(msg.get("url", ""))
+        if not url.startswith(("https://", "http://")):
+            raise ValueError("bad url")
+        webbrowser.open(url)
+    elif action == "windows":
+        return list_windows()
+    elif action == "focus":
+        focus_window(msg.get("id"))
+    elif action == "key":
         press(msg.get("k"))
     elif action == "text":
         text = " ".join(str(msg.get("t", "")).split())[:2000]
@@ -233,7 +542,7 @@ def handle_action(msg):
     elif action == "move":
         mouse_move(clamp(msg.get("dx", 0), 2000), clamp(msg.get("dy", 0), 2000))
     elif action == "click":
-        mouse_click()
+        mouse_click(right=bool(msg.get("right")))
     elif action == "scroll":
         mouse_scroll(clamp(msg.get("dy", 0), 1500))
     else:
@@ -294,6 +603,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/":
             with open(os.path.join(HERE, "index.html"), encoding="utf-8") as f:
                 page = f.read().replace("__PLATFORM__", PLATFORM)
+            page = page.replace("__HOST__", json.dumps(socket.gethostname()))
             self.reply(200, page.encode("utf-8"), "text/html; charset=utf-8")
         elif path == "/pair" and self.client_address[0] == "127.0.0.1":
             page = PAIR_PAGE.replace("__URL__", self.server.phone_url)
@@ -309,10 +619,12 @@ class Handler(BaseHTTPRequestHandler):
         if not secrets.compare_digest(self.headers.get("X-Token", ""), self.server.token):
             return self.reply(403)
         try:
-            handle_action(json.loads(body))
-        except (ValueError, TypeError, AttributeError):
+            result = handle_action(json.loads(body))
+        except (ValueError, TypeError, AttributeError, OSError, subprocess.SubprocessError):
             return self.reply(400)
-        self.reply(204)
+        if result is None:
+            return self.reply(204)
+        self.reply(200, json.dumps(result).encode("utf-8"), "application/json")
 
 
 def main():
@@ -325,6 +637,7 @@ def main():
         print("\n还没有控制权限：打开 系统设置 > 隐私与安全性 > 辅助功能，")
         print("把运行本程序的“终端”打开，然后重新启动本程序。")
     print("\n用的时候保持这个窗口开着，关掉窗口就是退出。")
+    start_media_watch()
     if "--no-browser" not in sys.argv:
         webbrowser.open("http://127.0.0.1:%d/pair" % PORT)
     try:

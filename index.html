@@ -3,148 +3,277 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#14161a">
+<meta name="theme-color" content="#0e0f13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="遥控器">
 <title>遥控器</title>
 <style>
-  :root { --bg:#14161a; --panel:#1e2127; --key:#2a2e36; --key-on:#3d4350; --text:#eef0f4; --dim:#8b93a3; --accent:#4c8dff; }
+  :root {
+    --bg:#0e0f13; --surface:#181a20; --key:#22252d; --key-on:#343945; --line:rgba(255,255,255,.07);
+    --text:#eceef3; --dim:#8a91a0; --accent:#6c8cff; --accent-on:#5270e0; --ok:#4cc38a; --bad:#e5645f;
+    --keyh:clamp(40px, 6.4dvh, 54px); --gap:10px;
+  }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
-  html { height:100%; }
-  body { margin:0 auto; min-height:100%; min-height:100dvh; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"PingFang SC",sans-serif; overscroll-behavior:none;
-         display:flex; flex-direction:column; gap:8px; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); max-width:520px; }
-  html { background:var(--bg); }
-  button { font:inherit; color:inherit; background:var(--key); border:0; border-radius:12px; min-height:48px; font-size:15px; padding:2px; touch-action:manipulation; }
-  button.on { background:var(--key-on); }
+  html { height:100%; background:var(--bg); }
+  body { margin:0 auto; height:100%; height:100dvh; max-width:520px; overflow:hidden; overscroll-behavior:none;
+         background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+         display:flex; flex-direction:column; padding:calc(8px + env(safe-area-inset-top)) 16px 0; }
+  svg { width:22px; height:22px; fill:currentColor; display:block; margin:0 auto; pointer-events:none; }
+
+  /* 顶部状态 */
+  header { display:flex; align-items:center; gap:8px; height:28px; flex:none; font-size:13px; color:var(--dim); }
+  #dot { width:8px; height:8px; border-radius:50%; background:var(--dim); }
+  #dot.ok { background:var(--ok); } #dot.bad { background:var(--bad); }
+  #vol { margin-left:auto; font-variant-numeric:tabular-nums; }
+
+  /* 按键 */
+  button { font:inherit; color:inherit; background:var(--key); border:0; border-radius:14px; height:var(--keyh); font-size:15px; padding:0 2px;
+           box-shadow:inset 0 0 0 1px var(--line); touch-action:manipulation; transition:transform .08s, background .08s; }
+  button.on { background:var(--key-on); transform:scale(.96); }
   button small { display:block; font-size:10px; color:var(--dim); margin-top:1px; }
-  .row { display:grid; gap:8px; }
-  .c3 { grid-template-columns:repeat(3,1fr); }
-  .c4 { grid-template-columns:repeat(4,1fr); }
-  .main { grid-template-columns:1fr 1.3fr 1fr; }
-  .main button { min-height:68px; font-size:26px; }
-  .play { background:var(--accent); }
-  .play.on { background:#3a6fd0; }
-  .textrow { display:flex; gap:8px; }
-  .textrow input { flex:1; min-width:0; font:inherit; font-size:16px; color:var(--text); background:var(--panel); border:1px solid var(--key); border-radius:12px; padding:0 12px; height:44px; user-select:text; -webkit-user-select:text; }
-  .textrow button { min-height:44px; padding:0 12px; white-space:nowrap; }
-  .padrow { flex:1; display:flex; gap:8px; min-height:140px; }
-  #pad { flex:1; background:var(--panel); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--dim); font-size:13px; text-align:center; line-height:1.7; touch-action:none; }
-  #pad.on { background:#252931; }
-  .strip { display:flex; flex-direction:column; gap:8px; width:56px; }
-  .strip button { flex:1; font-size:18px; }
-  .tabs { display:flex; gap:6px; }
-  .tabs button { flex:1; min-height:36px; font-size:14px; border-radius:10px; background:transparent; color:var(--dim); border:1px solid var(--key); }
-  .tabs button.sel { background:var(--key); color:var(--text); }
-  .extra { display:none; }
-  .extra.sel { display:grid; }
-  #msg { display:none; background:#5a2a2a; border-radius:10px; padding:10px 12px; font-size:14px; }
+  .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--gap); }
+  .label { font-size:12px; color:var(--dim); margin:2px 2px -4px; }
+
+  /* 页面 */
+  .screen { flex:1; min-height:0; display:none; flex-direction:column; gap:var(--gap); padding:6px 0 10px; }
+  body[data-screen="play"] #play, body[data-screen="pad"] #padscreen, body[data-screen="type"] #type, body[data-screen="wins"] #wins { display:flex; }
+
+  /* 窗口页 */
+  #winlist { flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; gap:6px; border-radius:14px; }
+  #winlist button { flex:none; height:auto; min-height:52px; padding:8px 14px; text-align:left; font-size:14px; touch-action:pan-y;
+                    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:var(--surface); }
+  #winlist button small { margin:0 0 2px; font-size:11px; }
+  #winlist button.active { box-shadow:inset 0 0 0 1.5px var(--accent); }
+  #winlist p { color:var(--dim); font-size:13px; text-align:center; margin:auto; }
+
+  /* 网站切换 */
+  .chips { display:flex; gap:6px; background:var(--surface); border-radius:12px; padding:4px; flex:none; }
+  .chips button { flex:1; height:32px; font-size:13px; border-radius:9px; background:transparent; box-shadow:none; color:var(--dim); }
+  .chips button.sel { background:var(--key-on); color:var(--text); }
+  .site { display:none; } .site.sel { display:grid; }
+
+  /* 触控板页 */
+  .padrow { flex:1; min-height:120px; display:flex; gap:var(--gap); }
+  .pad { flex:1; background:var(--surface); border-radius:18px; box-shadow:inset 0 0 0 1px var(--line); display:flex; align-items:center; justify-content:center;
+         color:var(--dim); font-size:12px; text-align:center; line-height:1.9; touch-action:none; }
+  .pad.on { background:#1d2027; }
+
+  /* 播放键：播放中是实心亮色 + 暂停图标，暂停时是空心描边 + 播放图标 */
+  .playbtn svg { display:none; }
+  .playbtn[data-state="unknown"] .s-unknown, .playbtn[data-state="playing"] .s-pause, .playbtn[data-state="paused"] .s-play { display:block; }
+  #now { flex:none; height:18px; font-size:13px; color:var(--dim); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #now b { color:var(--text); font-weight:500; }
+  /* 进度条：可以拖动；电脑读不到进度时整条隐藏 */
+  #prog { flex:none; display:flex; align-items:center; gap:10px; height:26px; margin-top:-4px; font-size:12px; color:var(--dim); font-variant-numeric:tabular-nums; }
+  #track { flex:1; height:26px; position:relative; touch-action:none; }
+  #track::before, #fill { content:""; position:absolute; left:0; top:11px; height:4px; border-radius:2px; }
+  #track::before { right:0; background:var(--key-on); }
+  #fill { width:0; background:var(--accent); }
+  #knob { position:absolute; left:0; top:6px; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.5); }
+  body.notimeline #prog { display:none; }
+  body.notimeline button[data-rel] { opacity:.35; }
+  .strip { display:flex; flex-direction:column; gap:var(--gap); width:52px; }
+  .strip button { flex:1; height:auto; }
+
+  /* 输入页 */
+  textarea { font:inherit; font-size:16px; color:var(--text); background:var(--surface); border:0; box-shadow:inset 0 0 0 1px var(--line); border-radius:14px;
+             padding:10px 14px; height:62px; resize:none; outline:none; flex:none; user-select:text; -webkit-user-select:text; }
+  textarea:focus { box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .sendrow { display:grid; grid-template-columns:1fr 1.4fr; gap:var(--gap); }
+  .primary { background:var(--accent); color:#fff; box-shadow:none; } .primary.on { background:var(--accent-on); }
+  .spacer { flex:1; }
+
+  /* 常驻的播放条：音量、快退、播放暂停、快进 */
+  .bar { flex:none; display:grid; grid-template-columns:1fr 1fr 72px 1fr 1fr; align-items:center; height:68px; padding:0 6px; margin-bottom:10px;
+         border-radius:24px; background:linear-gradient(180deg,#20232b,#17191f); box-shadow:inset 0 0 0 1px var(--line), 0 8px 24px rgba(0,0,0,.3); }
+  .bar button { height:56px; background:transparent; box-shadow:none; border-radius:16px; }
+  .bar button svg { width:24px; height:24px; }
+  .bar button.on { background:rgba(255,255,255,.07); transform:none; }
+  .bar .playbtn { width:60px; height:60px; border-radius:50%; justify-self:center; background:var(--accent); color:#fff; box-shadow:0 4px 18px rgba(108,140,255,.4); }
+  .bar .playbtn svg { width:28px; height:28px; }
+  .bar .playbtn.on { background:var(--accent-on); transform:scale(.94); }
+  .bar .playbtn[data-state="paused"] { background:var(--key); color:var(--accent); box-shadow:inset 0 0 0 2px var(--accent); }
+
+  /* 底部导航 */
+  nav { display:flex; flex:none; margin:0 -16px; padding:6px 16px calc(6px + env(safe-area-inset-bottom)); background:var(--surface); box-shadow:0 -1px 0 var(--line); }
+  nav button { flex:1; height:46px; background:transparent; box-shadow:none; border-radius:10px; color:var(--dim); font-size:11px; }
+  nav button svg { margin-bottom:3px; }
+  nav button.sel { color:var(--accent); }
+  nav button.on { transform:none; background:transparent; }
+
+  #toast { position:fixed; left:50%; top:calc(44px + env(safe-area-inset-top)); transform:translateX(-50%); max-width:86vw; background:#2b2f39; color:var(--text);
+           padding:9px 14px; border-radius:12px; font-size:13px; box-shadow:0 6px 24px rgba(0,0,0,.4); opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; }
+  #toast.show { opacity:1; } #toast.bad { background:#5a2a2a; }
 </style>
 </head>
-<body>
-<div id="msg"></div>
+<body data-screen="play">
 
-<div class="textrow">
-  <input id="text" type="text" enterkeyhint="send" autocomplete="off" placeholder="打字，或点键盘上的麦克风说话">
-  <button id="type">输入</button>
-  <button id="typeEnter">输入并发送</button>
-</div>
+<svg style="display:none">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M3 5v14l10-7zM15 5h2.6v14H15zM19.4 5H22v14h-2.6z"/></symbol>
+  <symbol id="i-playonly" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
+  <symbol id="i-rew"viewBox="0 0 24 24"><path d="M11.5 6v12L3 12zM21 6v12l-8.5-6z"/></symbol>
+  <symbol id="i-ff" viewBox="0 0 24 24"><path d="M12.5 6v12l8.5-6zM3 6v12l8.5-6z"/></symbol>
+  <symbol id="i-volup" viewBox="0 0 24 24"><path d="M2 9v6h4l5 4V5L6 9zM17 8h2v3h3v2h-3v3h-2v-3h-3v-2h3z"/></symbol>
+  <symbol id="i-voldown" viewBox="0 0 24 24"><path d="M2 9v6h4l5 4V5L6 9zM14 11h8v2h-8z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2.2c1.200 0 2.700 2.600 3.100 6.800H8.900c.4-4.200 1.900-6.800 3.100-6.800zM4.100 11a8 8 0 0 1 4.300-6.100C7.600 6.400 7.100 8.500 6.900 11zm0 2h2.800c.2 2.500.7 4.600 1.500 6.100A8 8 0 0 1 4.100 13zm4.800 0h6.200c-.4 4.200-1.900 6.800-3.100 6.800S9.300 17.200 8.900 13zm8.200 0h2.800a8 8 0 0 1-4.300 6.100c.8-1.500 1.300-3.600 1.500-6.100zm0-2c-.2-2.500-.7-4.600-1.500-6.100A8 8 0 0 1 19.900 11z"/></symbol>
+  <symbol id="i-pad" viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v9h6V5zm8 0v9h6V5zM5 16v3h14v-3z"/></symbol>
+  <symbol id="i-kbd" viewBox="0 0 24 24"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 2v10h16V7zm2 2h2v2H6zm3 0h2v2H9zm3 0h2v2h-2zm3 0h3v2h-3zM6 12h2v2H6zm3 0h6v2H9zm7 0h2v2h-2z"/></symbol>
+  <symbol id="i-win" viewBox="0 0 24 24"><path d="M8 3h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-1v-2h1V7H8v1H6V5a2 2 0 0 1 2-2zM5 10h9a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2zm0 4v5h9v-5z"/></symbol>
+  <symbol id="i-tv"viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6v2h3v2H7v-2h3v-2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v10h16V6zm6 2l5 3-5 3z"/></symbol>
+</svg>
 
-<div class="padrow">
-  <div id="pad">触控板<br>滑动移动鼠标 · 轻点单击<br>双指滑动滚动</div>
-  <div class="strip">
-    <button data-scroll="250" data-repeat>▲<small>滚动</small></button>
-    <button data-scroll="-250" data-repeat>▼<small>滚动</small></button>
+<header><span id="dot"></span><span id="status">正在连接…</span><span id="vol"></span></header>
+<div id="toast"></div>
+
+<!-- data-k 是按键组合；mod 表示 Windows 的 Ctrl / Mac 的 Command；data-mac 是 Mac 上写法不同时用的；data-repeat 表示长按连发 -->
+
+<!-- 播放 -->
+<section class="screen" id="play">
+  <div id="now"></div>
+  <div id="prog"><span id="cur">0:00</span><div id="track"><div id="fill"></div><div id="knob"></div></div><span id="total">0:00</span></div>
+  <div class="padrow">
+    <div class="pad">触控板</div>
+    <div class="strip">
+      <button data-scroll="250" data-repeat>▲</button>
+      <button data-scroll="-250" data-repeat>▼</button>
+    </div>
   </div>
+
+  <div class="grid">
+    <button data-k="mute">静音</button>
+    <button data-k="f">全屏<small>F</small></button>
+    <button data-k="esc">退出<small>Esc</small></button>
+    <button data-k="enter">确定<small>回车</small></button>
+  </div>
+
+  <div class="chips">
+    <button data-site="any">通用</button>
+    <button data-site="bili">B站</button>
+    <button data-site="yt">YouTube</button>
+  </div>
+
+  <div class="grid site" id="any">
+    <button data-k="up" data-repeat>↑</button>
+    <button data-k="down" data-repeat>↓</button>
+    <button data-k="c">字幕<small>C</small></button>
+    <button data-k="media">播放键<small>后台也有效</small></button>
+    <button data-rel="-30">−30 秒</button>
+    <button data-rel="30">+30 秒</button>
+    <button data-rel="90">跳片头<small>+90 秒</small></button>
+    <button id="timer">定时暂停<small>关</small></button>
+  </div>
+  <div class="grid site" id="bili">
+    <button data-k="[">上一集</button>
+    <button data-k="]">下一集</button>
+    <button data-k="d">弹幕</button>
+    <button data-k="m">静音<small>播放器</small></button>
+    <button data-k="up" data-repeat>音量 +<small>播放器</small></button>
+    <button data-k="down" data-repeat>音量 −<small>播放器</small></button>
+    <button data-k="q">点赞</button>
+    <button data-k="e">收藏</button>
+  </div>
+  <div class="grid site" id="yt">
+    <button data-k="shift+p">上一个</button>
+    <button data-k="shift+n">下一个</button>
+    <button data-k="j" data-repeat>−10 秒</button>
+    <button data-k="l" data-repeat>+10 秒</button>
+    <button data-k="shift+,">减速</button>
+    <button data-k="shift+.">加速</button>
+    <button data-k="c">字幕</button>
+    <button data-k="t">影院模式</button>
+  </div>
+</section>
+
+<!-- 浏览 -->
+<section class="screen" id="padscreen">
+  <div class="padrow">
+    <div class="pad">滑动移动鼠标　轻点单击　连点两下双击<br>双指轻点右键　双指滑动滚动</div>
+    <div class="strip">
+      <button data-scroll="250" data-repeat>▲</button>
+      <button data-scroll="-250" data-repeat>▼</button>
+    </div>
+  </div>
+  <div class="label">浏览器</div>
+  <div class="grid">
+    <button data-k="alt+left" data-mac="mod+[">后退</button>
+    <button data-k="alt+right" data-mac="mod+]">前进</button>
+    <button data-k="mod+r">刷新</button>
+    <button data-k="mod+w">关标签</button>
+    <button data-k="ctrl+shift+tab">◀ 标签</button>
+    <button data-k="ctrl+tab">标签 ▶</button>
+    <button data-k="mod+-">缩小</button>
+    <button data-k="mod+=">放大</button>
+    <button data-open="https://www.bilibili.com">B站</button>
+    <button data-open="https://www.youtube.com">YouTube</button>
+    <button data-k="mod+t">新标签</button>
+  </div>
+</section>
+
+<!-- 输入 -->
+<section class="screen" id="type">
+  <textarea id="text" enterkeyhint="send" autocomplete="off" placeholder="在这里打字，或点键盘上的麦克风说话。内容会输入到电脑当前的输入框。"></textarea>
+  <div class="sendrow">
+    <button id="sendText">只输入</button>
+    <button id="sendEnter" class="primary">输入并回车</button>
+  </div>
+  <div class="padrow">
+    <div class="pad">触控板</div>
+    <div class="strip">
+      <button data-scroll="250" data-repeat>▲</button>
+      <button data-scroll="-250" data-repeat>▼</button>
+    </div>
+  </div>
+  <div class="grid">
+    <button data-k="enter">回车</button>
+    <button data-k="shift+enter">换行</button>
+    <button data-k="backspace" data-repeat>退格</button>
+    <button data-k="esc">停止<small>Esc</small></button>
+    <button data-k="mod+a">全选</button>
+    <button data-k="mod+z">撤销</button>
+    <button data-k="mod+shift+o">新对话<small>AI</small></button>
+    <button data-k="win+h" data-mac="ctrl+alt+d">电脑听写<small>开 / 关</small></button>
+    <button data-k="mod+l">地址栏<small>浏览器</small></button>
+    <button data-k="mod+t">新标签<small>浏览器</small></button>
+    <button data-k="tab" data-repeat>Tab</button>
+    <button data-k="alt+tab" data-mac="mod+tab">切换窗口</button>
+  </div>
+</section>
+
+<!-- 窗口 -->
+<section class="screen" id="wins">
+  <div class="label">点一下切换到那个窗口</div>
+  <div id="winlist"></div>
+  <div class="grid">
+    <button data-k="alt+tab" data-mac="mod+tab">上一个窗口</button>
+    <button data-k="win+tab" data-mac="ctrl+up">全部窗口<small>再用触控板选</small></button>
+    <button data-k="win+up" data-mac="ctrl+mod+f">最大化</button>
+    <button data-k="win+down" data-mac="mod+m">最小化</button>
+    <button data-k="win+shift+right" data-only="win">换屏幕<small>移到电视</small></button>
+    <button data-k="f11" data-only="win">网页全屏<small>F11</small></button>
+  </div>
+</section>
+
+<div class="bar">
+  <button data-k="voldown" data-repeat><svg><use href="#i-voldown"/></svg></button>
+  <button data-k="left" data-repeat><svg><use href="#i-rew"/></svg></button>
+  <button class="playbtn" data-k="space" data-state="unknown"><svg class="s-unknown"><use href="#i-play"/></svg><svg class="s-play"><use href="#i-playonly"/></svg><svg class="s-pause"><use href="#i-pause"/></svg></button>
+  <button data-k="right" data-repeat><svg><use href="#i-ff"/></svg></button>
+  <button data-k="volup" data-repeat><svg><use href="#i-volup"/></svg></button>
 </div>
 
-<div class="row c3">
-  <button data-k="voldown" data-repeat>音量 −</button>
-  <button data-k="mute">静音</button>
-  <button data-k="volup" data-repeat>音量 +</button>
-</div>
-
-<div class="row main">
-  <button data-k="left" data-repeat>⏪</button>
-  <button data-k="space" class="play">⏯</button>
-  <button data-k="right" data-repeat>⏩</button>
-</div>
-
-<div class="tabs">
-  <button data-tab="play">播放</button>
-  <button data-tab="web">浏览</button>
-  <button data-tab="bili">B站</button>
-  <button data-tab="yt">YouTube</button>
-  <button data-tab="ai">AI</button>
-</div>
-
-<!-- data-k 是按键组合，mod 表示 Windows 的 Ctrl / Mac 的 Command；data-mac 是 Mac 上不同时的写法 -->
-<div class="row c4 extra" id="play">
-  <button data-k="f">全屏<small>F</small></button>
-  <button data-k="esc">退出<small>Esc</small></button>
-  <button data-k="enter">确定<small>回车</small></button>
-  <button data-k="media">播放键<small>后台也有效</small></button>
-  <button data-k="up" data-repeat>↑</button>
-  <button data-k="down" data-repeat>↓</button>
-  <button data-k="m">静音<small>M</small></button>
-  <button data-k="c">字幕<small>C</small></button>
-</div>
-
-<div class="row c4 extra" id="web">
-  <button data-k="alt+left" data-mac="mod+[">后退</button>
-  <button data-k="alt+right" data-mac="mod+]">前进</button>
-  <button data-k="mod+r">刷新</button>
-  <button data-k="mod+l">地址栏</button>
-  <button data-k="ctrl+shift+tab">◀ 标签</button>
-  <button data-k="ctrl+tab">标签 ▶</button>
-  <button data-k="mod+t">新标签</button>
-  <button data-k="mod+w">关标签</button>
-  <button data-k="shift+tab" data-repeat>上一项<small>Shift+Tab</small></button>
-  <button data-k="tab" data-repeat>下一项<small>Tab</small></button>
-  <button data-k="enter">确定<small>回车</small></button>
-  <button data-k="alt+tab" data-mac="mod+tab">切换窗口</button>
-  <button data-k="mod+=">放大</button>
-  <button data-k="mod+-">缩小</button>
-  <button data-k="pageup" data-repeat>上一页</button>
-  <button data-k="pagedown" data-repeat>下一页</button>
-</div>
-
-<div class="row c4 extra" id="bili">
-  <button data-k="[">上一集<small>[</small></button>
-  <button data-k="]">下一集<small>]</small></button>
-  <button data-k="d">弹幕<small>D</small></button>
-  <button data-k="f">全屏<small>F</small></button>
-  <button data-k="up" data-repeat>音量↑<small>播放器</small></button>
-  <button data-k="down" data-repeat>音量↓<small>播放器</small></button>
-  <button data-k="q">点赞<small>Q</small></button>
-  <button data-k="e">收藏<small>E</small></button>
-</div>
-
-<div class="row c4 extra" id="yt">
-  <button data-k="shift+p">上一个</button>
-  <button data-k="shift+n">下一个</button>
-  <button data-k="j" data-repeat>−10秒</button>
-  <button data-k="l" data-repeat>+10秒</button>
-  <button data-k="shift+,">减速</button>
-  <button data-k="shift+.">加速</button>
-  <button data-k="c">字幕<small>C</small></button>
-  <button data-k="f">全屏<small>F</small></button>
-  <button data-k="t">影院模式<small>T</small></button>
-  <button data-k="i">小窗<small>I</small></button>
-  <button data-k="m">静音<small>M</small></button>
-  <button data-k="0">从头播<small>0</small></button>
-</div>
-
-<div class="row c4 extra" id="ai">
-  <button data-k="win+h" data-mac="ctrl+alt+d">电脑听写<small>开 / 关</small></button>
-  <button data-k="enter">发送<small>回车</small></button>
-  <button data-k="shift+enter">换行</button>
-  <button data-k="esc">停止<small>Esc</small></button>
-  <button data-k="mod+shift+o">新对话</button>
-  <button data-k="shift+esc">聚焦输入框<small>ChatGPT</small></button>
-  <button data-k="alt+tab" data-mac="mod+tab">切换窗口</button>
-  <button data-k="backspace" data-repeat>退格</button>
-</div>
+<nav>
+  <button data-go="play"><svg><use href="#i-tv"/></svg>播放</button>
+  <button data-go="pad"><svg><use href="#i-globe"/></svg>浏览</button>
+  <button data-go="type"><svg><use href="#i-kbd"/></svg>输入</button>
+  <button data-go="wins"><svg><use href="#i-win"/></svg>窗口</button>
+</nav>
 
 <script>
 const PLATFORM = "__PLATFORM__";
+const HOST = __HOST__;
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
@@ -152,26 +281,43 @@ const store = {
 const token = location.hash.slice(1) || store.get("token") || "";
 if (token) store.set("token", token);
 
-const msg = document.getElementById("msg");
-function showMsg(text) { msg.textContent = text; msg.style.display = text ? "block" : "none"; }
-if (!token) showMsg("还没有配对：请用相机扫电脑上显示的二维码打开。");
+// 连接状态和提示
+const dot = document.getElementById("dot"), statusText = document.getElementById("status"), toastBox = document.getElementById("toast");
+let toastTimer;
+function toast(text, bad) {
+  toastBox.textContent = text;
+  toastBox.className = "show" + (bad ? " bad" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastBox.className = ""; }, bad ? 4000 : 1200);
+}
+function setStatus(ok, text) {
+  if (!ok && dot.className !== "bad") toast(text, true);
+  dot.className = ok ? "ok" : "bad";
+  statusText.textContent = ok ? "已连接 · " + HOST : text;
+}
 
+// 发指令给电脑；成功返回 true（有数据时返回数据），失败返回 false
 function send(data) {
+  if (!token) { setStatus(false, "还没配对：请扫电脑上的二维码打开"); return Promise.resolve(false); }
   return fetch("/api", {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-Token": token },
     body: JSON.stringify(data),
   }).then(r => {
-    if (r.status === 403) showMsg("配对失效：请重新扫电脑上的二维码。");
-    else showMsg("");
-  }).catch(() => showMsg("连不上电脑：确认遥控器程序开着，且手机和电脑在同一个 Wi-Fi。"));
+    if (r.status === 403) setStatus(false, "配对失效：请重新扫电脑上的二维码");
+    else setStatus(true);
+    if (!r.ok) return false;
+    return r.status === 200 ? r.json() : true;
+  }).catch(() => { setStatus(false, "连不上电脑：检查程序是否开着、是否同一个 Wi-Fi"); return false; });
 }
+send({ a: "ping" });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) send({ a: "ping" }); });
 
 // 按钮：按下立即触发，带 data-repeat 的长按连发
-document.querySelectorAll("button[data-k], button[data-scroll]").forEach(btn => {
+document.querySelectorAll("button[data-k], button[data-scroll], button[data-open]").forEach(btn => {
   let delay, repeat;
-  const fire = () => send(btn.dataset.scroll
-    ? { a: "scroll", dy: Number(btn.dataset.scroll) }
+  const fire = () => send(btn.dataset.scroll ? { a: "scroll", dy: Number(btn.dataset.scroll) }
+    : btn.dataset.open ? { a: "open", url: btn.dataset.open }
     : { a: "key", k: (PLATFORM === "mac" && btn.dataset.mac) || btn.dataset.k });
   const stop = () => { clearTimeout(delay); clearInterval(repeat); btn.classList.remove("on"); };
   btn.addEventListener("pointerdown", e => {
@@ -184,33 +330,169 @@ document.querySelectorAll("button[data-k], button[data-scroll]").forEach(btn => 
   btn.addEventListener("contextmenu", e => e.preventDefault());
 });
 
+// 页面和网站切换，记住上次的选择
+function pick(selector, attr, value, storeKey) {
+  document.querySelectorAll(selector).forEach(b => b.classList.toggle("sel", b.dataset[attr] === value));
+  store.set(storeKey, value);
+}
+function go(screen) {
+  document.body.dataset.screen = screen;
+  pick("nav button", "go", screen, "screen");
+  if (document.activeElement) document.activeElement.blur();
+  if (screen === "wins") loadWindows();
+}
+
+// 窗口列表：点一项就把那个窗口切到最前
+const winList = document.getElementById("winlist");
+function loadWindows() {
+  send({ a: "windows" }).then(list => {
+    winList.textContent = "";
+    if (!Array.isArray(list) || !list.length) {
+      const p = document.createElement("p");
+      p.textContent = list === false ? "读取不到窗口列表" : "没有打开的窗口";
+      winList.appendChild(p);
+      return;
+    }
+    list.forEach(w => {
+      const btn = document.createElement("button");
+      if (w.active) btn.className = "active";
+      if (w.app) { const app = document.createElement("small"); app.textContent = w.app; btn.appendChild(app); }
+      btn.appendChild(document.createTextNode(w.title));
+      btn.addEventListener("click", () => send({ a: "focus", id: w.id }).then(() => setTimeout(loadWindows, 350)));
+      winList.appendChild(btn);
+    });
+  });
+}
+document.querySelectorAll("[data-only]").forEach(b => { if (b.dataset.only !== PLATFORM) b.remove(); });
+document.querySelectorAll("#wins .grid button").forEach(b => b.addEventListener("pointerup", () => setTimeout(loadWindows, 500)));
+function setSite(site) {
+  pick(".chips button[data-site]", "site", site, "site");
+  document.querySelectorAll(".site").forEach(d => d.classList.toggle("sel", d.id === site));
+}
+document.querySelectorAll("nav button").forEach(b => b.addEventListener("pointerdown", () => go(b.dataset.go)));
+document.querySelectorAll(".chips button[data-site]").forEach(b => b.addEventListener("pointerdown", () => setSite(b.dataset.site)));
+go(["play", "pad", "type", "wins"].includes(store.get("screen")) ? store.get("screen") : "play");
+setSite(["any", "bili", "yt"].includes(store.get("site")) ? store.get("site") : "any");
+
 // 文字输入：手机上打字或听写，发到电脑当前的输入框里
 const textInput = document.getElementById("text");
 function sendText(enter) {
   const t = textInput.value.trim();
-  if (!t && !enter) return;
-  send({ a: "text", t, enter });
-  textInput.value = "";
+  if (!t && !enter) { toast("先在上面输入文字"); return; }
+  send({ a: "text", t, enter }).then(ok => { if (ok) { textInput.value = ""; toast(enter ? "已输入并回车" : "已输入"); } });
 }
-document.getElementById("type").addEventListener("click", () => sendText(false));
-document.getElementById("typeEnter").addEventListener("click", () => sendText(true));
-textInput.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); sendText(true); } });
+document.getElementById("sendText").addEventListener("click", () => sendText(false));
+document.getElementById("sendEnter").addEventListener("click", () => sendText(true));
+textInput.addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); sendText(true); } });
 
-// 分页
-function selectTab(name) {
-  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("sel", b.dataset.tab === name));
-  document.querySelectorAll(".extra").forEach(d => d.classList.toggle("sel", d.id === name));
-  store.set("tab", name);
+// 播放状态：定时问电脑，更新播放键、标题、进度条和音量。
+// 浏览器上报“播放 / 暂停”可能晚十秒左右，所以按下播放键后先按预期显示，过一会儿再以电脑为准。
+const playButtons = document.querySelectorAll(".playbtn"), nowBox = document.getElementById("now"), volBox = document.getElementById("vol");
+const curBox = document.getElementById("cur"), totalBox = document.getElementById("total");
+const track = document.getElementById("track"), fill = document.getElementById("fill"), knob = document.getElementById("knob");
+const media = { playing: null, title: "", pos: 0, dur: 0, at: 0, holdPlay: 0, holdPos: 0, serverPos: 0 };
+let dragging = null;
+
+function clock(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = String(sec % 60).padStart(2, "0");
+  return h ? h + ":" + String(m).padStart(2, "0") + ":" + s : m + ":" + s;
 }
-document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("pointerdown", () => selectTab(b.dataset.tab)));
-selectTab(document.querySelector('.extra[id="' + store.get("tab") + '"]') ? store.get("tab") : "play");
+function localPos() {
+  const pos = media.playing ? media.pos + (performance.now() - media.at) / 1000 : media.pos;
+  return Math.max(0, Math.min(media.dur, pos));
+}
+function setPos(pos) { media.pos = pos; media.at = performance.now(); }
 
-// 触控板
-const pad = document.getElementById("pad");
+function render() {
+  const name = media.playing === true ? "playing" : media.playing === false ? "paused" : "unknown";
+  playButtons.forEach(b => { b.dataset.state = name; });
+  nowBox.textContent = "";
+  if (media.playing !== null && media.title) {
+    nowBox.textContent = media.playing ? "正在播放　" : "已暂停　";
+    const b = document.createElement("b");
+    b.textContent = media.title;
+    nowBox.appendChild(b);
+  }
+  document.body.classList.toggle("notimeline", !media.dur);
+  if (media.dur) {
+    const pos = dragging === null ? localPos() : dragging;
+    const percent = pos / media.dur * 100 + "%";
+    fill.style.width = percent; knob.style.left = percent;
+    curBox.textContent = clock(pos); totalBox.textContent = clock(media.dur);
+  }
+}
+
+function applyState(state) {
+  const now = performance.now();
+  const newVideo = state.dur !== media.dur || state.title !== media.title;
+  const moved = Math.abs(state.pos - media.serverPos) > 2;   // 电脑上的进度跳了，说明发生过跳转
+  media.serverPos = state.pos;
+  if (newVideo || now > media.holdPlay || media.playing === null || state.playing === null) {
+    if (state.playing !== media.playing) { setPos(localPos()); media.playing = state.playing; }
+  }
+  media.dur = state.dur || 0;
+  media.title = state.title || "";
+  if (newVideo) setPos(state.pos);
+  else if (now > media.holdPos && Math.abs(state.pos - localPos()) > 2 && (moved || state.playing === media.playing)) setPos(state.pos);
+  volBox.textContent = state.vol === null || state.vol === undefined ? "" : state.muted ? "已静音" : "音量 " + state.vol;
+  if ("timer" in state) timerLabel.textContent = state.timer ? "剩 " + Math.ceil(state.timer / 60) + " 分钟" : "关";
+  render();
+}
+function pollState() {
+  if (document.hidden || !token) return;
+  send({ a: "state" }).then(state => { if (state && typeof state === "object") applyState(state); });
+}
+setInterval(pollState, 1500);
+setInterval(render, 500);
+document.addEventListener("visibilitychange", pollState);
+
+playButtons.forEach(b => b.addEventListener("pointerdown", () => {
+  if (media.playing === null) return;
+  setPos(localPos());
+  media.playing = !media.playing;
+  media.holdPlay = performance.now() + 12000;
+  render();
+}));
+
+// 跳转：进度条拖动和 ±30 秒都换算成绝对位置发给电脑
+function seekTo(pos) {
+  if (!media.dur) return;
+  pos = Math.max(0, Math.min(media.dur - 1, pos));
+  setPos(pos);
+  media.holdPos = performance.now() + 2500;
+  send({ a: "seek", to: pos });
+  render();
+}
+function trackPos(e) {
+  const box = track.getBoundingClientRect();
+  return Math.max(0, Math.min(1, (e.clientX - box.left) / box.width)) * media.dur;
+}
+track.addEventListener("pointerdown", e => { track.setPointerCapture(e.pointerId); dragging = trackPos(e); render(); });
+track.addEventListener("pointermove", e => { if (dragging !== null) { dragging = trackPos(e); render(); } });
+track.addEventListener("pointerup", e => { if (dragging !== null) { const pos = trackPos(e); dragging = null; seekTo(pos); } });
+track.addEventListener("pointercancel", () => { dragging = null; render(); });
+document.querySelectorAll("button[data-rel]").forEach(b => {
+  b.addEventListener("pointerdown", () => { b.classList.add("on"); seekTo(localPos() + Number(b.dataset.rel)); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(t => b.addEventListener(t, () => b.classList.remove("on")));
+});
+
+// 定时暂停：每按一次换一档
+const timerButton = document.getElementById("timer"), timerLabel = timerButton.querySelector("small");
+pollState();
+const TIMER_STEPS = [15, 30, 60, 90, 0];
+let timerStep = -1;
+timerButton.addEventListener("pointerdown", () => {
+  timerButton.classList.add("on");
+  timerStep = (timerStep + 1) % TIMER_STEPS.length;
+  const min = TIMER_STEPS[timerStep];
+  send({ a: "timer", min }).then(ok => { if (ok) { toast(min ? min + " 分钟后暂停" : "已取消定时"); pollState(); } });
+});
+["pointerup", "pointercancel", "pointerleave"].forEach(t => timerButton.addEventListener(t, () => timerButton.classList.remove("on")));
+
+// 触控板（播放、浏览、输入页各有一块，共用一套手势）
 const SPEED = 1.7;
-const pointers = new Map();
 let pending = { dx: 0, dy: 0, scroll: 0 }, busy = false;
-let travel = 0, startTime = 0, maxPointers = 0;
 
 function flush() {
   if (busy) return;
@@ -224,30 +506,37 @@ function flush() {
   Promise.all(jobs).then(() => { busy = false; flush(); });
 }
 
-pad.addEventListener("pointerdown", e => {
-  pad.setPointerCapture(e.pointerId);
-  if (pointers.size === 0) { travel = 0; startTime = Date.now(); maxPointers = 0; }
-  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  maxPointers = Math.max(maxPointers, pointers.size);
-  pad.classList.add("on");
-});
-pad.addEventListener("pointermove", e => {
-  const last = pointers.get(e.pointerId);
-  if (!last) return;
-  const dx = e.clientX - last.x, dy = e.clientY - last.y;
-  last.x = e.clientX; last.y = e.clientY;
-  travel += Math.abs(dx) + Math.abs(dy);
-  if (pointers.size === 1) { pending.dx += dx * SPEED; pending.dy += dy * SPEED; }
-  else pending.scroll += dy / pointers.size * 2.5;
-  flush();
-});
-function padUp(e) {
-  if (!pointers.delete(e.pointerId) || pointers.size) return;
-  pad.classList.remove("on");
-  if (e.type === "pointerup" && maxPointers === 1 && travel < 8 && Date.now() - startTime < 300) send({ a: "click" });
+function initPad(pad) {
+  const pointers = new Map();
+  let travel = 0, startTime = 0, maxPointers = 0;
+  pad.addEventListener("pointerdown", e => {
+    pad.setPointerCapture(e.pointerId);
+    if (pointers.size === 0) { travel = 0; startTime = Date.now(); maxPointers = 0; }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    maxPointers = Math.max(maxPointers, pointers.size);
+    pad.classList.add("on");
+  });
+  pad.addEventListener("pointermove", e => {
+    const last = pointers.get(e.pointerId);
+    if (!last) return;
+    const dx = e.clientX - last.x, dy = e.clientY - last.y;
+    last.x = e.clientX; last.y = e.clientY;
+    travel += Math.abs(dx) + Math.abs(dy);
+    if (pointers.size === 1) { pending.dx += dx * SPEED; pending.dy += dy * SPEED; }
+    else pending.scroll += dy / pointers.size * 2.5;
+    flush();
+  });
+  function padUp(e) {
+    if (!pointers.delete(e.pointerId) || pointers.size) return;
+    pad.classList.remove("on");
+    const quick = e.type === "pointerup" && Date.now() - startTime < 300;
+    if (quick && maxPointers === 1 && travel < 8) send({ a: "click" });
+    else if (quick && maxPointers === 2 && travel < 16) send({ a: "click", right: true });
+  }
+  pad.addEventListener("pointerup", padUp);
+  pad.addEventListener("pointercancel", padUp);
 }
-pad.addEventListener("pointerup", padUp);
-pad.addEventListener("pointercancel", padUp);
+document.querySelectorAll(".pad").forEach(initPad);
 </script>
 </body>
 </html>
