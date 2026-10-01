@@ -69,15 +69,25 @@
 
   /* 触控板页 */
   .padrow { flex:1; min-height:120px; display:flex; gap:var(--gap); }
-  #pad { flex:1; background:var(--surface); border-radius:18px; box-shadow:inset 0 0 0 1px var(--line); display:flex; align-items:center; justify-content:center;
+  .pad { flex:1; background:var(--surface); border-radius:18px; box-shadow:inset 0 0 0 1px var(--line); display:flex; align-items:center; justify-content:center;
          color:var(--dim); font-size:12px; text-align:center; line-height:1.9; touch-action:none; }
-  #pad.on { background:#1d2027; }
+  .pad.on { background:#1d2027; }
+
+  /* 播放键：播放中是实心亮色 + 暂停图标，暂停时是空心描边 + 播放图标 */
+  .playbtn svg { display:none; }
+  .playbtn[data-state="unknown"] .s-unknown, .playbtn[data-state="playing"] .s-pause, .playbtn[data-state="paused"] .s-play { display:block; }
+  .playbtn, .ring .playbtn { background:var(--accent); color:#fff; box-shadow:0 4px 16px rgba(108,140,255,.35); }
+  .playbtn.on, .ring .playbtn.on { background:var(--accent-on); }
+  .playbtn[data-state="paused"], .ring .playbtn[data-state="paused"] { background:var(--key); color:var(--accent); box-shadow:inset 0 0 0 2px var(--accent); }
+  .ring .playbtn[data-state="paused"] svg { color:var(--accent); }
+  #now { flex:none; height:18px; font-size:13px; color:var(--dim); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #now b { color:var(--text); font-weight:500; }
   .strip { display:flex; flex-direction:column; gap:var(--gap); width:52px; }
   .strip button { flex:1; height:auto; }
 
   /* 输入页 */
   textarea { font:inherit; font-size:16px; color:var(--text); background:var(--surface); border:0; box-shadow:inset 0 0 0 1px var(--line); border-radius:14px;
-             padding:12px 14px; height:92px; resize:none; outline:none; flex:none; user-select:text; -webkit-user-select:text; }
+             padding:10px 14px; height:62px; resize:none; outline:none; flex:none; user-select:text; -webkit-user-select:text; }
   textarea:focus { box-shadow:inset 0 0 0 1.5px var(--accent); }
   .sendrow { display:grid; grid-template-columns:1fr 1.4fr; gap:var(--gap); }
   .primary { background:var(--accent); color:#fff; box-shadow:none; } .primary.on { background:var(--accent-on); }
@@ -103,7 +113,9 @@
 
 <svg style="display:none">
   <symbol id="i-play" viewBox="0 0 24 24"><path d="M3 5v14l10-7zM15 5h2.6v14H15zM19.4 5H22v14h-2.6z"/></symbol>
-  <symbol id="i-rew" viewBox="0 0 24 24"><path d="M11.5 6v12L3 12zM21 6v12l-8.5-6z"/></symbol>
+  <symbol id="i-playonly" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
+  <symbol id="i-rew"viewBox="0 0 24 24"><path d="M11.5 6v12L3 12zM21 6v12l-8.5-6z"/></symbol>
   <symbol id="i-ff" viewBox="0 0 24 24"><path d="M12.5 6v12l8.5-6zM3 6v12l8.5-6z"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 11h14v2H5z"/></symbol>
@@ -120,11 +132,12 @@
 
 <!-- 播放 -->
 <section class="screen" id="play">
+  <div id="now"></div>
   <div class="ringwrap">
     <div class="ring">
       <button class="up" data-k="volup" data-repeat><svg><use href="#i-plus"/></svg>音量</button>
       <button class="lt" data-k="left" data-repeat><svg><use href="#i-rew"/></svg></button>
-      <button class="mid" data-k="space"><svg><use href="#i-play"/></svg></button>
+      <button class="mid playbtn" data-k="space" data-state="unknown"><svg class="s-unknown"><use href="#i-play"/></svg><svg class="s-play"><use href="#i-playonly"/></svg><svg class="s-pause"><use href="#i-pause"/></svg></button>
       <button class="rt" data-k="right" data-repeat><svg><use href="#i-ff"/></svg></button>
       <button class="down" data-k="voldown" data-repeat>音量<svg><use href="#i-minus"/></svg></button>
     </div>
@@ -174,7 +187,7 @@
 <!-- 触控板 -->
 <section class="screen" id="padscreen">
   <div class="padrow">
-    <div id="pad">滑动移动鼠标　轻点单击　连点两下双击<br>双指轻点右键　双指滑动滚动</div>
+    <div class="pad">滑动移动鼠标　轻点单击　连点两下双击<br>双指轻点右键　双指滑动滚动</div>
     <div class="strip">
       <button data-scroll="250" data-repeat>▲</button>
       <button data-scroll="-250" data-repeat>▼</button>
@@ -200,25 +213,27 @@
     <button id="sendText">只输入</button>
     <button id="sendEnter" class="primary">输入并回车</button>
   </div>
-  <div class="label">按键</div>
+  <div class="padrow">
+    <div class="pad">触控板</div>
+    <div class="strip">
+      <button data-scroll="250" data-repeat>▲</button>
+      <button data-scroll="-250" data-repeat>▼</button>
+    </div>
+  </div>
   <div class="grid">
     <button data-k="enter">回车</button>
     <button data-k="shift+enter">换行</button>
     <button data-k="backspace" data-repeat>退格</button>
-    <button data-k="esc">Esc</button>
+    <button data-k="esc">停止<small>Esc</small></button>
     <button data-k="mod+a">全选</button>
     <button data-k="mod+z">撤销</button>
+    <button data-k="mod+shift+o">新对话<small>AI</small></button>
+    <button data-k="win+h" data-mac="ctrl+alt+d">电脑听写<small>开 / 关</small></button>
+    <button data-k="mod+l">地址栏<small>浏览器</small></button>
+    <button data-k="mod+t">新标签<small>浏览器</small></button>
     <button data-k="tab" data-repeat>Tab</button>
     <button data-k="alt+tab" data-mac="mod+tab">切换窗口</button>
   </div>
-  <div class="label">快捷操作</div>
-  <div class="grid">
-    <button data-k="mod+l">地址栏<small>浏览器</small></button>
-    <button data-k="mod+t">新标签<small>浏览器</small></button>
-    <button data-k="mod+shift+o">新对话<small>AI</small></button>
-    <button data-k="win+h" data-mac="ctrl+alt+d">电脑听写<small>开 / 关</small></button>
-  </div>
-  <div class="spacer"></div>
 </section>
 
 <!-- 窗口 -->
@@ -237,7 +252,7 @@
 
 <div class="dock">
   <button data-k="voldown" data-repeat><svg><use href="#i-minus"/></svg></button>
-  <button data-k="space"><svg><use href="#i-play"/></svg></button>
+  <button class="playbtn" data-k="space" data-state="unknown"><svg class="s-unknown"><use href="#i-play"/></svg><svg class="s-play"><use href="#i-playonly"/></svg><svg class="s-pause"><use href="#i-pause"/></svg></button>
   <button data-k="volup" data-repeat><svg><use href="#i-plus"/></svg></button>
 </div>
 
@@ -362,12 +377,37 @@ document.getElementById("sendText").addEventListener("click", () => sendText(fal
 document.getElementById("sendEnter").addEventListener("click", () => sendText(true));
 textInput.addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); sendText(true); } });
 
-// 触控板
-const pad = document.getElementById("pad");
+// 播放状态：定时问电脑当前是播放还是暂停，更新播放键的样子
+const playButtons = document.querySelectorAll(".playbtn"), nowBox = document.getElementById("now");
+let playing = null;
+function showState(state) {
+  playing = state.playing;
+  const name = playing === true ? "playing" : playing === false ? "paused" : "unknown";
+  playButtons.forEach(b => { b.dataset.state = name; });
+  nowBox.textContent = "";
+  if (playing !== null && state.title) {
+    nowBox.textContent = playing ? "正在播放　" : "已暂停　";
+    const b = document.createElement("b");
+    b.textContent = state.title;
+    nowBox.appendChild(b);
+  }
+}
+function pollState() {
+  if (document.hidden || !token) return;
+  send({ a: "state" }).then(state => { if (state && typeof state === "object") showState(state); });
+}
+setInterval(pollState, 1500);
+pollState();
+document.addEventListener("visibilitychange", pollState);
+// 按下后先按预期翻转，再向电脑确认
+playButtons.forEach(b => b.addEventListener("pointerdown", () => {
+  if (playing !== null) showState({ playing: !playing, title: nowBox.lastChild ? nowBox.lastChild.textContent : "" });
+  setTimeout(pollState, 900);
+}));
+
+// 触控板（播放以外的页面各有一块，共用一套手势）
 const SPEED = 1.7;
-const pointers = new Map();
 let pending = { dx: 0, dy: 0, scroll: 0 }, busy = false;
-let travel = 0, startTime = 0, maxPointers = 0;
 
 function flush() {
   if (busy) return;
@@ -381,32 +421,37 @@ function flush() {
   Promise.all(jobs).then(() => { busy = false; flush(); });
 }
 
-pad.addEventListener("pointerdown", e => {
-  pad.setPointerCapture(e.pointerId);
-  if (pointers.size === 0) { travel = 0; startTime = Date.now(); maxPointers = 0; }
-  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  maxPointers = Math.max(maxPointers, pointers.size);
-  pad.classList.add("on");
-});
-pad.addEventListener("pointermove", e => {
-  const last = pointers.get(e.pointerId);
-  if (!last) return;
-  const dx = e.clientX - last.x, dy = e.clientY - last.y;
-  last.x = e.clientX; last.y = e.clientY;
-  travel += Math.abs(dx) + Math.abs(dy);
-  if (pointers.size === 1) { pending.dx += dx * SPEED; pending.dy += dy * SPEED; }
-  else pending.scroll += dy / pointers.size * 2.5;
-  flush();
-});
-function padUp(e) {
-  if (!pointers.delete(e.pointerId) || pointers.size) return;
-  pad.classList.remove("on");
-  const quick = e.type === "pointerup" && Date.now() - startTime < 300;
-  if (quick && maxPointers === 1 && travel < 8) send({ a: "click" });
-  else if (quick && maxPointers === 2 && travel < 16) send({ a: "click", right: true });
+function initPad(pad) {
+  const pointers = new Map();
+  let travel = 0, startTime = 0, maxPointers = 0;
+  pad.addEventListener("pointerdown", e => {
+    pad.setPointerCapture(e.pointerId);
+    if (pointers.size === 0) { travel = 0; startTime = Date.now(); maxPointers = 0; }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    maxPointers = Math.max(maxPointers, pointers.size);
+    pad.classList.add("on");
+  });
+  pad.addEventListener("pointermove", e => {
+    const last = pointers.get(e.pointerId);
+    if (!last) return;
+    const dx = e.clientX - last.x, dy = e.clientY - last.y;
+    last.x = e.clientX; last.y = e.clientY;
+    travel += Math.abs(dx) + Math.abs(dy);
+    if (pointers.size === 1) { pending.dx += dx * SPEED; pending.dy += dy * SPEED; }
+    else pending.scroll += dy / pointers.size * 2.5;
+    flush();
+  });
+  function padUp(e) {
+    if (!pointers.delete(e.pointerId) || pointers.size) return;
+    pad.classList.remove("on");
+    const quick = e.type === "pointerup" && Date.now() - startTime < 300;
+    if (quick && maxPointers === 1 && travel < 8) send({ a: "click" });
+    else if (quick && maxPointers === 2 && travel < 16) send({ a: "click", right: true });
+  }
+  pad.addEventListener("pointerup", padUp);
+  pad.addEventListener("pointercancel", padUp);
 }
-pad.addEventListener("pointerup", padUp);
-pad.addEventListener("pointercancel", padUp);
+document.querySelectorAll(".pad").forEach(initPad);
 </script>
 </body>
 </html>
