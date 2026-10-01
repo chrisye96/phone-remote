@@ -53,6 +53,8 @@ def press(mods, name):
     if name in VOLUME_SCRIPTS:
         osascript_async(VOLUME_SCRIPTS[name])
         return
+    if name in ("next", "prev"):
+        raise ValueError("not supported on macOS yet")
     if name == "media":
         name = "space"
     flags = 0

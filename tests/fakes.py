@@ -8,6 +8,7 @@ class FakePlatform(Platform):
     def __init__(self):
         self.calls = []
         self.media = empty_media_state()
+        self.can_toggle = True
 
     def press(self, mods, name):
         self.calls.append(("press", mods, name))
@@ -32,6 +33,10 @@ class FakePlatform(Platform):
 
     def media_state(self):
         return self.media
+
+    def media_toggle(self):
+        self.calls.append(("media_toggle",))
+        return self.can_toggle
 
     def media_seek(self, seconds):
         self.calls.append(("media_seek", seconds))

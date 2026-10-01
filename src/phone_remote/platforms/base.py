@@ -49,5 +49,12 @@ class Platform:
     def media_state(self):
         return empty_media_state()
 
+    def media_toggle(self):
+        """让正在播放（或刚暂停）的那个程序播放 / 暂停，不管它在不在前台。
+
+        做到了返回 True；没有可控制的播放时返回 False，调用方会改按空格。
+        """
+        return False
+
     def media_seek(self, seconds):
         """跳到指定秒数；做不到就什么都不做。"""

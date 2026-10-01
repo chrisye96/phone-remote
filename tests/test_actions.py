@@ -77,6 +77,23 @@ class DispatcherTest(unittest.TestCase):
         self.assertEqual(dispatcher.handle({"a": "windows"})[0]["title"], "Video")
         self.assertEqual(platform.calls, [("media_seek", 61.5), ("focus_window", 7)])
 
+    def test_playpause_uses_system_media_control_when_possible(self):
+        dispatcher, platform, _ = make()
+        dispatcher.handle({"a": "playpause"})
+        self.assertEqual(platform.calls, [("media_toggle",)])
+
+    def test_playpause_falls_back_to_space(self):
+        dispatcher, platform, _ = make()
+        platform.can_toggle = False
+        dispatcher.handle({"a": "playpause"})
+        self.assertEqual(platform.calls, [("media_toggle",), ("press", [], "space")])
+
+    def test_track_keys_are_system_keys(self):
+        dispatcher, platform, _ = make()
+        dispatcher.handle({"a": "key", "k": "next"})
+        dispatcher.handle({"a": "key", "k": "prev"})
+        self.assertEqual(platform.calls, [("press", [], "next"), ("press", [], "prev")])
+
     def test_hello_reports_platform_and_features(self):
         dispatcher, _, _ = make(windows=False)
         hello = dispatcher.handle({"a": "hello"})
