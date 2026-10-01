@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>界面方案预览</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  body { margin:0; padding:24px 16px 40px; background:#1b1d22; color:#e8eaf0; font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+  h1 { font-size:18px; font-weight:600; text-align:center; margin:0 0 4px; }
+  .sub { text-align:center; color:#9aa1b0; font-size:13px; margin:0 0 20px; }
+  .frames { display:flex; flex-wrap:wrap; gap:28px; justify-content:center; }
+  figure { margin:0; } figcaption { text-align:center; font-size:14px; margin-bottom:10px; color:#c6cbd6; }
+  .phone { width:360px; height:700px; border-radius:34px; padding:14px 14px 0; box-sizing:border-box; display:flex; flex-direction:column; gap:9px; overflow:hidden; border:3px solid #33363e; }
+  .phone button { font:inherit; border:0; }
+  .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+
+  /* ---------- 现在 ---------- */
+  .old { background:#0e0f13; color:#eceef3; }
+  .old .head { display:flex; font-size:12px; color:#8a91a0; }
+  .old .now { font-size:12px; color:#8a91a0; text-align:center; } .old .now b { color:#eceef3; font-weight:500; }
+  .old .prog { height:4px; border-radius:2px; background:#343945; position:relative; margin:4px 30px 6px; } .old .prog i { position:absolute; left:0; top:0; bottom:0; width:35%; background:#6c8cff; border-radius:2px; }
+  .old .padrow { flex:1; display:flex; gap:8px; }
+  .old .pad { flex:1; background:#181a20; border-radius:18px; display:flex; align-items:center; justify-content:center; color:#8a91a0; font-size:12px; }
+  .old .strip { width:48px; display:flex; flex-direction:column; gap:8px; } .old .strip button { flex:1; }
+  .old button { background:#22252d; color:#eceef3; border-radius:14px; height:44px; font-size:14px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.07); }
+  .old button small { display:block; font-size:10px; color:#8a91a0; }
+  .old .chips { display:flex; gap:6px; background:#181a20; border-radius:12px; padding:4px; } .old .chips button { flex:1; height:30px; background:transparent; box-shadow:none; color:#8a91a0; font-size:13px; border-radius:9px; } .old .chips .sel { background:#343945; color:#eceef3; }
+  .old .bar { display:grid; grid-template-columns:1fr 1fr 68px 1fr 1fr; align-items:center; height:64px; border-radius:24px; background:#1b1e25; }
+  .old .bar button { background:transparent; box-shadow:none; font-size:22px; } .old .bar .play { width:56px; height:56px; border-radius:50%; background:#6c8cff; color:#fff; justify-self:center; }
+  .old .nav { display:flex; margin:0 -14px; padding:6px 14px 10px; background:#181a20; } .old .nav button { flex:1; background:transparent; box-shadow:none; color:#8a91a0; font-size:11px; height:44px; } .old .nav i { display:block; font-size:20px; } .old .nav .sel { color:#6c8cff; }
+
+  /* ---------- 方案 ---------- */
+  .new { --bg:#0a0c11; --panel:#141821; --key:#2b313d; --line:rgba(255,255,255,.12); --text:#f4f6fa; --dim:#a3abbb;
+         --play:#5b8cff; --vol:#2ec4a6; --exit:#ff7b6b; --nav:#f2b84b;
+         background:var(--bg); color:var(--text); }
+  .new .head { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--dim); }
+  .new .head .dot { width:8px; height:8px; border-radius:50%; background:#3ddc97; }
+  .new .head .vol { margin-left:auto; color:var(--vol); font-weight:600; }
+  .new .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:10px 12px; }
+  .new .now { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .new .time { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--dim); margin-top:8px; font-variant-numeric:tabular-nums; }
+  .new .prog { flex:1; height:6px; border-radius:3px; background:#333a48; position:relative; } .new .prog i { position:absolute; left:0; top:0; bottom:0; width:35%; background:var(--play); border-radius:3px; }
+  .new .prog b { position:absolute; left:35%; top:-5px; width:16px; height:16px; margin-left:-8px; border-radius:50%; background:#fff; }
+  .new .padrow { flex:1; display:flex; gap:8px; }
+  .new .pad { flex:1; border-radius:18px; border:1.5px dashed rgba(255,255,255,.22); background:radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.4px) 0 0/16px 16px, #10141c;
+              display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--dim); font-size:12px; gap:4px; }
+  .new .pad .ti { font-size:22px; }
+  .new .strip { width:48px; display:flex; flex-direction:column; gap:8px; } .new .strip button { flex:1; height:auto; }
+  .new .label { font-size:11px; color:var(--dim); margin:2px 2px -3px; letter-spacing:.5px; }
+  .new button { background:var(--key); color:var(--text); border-radius:14px; height:50px; font-size:12px; border-top:1px solid rgba(255,255,255,.14); box-shadow:0 2px 0 rgba(0,0,0,.45); }
+  .new button .ti { display:block; font-size:19px; margin-bottom:1px; }
+  .new .c-play { background:#243357; } .new .c-play .ti { color:#8fb0ff; }
+  .new .c-vol { background:#17403b; } .new .c-vol .ti { color:#5fe0c5; }
+  .new .c-exit { background:#4a2a2a; } .new .c-exit .ti { color:#ff9c8f; }
+  .new .c-nav { background:#473a1c; } .new .c-nav .ti { color:#ffd27a; }
+  .new .chips { display:flex; gap:6px; } .new .chips button { flex:1; height:32px; font-size:13px; border-radius:16px; background:transparent; border:1px solid var(--line); box-shadow:none; color:var(--dim); display:flex; align-items:center; justify-content:center; gap:5px; }
+  .new .chips em { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .new .chips .sel { background:#3b2030; border-color:#fb7299; color:#fff; }
+  .new .bar { display:grid; grid-template-columns:1fr 1fr 72px 1fr 1fr; align-items:center; height:68px; border-radius:24px; background:var(--panel); border:1px solid var(--line); padding:0 4px; }
+  .new .bar button { background:transparent; border:0; box-shadow:none; height:54px; font-size:10px; color:var(--dim); } .new .bar button .ti { font-size:24px; color:var(--text); }
+  .new .bar .v .ti { color:#5fe0c5; }
+  .new .bar .play { width:60px; height:60px; border-radius:50%; background:var(--play); justify-self:center; box-shadow:0 0 0 5px rgba(91,140,255,.22); } .new .bar .play .ti { font-size:28px; color:#fff; margin:0; }
+  .new .nav { display:flex; margin:0 -14px; padding:6px 14px 10px; background:var(--panel); border-top:1px solid var(--line); } .new .nav button { flex:1; background:transparent; border:0; box-shadow:none; color:var(--dim); font-size:11px; height:46px; border-radius:12px; }
+  .new .nav .ti { font-size:21px; } .new .nav .sel { color:#fff; background:#243357; } .new .nav .sel .ti { color:#8fb0ff; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:22px; font-size:13px; color:#c6cbd6; }
+  .legend span::before { content:""; display:inline-block; width:12px; height:12px; border-radius:4px; margin-right:6px; vertical-align:-1px; background:var(--c); }
+</style>
+</head>
+<body>
+<h1>播放页：现在和方案对比</h1>
+<p class="sub">静态示意图，按钮不能点</p>
+
+<div class="frames">
+  <figure>
+    <figcaption>现在</figcaption>
+    <div class="phone old">
+      <div class="head"><span>● 已连接 · Luna</span><span style="margin-left:auto">音量 30</span></div>
+      <div class="now">正在播放　<b>群论之美宣传片_哔哩哔哩</b></div>
+      <div class="prog"><i></i></div>
+      <div class="padrow"><div class="pad">触控板</div><div class="strip"><button>▲</button><button>▼</button></div></div>
+      <div class="grid"><button>静音</button><button>全屏<small>F</small></button><button>退出<small>Esc</small></button><button>确定<small>回车</small></button></div>
+      <div class="chips"><button>通用</button><button class="sel">B站</button><button>YouTube</button><button>音乐</button></div>
+      <div class="grid"><button>上一集</button><button>下一集</button><button>弹幕</button><button>静音<small>播放器</small></button><button>音量 +</button><button>音量 −</button><button>点赞</button><button>收藏</button></div>
+      <div class="bar"><button><i class="ti ti-volume-2"></i></button><button><i class="ti ti-player-track-prev"></i></button><button class="play"><i class="ti ti-player-pause"></i></button><button><i class="ti ti-player-track-next"></i></button><button><i class="ti ti-volume"></i></button></div>
+      <div class="nav"><button class="sel"><i class="ti ti-device-tv"></i>播放</button><button><i class="ti ti-world"></i>浏览</button><button><i class="ti ti-keyboard"></i>输入</button><button><i class="ti ti-app-window"></i>窗口</button></div>
+    </div>
+  </figure>
+
+  <figure>
+    <figcaption>方案</figcaption>
+    <div class="phone new">
+      <div class="head"><span class="dot"></span><span>Luna</span><span class="vol"><i class="ti ti-volume"></i> 30</span></div>
+      <div class="card">
+        <div class="now">群论之美宣传片_哔哩哔哩</div>
+        <div class="time"><span>4:46</span><div class="prog"><i></i><b></b></div><span>13:38</span></div>
+      </div>
+      <div class="padrow">
+        <div class="pad"><i class="ti ti-hand-finger"></i>触控板</div>
+        <div class="strip"><button><i class="ti ti-chevron-up"></i></button><button><i class="ti ti-chevron-down"></i></button></div>
+      </div>
+      <div class="grid">
+        <button class="c-vol"><i class="ti ti-volume-off"></i>静音</button>
+        <button class="c-play"><i class="ti ti-maximize"></i>全屏</button>
+        <button class="c-exit"><i class="ti ti-arrow-back-up"></i>退出</button>
+        <button class="c-nav"><i class="ti ti-corner-down-left"></i>确定</button>
+      </div>
+      <div class="chips"><button>通用</button><button class="sel"><em style="background:#fb7299"></em>B站</button><button><em style="background:#ff4e45"></em>YouTube</button><button><em style="background:#1ed760"></em>音乐</button></div>
+      <div class="grid">
+        <button class="c-play"><i class="ti ti-player-skip-back"></i>上一集</button>
+        <button class="c-play"><i class="ti ti-player-skip-forward"></i>下一集</button>
+        <button><i class="ti ti-message-2"></i>弹幕</button>
+        <button><i class="ti ti-thumb-up"></i>点赞</button>
+        <button class="c-vol"><i class="ti ti-volume-2"></i>播放器 −</button>
+        <button class="c-vol"><i class="ti ti-volume"></i>播放器 +</button>
+        <button class="c-vol"><i class="ti ti-volume-off"></i>播放器静音</button>
+        <button><i class="ti ti-star"></i>收藏</button>
+      </div>
+      <div class="bar">
+        <button class="v"><i class="ti ti-volume-2"></i>音量 −</button>
+        <button><i class="ti ti-player-track-prev"></i>快退</button>
+        <button class="play"><i class="ti ti-player-pause"></i></button>
+        <button><i class="ti ti-player-track-next"></i>快进</button>
+        <button class="v"><i class="ti ti-volume"></i>音量 +</button>
+      </div>
+      <div class="nav"><button class="sel"><i class="ti ti-device-tv"></i><br>播放</button><button><i class="ti ti-world"></i><br>浏览</button><button><i class="ti ti-keyboard"></i><br>输入</button><button><i class="ti ti-app-window"></i><br>窗口</button></div>
+    </div>
+  </figure>
+</div>
+
+<div class="legend">
+  <span style="--c:#5b8cff">蓝：播放和进度</span>
+  <span style="--c:#2ec4a6">青：音量</span>
+  <span style="--c:#ff7b6b">红：退出、关闭、删除</span>
+  <span style="--c:#f2b84b">黄：确认和跳转</span>
+  <span style="--c:#2b313d">灰：其他</span>
+</div>
+</body>
+</html>
