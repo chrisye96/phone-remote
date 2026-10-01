@@ -11,10 +11,11 @@ import socket
 import struct
 import subprocess
 import sys
+import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-PORT = 8765
+PORT = int(os.environ.get("REMOTE_PORT", 8765))
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOKEN_FILE = os.path.join(HERE, "token.txt")
 SYSTEM_KEYS = ("volup", "voldown", "mute", "media")
@@ -111,13 +112,95 @@ if sys.platform == "win32":
     def mouse_move(dx, dy):
         user32.mouse_event(0x0001, dx, dy, 0, 0)
 
-    def mouse_click():
-        user32.mouse_event(0x0002, 0, 0, 0, 0)
-        user32.mouse_event(0x0004, 0, 0, 0, 0)
+    def mouse_click(right=False):
+        down, up = (0x0008, 0x0010) if right else (0x0002, 0x0004)
+        user32.mouse_event(down, 0, 0, 0, 0)
+        user32.mouse_event(up, 0, 0, 0, 0)
 
     def mouse_scroll(dy):
         # 滚轮一格是 120，大约对应 100 像素
         user32.mouse_event(0x0800, 0, 0, int(dy * 1.2), 0)
+
+    kernel32 = ctypes.windll.kernel32
+    dwmapi = ctypes.windll.dwmapi
+    HWND = ctypes.c_void_p
+    ENUM_PROC = ctypes.WINFUNCTYPE(ctypes.c_bool, HWND, ctypes.c_void_p)
+    for fn in ("IsWindowVisible", "IsWindow", "IsIconic", "SetForegroundWindow",
+               "BringWindowToTop", "GetWindowTextLengthW"):
+        getattr(user32, fn).argtypes = [HWND]
+    user32.GetForegroundWindow.restype = HWND
+    user32.GetWindow.restype = HWND
+    user32.GetWindow.argtypes = [HWND, ctypes.c_uint]
+    user32.GetWindowLongW.argtypes = [HWND, ctypes.c_int]
+    user32.GetWindowTextW.argtypes = [HWND, ctypes.c_wchar_p, ctypes.c_int]
+    user32.GetClassNameW.argtypes = [HWND, ctypes.c_wchar_p, ctypes.c_int]
+    user32.ShowWindow.argtypes = [HWND, ctypes.c_int]
+    user32.GetWindowThreadProcessId.argtypes = [HWND, ctypes.POINTER(ctypes.c_ulong)]
+    user32.EnumWindows.argtypes = [ENUM_PROC, ctypes.c_void_p]
+    user32.AttachThreadInput.argtypes = [ctypes.c_ulong, ctypes.c_ulong, ctypes.c_bool]
+    dwmapi.DwmGetWindowAttribute.argtypes = [HWND, ctypes.c_ulong, ctypes.c_void_p, ctypes.c_ulong]
+    kernel32.OpenProcess.restype = ctypes.c_void_p
+    kernel32.OpenProcess.argtypes = [ctypes.c_ulong, ctypes.c_bool, ctypes.c_ulong]
+    kernel32.CloseHandle.argtypes = [ctypes.c_void_p]
+    kernel32.QueryFullProcessImageNameW.argtypes = [
+        ctypes.c_void_p, ctypes.c_ulong, ctypes.c_wchar_p, ctypes.POINTER(ctypes.c_ulong)]
+
+    def _app_name(hwnd):
+        pid = ctypes.c_ulong()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        handle = kernel32.OpenProcess(0x1000, False, pid.value)
+        if not handle:
+            return ""
+        buf = ctypes.create_unicode_buffer(520)
+        size = ctypes.c_ulong(520)
+        ok = kernel32.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size))
+        kernel32.CloseHandle(handle)
+        return os.path.splitext(os.path.basename(buf.value))[0] if ok else ""
+
+    def list_windows():
+        """任务栏上能看到的窗口，按从前到后的顺序。"""
+        found = []
+        front = user32.GetForegroundWindow()
+
+        def visit(hwnd, _):
+            if not user32.IsWindowVisible(hwnd) or user32.GetWindow(hwnd, 4):
+                return True
+            if user32.GetWindowLongW(hwnd, -20) & 0x80:  # 工具窗口
+                return True
+            cloaked = ctypes.c_int(0)
+            dwmapi.DwmGetWindowAttribute(hwnd, 14, ctypes.byref(cloaked), 4)
+            length = user32.GetWindowTextLengthW(hwnd)
+            if cloaked.value or not length:
+                return True
+            title = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, title, length + 1)
+            cls = ctypes.create_unicode_buffer(64)
+            user32.GetClassNameW(hwnd, cls, 64)
+            if cls.value != "Progman":
+                found.append({"id": hwnd, "title": title.value, "app": _app_name(hwnd),
+                              "active": hwnd == front})
+            return True
+
+        user32.EnumWindows(ENUM_PROC(visit), None)
+        return found
+
+    def focus_window(hwnd):
+        hwnd = int(hwnd)
+        if not user32.IsWindow(hwnd):
+            raise ValueError("no such window")
+        if user32.IsIconic(hwnd):
+            user32.ShowWindow(hwnd, 9)
+        # Windows 只让“刚收到过输入”的进程抢前台，先发一个没有任何作用的按键
+        user32.keybd_event(0xE8, 0, 0, 0)
+        user32.keybd_event(0xE8, 0, KEYUP, 0)
+        user32.SetForegroundWindow(hwnd)
+        if user32.GetForegroundWindow() != hwnd:
+            ours = kernel32.GetCurrentThreadId()
+            theirs = user32.GetWindowThreadProcessId(user32.GetForegroundWindow(), None)
+            user32.AttachThreadInput(ours, theirs, True)
+            user32.BringWindowToTop(hwnd)
+            user32.SetForegroundWindow(hwnd)
+            user32.AttachThreadInput(ours, theirs, False)
 
     def check_permission():
         return True
@@ -137,6 +220,7 @@ elif sys.platform == "darwin":
     cg.CGEventSetFlags.argtypes = [vp, ctypes.c_uint64]
     cg.CGEventKeyboardSetUnicodeString.argtypes = [
         vp, ctypes.c_ulong, ctypes.POINTER(ctypes.c_uint16)]
+    cg.CGEventSetIntegerValueField.argtypes = [vp, ctypes.c_uint32, ctypes.c_int64]
     cg.CGEventPost.argtypes = [ctypes.c_uint32, vp]
     cg.CFRelease.argtypes = [vp]
     cg.CGEventCreate.restype = vp
@@ -201,13 +285,45 @@ elif sys.platform == "darwin":
         point.y += dy
         _post(cg.CGEventCreateMouseEvent(None, 5, point, 0))
 
-    def mouse_click():
+    _last_click = [0.0]
+
+    def mouse_click(right=False):
         point = _cursor()
-        _post(cg.CGEventCreateMouseEvent(None, 1, point, 0))
-        _post(cg.CGEventCreateMouseEvent(None, 2, point, 0))
+        down, up, button = (3, 4, 1) if right else (1, 2, 0)
+        # macOS 靠事件里的点击计数识别双击，两次单击不会自动算双击
+        now = time.monotonic()
+        count = 2 if not right and now - _last_click[0] < 0.4 else 1
+        _last_click[0] = 0.0 if count == 2 else now
+        for kind in (down, up):
+            event = cg.CGEventCreateMouseEvent(None, kind, point, button)
+            cg.CGEventSetIntegerValueField(event, 1, count)
+            _post(event)
 
     def mouse_scroll(dy):
         _post(cg.CGEventCreateScrollWheelEvent2(None, 0, 1, dy, 0, 0))
+
+    def _osascript(*lines, args=()):
+        cmd = ["osascript"]
+        for line in lines:
+            cmd += ["-e", line]
+        result = subprocess.run(cmd + list(args), capture_output=True, text=True, timeout=5)
+        return result.stdout.strip()
+
+    def list_windows():
+        """Mac 上按应用切换：列出有界面的应用。"""
+        names = _osascript('tell application "System Events" to get name of every process '
+                           'whose background only is false')
+        front = _osascript('tell application "System Events" to get name of first process '
+                           'whose frontmost is true')
+        return [{"id": name, "title": name, "app": "", "active": name == front}
+                for name in (n.strip() for n in names.split(",")) if name]
+
+    def focus_window(name):
+        if name not in [w["id"] for w in list_windows()]:
+            raise ValueError("no such app")
+        _osascript("on run argv",
+                   'tell application "System Events" to set frontmost of process (item 1 of argv) to true',
+                   "end run", args=[name])
 
     def check_permission():
         return cg.AXIsProcessTrusted()
@@ -222,7 +338,13 @@ def clamp(value, limit):
 
 def handle_action(msg):
     action = msg.get("a")
-    if action == "key":
+    if action == "ping":
+        pass
+    elif action == "windows":
+        return list_windows()
+    elif action == "focus":
+        focus_window(msg.get("id"))
+    elif action == "key":
         press(msg.get("k"))
     elif action == "text":
         text = " ".join(str(msg.get("t", "")).split())[:2000]
@@ -233,7 +355,7 @@ def handle_action(msg):
     elif action == "move":
         mouse_move(clamp(msg.get("dx", 0), 2000), clamp(msg.get("dy", 0), 2000))
     elif action == "click":
-        mouse_click()
+        mouse_click(right=bool(msg.get("right")))
     elif action == "scroll":
         mouse_scroll(clamp(msg.get("dy", 0), 1500))
     else:
@@ -294,6 +416,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/":
             with open(os.path.join(HERE, "index.html"), encoding="utf-8") as f:
                 page = f.read().replace("__PLATFORM__", PLATFORM)
+            page = page.replace("__HOST__", json.dumps(socket.gethostname()))
             self.reply(200, page.encode("utf-8"), "text/html; charset=utf-8")
         elif path == "/pair" and self.client_address[0] == "127.0.0.1":
             page = PAIR_PAGE.replace("__URL__", self.server.phone_url)
@@ -309,10 +432,12 @@ class Handler(BaseHTTPRequestHandler):
         if not secrets.compare_digest(self.headers.get("X-Token", ""), self.server.token):
             return self.reply(403)
         try:
-            handle_action(json.loads(body))
-        except (ValueError, TypeError, AttributeError):
+            result = handle_action(json.loads(body))
+        except (ValueError, TypeError, AttributeError, OSError, subprocess.SubprocessError):
             return self.reply(400)
-        self.reply(204)
+        if result is None:
+            return self.reply(204)
+        self.reply(200, json.dumps(result).encode("utf-8"), "application/json")
 
 
 def main():
