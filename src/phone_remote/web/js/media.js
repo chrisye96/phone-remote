@@ -3,6 +3,7 @@
 import { send, token } from "./api.js";
 
 const playButtons = document.querySelectorAll(".playbtn");
+const nowCard = document.getElementById("nowcard");
 const nowBox = document.getElementById("now"), volBox = document.getElementById("vol");
 const curBox = document.getElementById("cur"), totalBox = document.getElementById("total");
 const track = document.getElementById("track"), fill = document.getElementById("fill"), knob = document.getElementById("knob");
@@ -27,13 +28,10 @@ function setPos(pos) { media.pos = pos; media.at = performance.now(); }
 function render() {
   const name = media.playing === true ? "playing" : media.playing === false ? "paused" : "unknown";
   playButtons.forEach(b => { b.dataset.state = name; });
-  nowBox.textContent = "";
-  if (media.playing !== null && media.title) {
-    nowBox.textContent = media.playing ? "正在播放　" : "已暂停　";
-    const b = document.createElement("b");
-    b.textContent = media.title;
-    nowBox.appendChild(b);
-  }
+  const hasTitle = media.playing !== null && media.title;
+  nowBox.textContent = hasTitle ? media.title : "";
+  nowBox.classList.toggle("paused", media.playing === false);
+  nowCard.hidden = !((hasTitle && nowBox.isConnected) || (media.dur && track.isConnected));
   document.body.classList.toggle("notimeline", !media.dur);
   if (media.dur) {
     const pos = dragging === null ? localPos() : dragging;

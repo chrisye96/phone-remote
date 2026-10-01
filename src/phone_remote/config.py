@@ -18,17 +18,26 @@ FEATURES = {
     "progress": "进度条、拖动跳转、±30 秒",
     "volume_display": "显示音量数值",
     "sleep_timer": "定时暂停",
-    "open_sites": "快速打开网站",
+    "open_sites": "网页快捷方式",
     "site_keys": "B 站、YouTube 的专用按键",
     "browser_keys": "浏览器按键：后退、标签、缩放",
 }
 
 
+MAX_SHORTCUTS = 4
+DEFAULT_SHORTCUTS = [
+    {"name": "B站", "url": "https://www.bilibili.com", "color": "#fb7299"},
+    {"name": "YouTube", "url": "https://www.youtube.com", "color": "#ff4e45"},
+]
+
+
 @dataclass
 class Config:
     port: int = DEFAULT_PORT
+    saved_port: int = DEFAULT_PORT  # 配置文件里写的端口；port 可能被环境变量临时改掉
     token: str = ""
     features: dict = field(default_factory=lambda: dict.fromkeys(FEATURES, True))
+    shortcuts: list = field(default_factory=lambda: [dict(s) for s in DEFAULT_SHORTCUTS])
     data_dir: Path = Path(".")
 
 
@@ -57,6 +66,13 @@ def _load_token(folder):
     return token
 
 
+def save(config):
+    (config.data_dir / "config.json").write_text(
+        json.dumps({"port": config.saved_port, "features": config.features, "shortcuts": config.shortcuts},
+                   indent=2, ensure_ascii=False),
+        encoding="utf-8")
+
+
 def load():
     folder = data_dir()
     folder.mkdir(parents=True, exist_ok=True)
@@ -68,14 +84,17 @@ def load():
             saved = json.loads(config_file.read_text(encoding="utf-8"))
         except ValueError:
             saved = {}
-    config.port = int(saved.get("port", DEFAULT_PORT))
+    config.port = config.saved_port = int(saved.get("port", DEFAULT_PORT))
     for name, enabled in saved.get("features", {}).items():
         if name in FEATURES:
             config.features[name] = bool(enabled)
-    # 每次写回，这样新增的功能开关会出现在文件里，方便修改
-    config_file.write_text(
-        json.dumps({"port": config.port, "features": config.features}, indent=2),
-        encoding="utf-8")
+    if isinstance(saved.get("shortcuts"), list):
+        config.shortcuts = [
+            {"name": str(s.get("name", ""))[:12], "url": str(s.get("url", "")), "color": str(s.get("color", ""))}
+            for s in saved["shortcuts"]
+            if isinstance(s, dict) and str(s.get("url", "")).startswith(("https://", "http://"))
+        ][:MAX_SHORTCUTS]
+    save(config)  # 每次写回，这样新增的功能开关会出现在文件里，方便修改
     if os.environ.get("REMOTE_PORT"):
         config.port = int(os.environ["REMOTE_PORT"])
     config.token = _load_token(folder)

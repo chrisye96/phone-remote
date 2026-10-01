@@ -3,6 +3,7 @@ import { env, send, token } from "./api.js";
 import { initButtons } from "./buttons.js";
 import { initMedia } from "./media.js";
 import { initNav, setSite } from "./nav.js";
+import { initShortcuts, renderShortcuts } from "./shortcuts.js";
 import { setHost } from "./status.js";
 import { initText } from "./text.js";
 import { initTimer } from "./timer.js";
@@ -15,6 +16,7 @@ initText();
 initWindows();
 initMedia();
 initTimer();
+initShortcuts();
 initNav();
 
 // 去掉这台电脑用不上的部分：别的系统专用的按键、被关掉的功能
@@ -23,7 +25,12 @@ function applyEnvironment(info) {
   setHost(info.host);
   document.querySelectorAll("[data-only]").forEach(el => { if (el.dataset.only !== info.platform) el.remove(); });
   document.querySelectorAll("[data-feature]").forEach(el => { if (info.features[el.dataset.feature] === false) el.remove(); });
-  setSite(document.querySelector(".chips button.sel") ? document.querySelector(".chips button.sel").dataset.site : "any");
+  // 里面的东西都被去掉了的行和面板，一起去掉
+  document.querySelectorAll(".row, .site").forEach(el => { if (!el.children.length && el.id !== "shortcuts") el.remove(); });
+  document.querySelectorAll(".group, .card").forEach(el => { if (!el.querySelector("button, #now, #prog, #shortcuts")) el.remove(); });
+  renderShortcuts(info.shortcuts || [], info.max_shortcuts);
+  const selected = document.querySelector(".tabs button.sel");
+  setSite(selected ? selected.dataset.site : "any");
 }
 
 let connected = false;

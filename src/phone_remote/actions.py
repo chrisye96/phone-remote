@@ -1,7 +1,10 @@
 """把手机发来的指令校验后交给平台实现去执行。"""
+import re
 import socket
 import webbrowser
 
+from . import siteinfo
+from .config import MAX_SHORTCUTS
 from .keys import parse_combo
 from .timer import SleepTimer
 
@@ -12,8 +15,11 @@ ACTION_FEATURE = {
     "windows": "windows", "focus": "windows",
     "seek": "progress",
     "timer": "sleep_timer",
-    "open": "open_sites",
+    "open": "open_sites", "shortcut_save": "open_sites", "shortcut_delete": "open_sites",
 }
+
+
+BARE_HOST = re.compile(r"^[\w-]+(\.[\w-]+)+([/:?#]|$)")
 
 
 class FeatureDisabled(Exception):
@@ -25,9 +31,13 @@ def clamp(value, limit):
 
 
 class Dispatcher:
-    def __init__(self, platform, features, opener=webbrowser.open):
+    def __init__(self, platform, features, opener=webbrowser.open,
+                 shortcuts=None, on_change=None, site_info=siteinfo.fetch):
         self.platform = platform
         self.features = features
+        self.shortcuts = shortcuts if shortcuts is not None else []
+        self._on_change = on_change or (lambda: None)  # 快捷方式改动后调用，用来存盘
+        self._site_info = site_info
         self.timer = SleepTimer(platform)
         self._open = opener
 
@@ -50,7 +60,8 @@ class Dispatcher:
 
     def _do_hello(self, msg):
         return {"platform": self.platform.name, "host": socket.gethostname(),
-                "features": self.features}
+                "features": self.features,
+                "shortcuts": self.shortcuts, "max_shortcuts": MAX_SHORTCUTS}
 
     def _do_state(self, msg):
         state = dict(self.platform.media_state())
@@ -74,11 +85,40 @@ class Dispatcher:
     def _do_timer(self, msg):
         self.timer.set(float(msg.get("min", 0)))
 
+    def _shortcut_index(self, msg):
+        index = msg.get("i")
+        if not isinstance(index, int) or isinstance(index, bool) or not 0 <= index < len(self.shortcuts):
+            raise ValueError("no such shortcut")
+        return index
+
     def _do_open(self, msg):
-        url = str(msg.get("url", ""))
-        if not url.startswith(("https://", "http://")):
+        # 只能打开已保存的快捷方式，手机发不了任意网址过来
+        self._open(self.shortcuts[self._shortcut_index(msg)]["url"])
+
+    def _do_shortcut_save(self, msg):
+        """新增（不带 i）或修改（带 i）一个快捷方式。名称留空就用网页自己的名称。"""
+        url = str(msg.get("url", "")).strip()
+        if "://" not in url and BARE_HOST.match(url):  # 允许只写 bilibili.com 这样的
+            url = "https://" + url
+        if not url.startswith(("https://", "http://")) or len(url) > 500 or " " in url:
             raise ValueError("bad url")
-        self._open(url)
+        index = self._shortcut_index(msg) if msg.get("i") is not None else None
+        if index is None and len(self.shortcuts) >= MAX_SHORTCUTS:
+            raise ValueError("too many shortcuts")
+        info = self._site_info(url)
+        name = " ".join(str(msg.get("name", "")).split())[:12] or info["name"]
+        shortcut = {"name": name, "url": url, "color": info["color"]}
+        if index is None:
+            self.shortcuts.append(shortcut)
+        else:
+            self.shortcuts[index] = shortcut
+        self._on_change()
+        return self.shortcuts
+
+    def _do_shortcut_delete(self, msg):
+        del self.shortcuts[self._shortcut_index(msg)]
+        self._on_change()
+        return self.shortcuts
 
     def _do_windows(self, msg):
         return self.platform.list_windows()

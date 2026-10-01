@@ -17,8 +17,15 @@ function loadWindows() {
     list.forEach(w => {
       const btn = document.createElement("button");
       if (w.active) btn.className = "active";
-      if (w.app) { const app = document.createElement("small"); app.textContent = w.app; btn.appendChild(app); }
-      btn.appendChild(document.createTextNode(w.title));
+      const avatar = document.createElement("span");
+      avatar.className = "av";
+      avatar.textContent = (w.app || w.title || "?").charAt(0).toUpperCase();
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = w.title;
+      if (w.app) { const app = document.createElement("small"); app.textContent = w.app; name.appendChild(app); }
+      btn.append(avatar, name);
+      if (w.active) { const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = "当前"; btn.appendChild(tag); }
       btn.addEventListener("click", () => send({ a: "focus", id: w.id }).then(() => setTimeout(loadWindows, 350)));
       winList.appendChild(btn);
     });
