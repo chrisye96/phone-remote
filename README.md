@@ -2,16 +2,24 @@
 
 在电脑上运行一个小程序，手机浏览器打开网页，就能遥控电脑上的视频播放：音量、播放暂停、快进快退、触控板、滚动、文字输入，以及 B 站、YouTube、浏览器和 AI 客户端的常用快捷键。
 
-只用 Python 标准库，Windows 和 macOS 通用。手机和电脑需要在同一个 Wi-Fi 下。
+Windows 和 macOS 通用，用 Python 编写。手机和电脑需要在同一个 Wi-Fi 下。
 
 ## 运行
 
-Windows：双击 `start-windows.bat`。
+Windows：双击 `start-windows.bat`。第一次运行会在仓库里建一个 `.venv` 虚拟环境并安装依赖，需要联网，大约一分钟。
 
-macOS：
+macOS（先安装一次，以后只需要最后一行）：
 
 ```bash
-PYTHONPATH=src python3 -m phone_remote
+python3 -m venv .venv
+```
+
+```bash
+.venv/bin/python -m pip install -e .
+```
+
+```bash
+.venv/bin/python -m phone_remote
 ```
 
 第一次在 Mac 上运行，需要在 系统设置 > 隐私与安全性 > 辅助功能 里给"终端"授权。
@@ -57,18 +65,14 @@ src/phone_remote/
   pairing.py       二维码页面
   platforms/       每个系统一套实现，其他代码只用 base.py 里的接口
     base.py
-    windows/       input.py  windows.py  media.py
+    windows/       input.py  windows.py  media.py  audio.py
     macos/         input.py  windows.py  media.py
   web/             手机页面：index.html、css/、js/（按功能分模块）
 tests/             自动测试，不碰真实的键盘鼠标
 docs/              重构计划
 ```
 
-运行测试：双击 `run-tests.bat`，或
-
-```bash
-PYTHONPATH="src;tests" python -m unittest discover -s tests
-```
+运行测试：双击 `run-tests.bat`。
 
 ## 分支
 

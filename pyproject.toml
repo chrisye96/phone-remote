@@ -7,6 +7,12 @@ name = "phone-remote"
 dynamic = ["version"]
 description = "用手机浏览器遥控电脑上的视频播放"
 requires-python = ">=3.9"
+dependencies = [
+    "winrt-runtime; sys_platform == 'win32'",
+    "winrt-Windows.Media.Control; sys_platform == 'win32'",
+    "winrt-Windows.Foundation; sys_platform == 'win32'",
+    "winrt-Windows.Foundation.Collections; sys_platform == 'win32'",
+]
 
 [project.scripts]
 phone-remote = "phone_remote.__main__:main"
@@ -18,4 +24,4 @@ version = { attr = "phone_remote.__version__" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-phone_remote = ["web/**/*", "platforms/windows/*.ps1"]
+phone_remote = ["web/**/*"]
