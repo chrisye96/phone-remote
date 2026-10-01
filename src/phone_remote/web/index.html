@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c11">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="遥控器">
+<title>遥控器</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-screen="play">
+
+<header><span id="dot"></span><span id="status">正在连接…</span><span id="vol" data-feature="volume_display"></span></header>
+<div id="toast"></div>
+
+<!--
+  按钮上的属性：
+  data-k        按键组合；mod 表示 Windows 的 Ctrl / Mac 的 Command
+  data-mac      Mac 上写法不同时用的按键组合
+  data-cmd      不是按键的指令，比如 playpause
+  data-rel      相对当前进度跳多少秒
+  data-repeat   长按连发
+  data-only     只在这个系统上显示（win / mac）
+  data-feature  属于哪个功能开关，开关关掉时整块不显示
+  按钮的颜色：c-play 蓝（播放、主操作） c-vol 青（音量） c-ok 绿（确认）
+              c-nav 黄（跳转） c-exit 红（退出、关闭、删除）
+  图标：<svg class="ic"><use href="icons.svg#名字"/></svg>，名单在 scripts/build-icons.py
+-->
+
+<!-- 播放 -->
+<section class="screen" id="play">
+  <div class="card" id="nowcard" hidden>
+    <div id="now" data-feature="play_state"></div>
+    <div id="prog" data-feature="progress"><span id="cur">0:00</span><div id="track"><div id="fill"></div><div id="knob"></div></div><span id="total">0:00</span></div>
+  </div>
+  <div class="padrow" data-feature="touchpad">
+    <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg>触控板</div>
+    <div class="rocker col">
+      <button data-scroll="250" data-repeat><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
+      <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
+    </div>
+  </div>
+
+  <div class="row r211">
+    <button class="c-play big" data-k="f"><svg class="ic"><use href="icons.svg#maximize"/></svg>全屏</button>
+    <button class="c-exit" data-k="esc"><svg class="ic"><use href="icons.svg#arrows-minimize"/></svg>退出</button>
+    <button class="c-ok" data-k="enter"><svg class="ic"><use href="icons.svg#check"/></svg>确定</button>
+  </div>
+
+  <div class="group" id="sitegroup">
+    <div class="tabs" data-feature="site_keys">
+      <button data-site="any">通用</button>
+      <button data-site="bili" style="--site:#fb7299"><em></em>B站</button>
+      <button data-site="yt" style="--site:#ff4e45"><em></em>YouTube</button>
+      <button data-site="music" style="--site:#1ed760"><em></em>音乐</button>
+    </div>
+
+    <div class="site" id="any">
+      <div class="row r211">
+        <div class="rocker c-play" data-feature="progress">
+          <button data-rel="-30"><svg class="ic"><use href="icons.svg#rewind-backward-30"/></svg>退 30 秒</button>
+          <button data-rel="30"><svg class="ic"><use href="icons.svg#rewind-forward-30"/></svg>进 30 秒</button>
+        </div>
+        <button data-rel="90" data-feature="progress"><svg class="ic"><use href="icons.svg#player-skip-forward"/></svg>跳片头</button>
+        <button id="timer" data-feature="sleep_timer"><svg class="ic"><use href="icons.svg#hourglass"/></svg><span>定时暂停</span></button>
+      </div>
+      <div class="row r211">
+        <div class="rocker">
+          <button data-k="up" data-repeat><svg class="ic"><use href="icons.svg#arrow-up"/></svg>上</button>
+          <button data-k="down" data-repeat><svg class="ic"><use href="icons.svg#arrow-down"/></svg>下</button>
+        </div>
+        <button data-k="c"><svg class="ic"><use href="icons.svg#badge-cc"/></svg>字幕</button>
+        <button data-k="space"><svg class="ic"><use href="icons.svg#space"/></svg>空格</button>
+      </div>
+    </div>
+
+    <div class="site" id="bili" data-feature="site_keys" style="--site:#fb7299">
+      <div class="row r211">
+        <div class="rocker c-play">
+          <button data-k="["><svg class="ic"><use href="icons.svg#player-skip-back"/></svg>上一集</button>
+          <button data-k="]"><svg class="ic"><use href="icons.svg#player-skip-forward"/></svg>下一集</button>
+        </div>
+        <button data-k="d"><svg class="ic"><use href="icons.svg#message-2"/></svg>弹幕</button>
+        <button data-k="q"><svg class="ic"><use href="icons.svg#thumb-up"/></svg>点赞</button>
+      </div>
+      <div class="row r31">
+        <div class="rocker c-vol">
+          <button data-k="down" data-repeat><svg class="ic"><use href="icons.svg#minus"/></svg>播放器音量</button>
+          <button data-k="m"><svg class="ic"><use href="icons.svg#volume-off"/></svg>静音</button>
+          <button data-k="up" data-repeat><svg class="ic"><use href="icons.svg#plus"/></svg>播放器音量</button>
+        </div>
+        <button data-k="e"><svg class="ic"><use href="icons.svg#star"/></svg>收藏</button>
+      </div>
+    </div>
+
+    <div class="site" id="yt" data-feature="site_keys" style="--site:#ff4e45">
+      <div class="row r211">
+        <div class="rocker c-play">
+          <button data-k="shift+p"><svg class="ic"><use href="icons.svg#player-skip-back"/></svg>上一个</button>
+          <button data-k="shift+n"><svg class="ic"><use href="icons.svg#player-skip-forward"/></svg>下一个</button>
+        </div>
+        <button data-k="c"><svg class="ic"><use href="icons.svg#badge-cc"/></svg>字幕</button>
+        <button data-k="t"><svg class="ic"><use href="icons.svg#rectangle"/></svg>影院模式</button>
+      </div>
+      <div class="row r22">
+        <div class="rocker c-play">
+          <button data-k="j" data-repeat><svg class="ic"><use href="icons.svg#rewind-backward-10"/></svg>退 10 秒</button>
+          <button data-k="l" data-repeat><svg class="ic"><use href="icons.svg#rewind-forward-10"/></svg>进 10 秒</button>
+        </div>
+        <div class="rocker">
+          <button data-k="shift+,"><svg class="ic"><use href="icons.svg#minus"/></svg>减速</button>
+          <button data-k="shift+."><svg class="ic"><use href="icons.svg#plus"/></svg>加速</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="site" id="music" data-feature="site_keys" style="--site:#1ed760">
+      <div class="row r22">
+        <div class="rocker c-play" data-only="win">
+          <button data-k="prev"><svg class="ic"><use href="icons.svg#player-skip-back"/></svg>上一首</button>
+          <button data-k="next"><svg class="ic"><use href="icons.svg#player-skip-forward"/></svg>下一首</button>
+        </div>
+        <div class="rocker c-play" data-feature="progress">
+          <button data-rel="-10"><svg class="ic"><use href="icons.svg#rewind-backward-10"/></svg>退 10 秒</button>
+          <button data-rel="10"><svg class="ic"><use href="icons.svg#rewind-forward-10"/></svg>进 10 秒</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 浏览 -->
+<section class="screen" id="browse">
+  <div class="padrow" data-feature="touchpad">
+    <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg>滑动移动鼠标　轻点单击<br>双指轻点右键　双指滑动滚动</div>
+    <div class="rocker col">
+      <button data-scroll="250" data-repeat><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
+      <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
+    </div>
+  </div>
+
+  <div class="group" data-feature="browser_keys">
+    <div class="gtitle">页面</div>
+    <div class="row r212">
+      <div class="rocker c-nav">
+        <button data-k="alt+left" data-mac="mod+["><svg class="ic"><use href="icons.svg#arrow-left"/></svg>后退</button>
+        <button data-k="alt+right" data-mac="mod+]"><svg class="ic"><use href="icons.svg#arrow-right"/></svg>前进</button>
+      </div>
+      <button data-k="mod+r"><svg class="ic"><use href="icons.svg#refresh"/></svg>刷新</button>
+      <div class="rocker">
+        <button data-k="mod+-" aria-label="缩小"><svg class="ic"><use href="icons.svg#zoom-out"/></svg></button>
+        <button data-k="mod+=" aria-label="放大"><svg class="ic"><use href="icons.svg#zoom-in"/></svg></button>
+      </div>
+    </div>
+    <div class="gtitle">标签页</div>
+    <div class="row r211">
+      <div class="rocker c-nav">
+        <button data-k="ctrl+shift+tab"><svg class="ic"><use href="icons.svg#chevron-left"/></svg>上一个</button>
+        <button data-k="ctrl+tab"><svg class="ic"><use href="icons.svg#chevron-right"/></svg>下一个</button>
+      </div>
+      <button data-k="mod+t"><svg class="ic"><use href="icons.svg#plus"/></svg>新建</button>
+      <button class="c-exit" data-k="mod+w"><svg class="ic"><use href="icons.svg#x"/></svg>关闭</button>
+    </div>
+  </div>
+
+  <div class="group" data-feature="open_sites">
+    <div class="gtitle">常用<small>长按可以修改</small></div>
+    <div class="row r1111" id="shortcuts"></div>
+  </div>
+</section>
+
+<!-- 输入 -->
+<section class="screen" id="type">
+  <div class="compose" data-feature="text_input">
+    <textarea id="text" enterkeyhint="send" autocomplete="off" placeholder="在这里打字，或点键盘上的麦克风说话"></textarea>
+    <div class="row r12">
+      <button id="sendText">只输入</button>
+      <button id="sendEnter" class="primary"><svg class="ic"><use href="icons.svg#send"/></svg>输入并回车</button>
+    </div>
+  </div>
+  <div class="padrow" data-feature="touchpad">
+    <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg>触控板</div>
+    <div class="rocker col">
+      <button data-scroll="250" data-repeat><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
+      <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
+    </div>
+  </div>
+  <div class="group">
+    <div class="row r211">
+      <button class="c-ok big" data-k="enter"><svg class="ic"><use href="icons.svg#corner-down-left"/></svg>回车</button>
+      <button data-k="shift+enter"><svg class="ic"><use href="icons.svg#arrow-bar-down"/></svg>换行</button>
+      <button class="c-exit" data-k="backspace" data-repeat><svg class="ic"><use href="icons.svg#backspace"/></svg>退格</button>
+    </div>
+    <div class="row r1111">
+      <button data-k="mod+a"><svg class="ic"><use href="icons.svg#select-all"/></svg>全选</button>
+      <button data-k="mod+z"><svg class="ic"><use href="icons.svg#arrow-back-up"/></svg>撤销</button>
+      <button data-k="tab" data-repeat><svg class="ic"><use href="icons.svg#arrow-bar-to-right"/></svg>Tab</button>
+      <button class="c-exit" data-k="esc"><svg class="ic"><use href="icons.svg#player-stop"/></svg>停止</button>
+    </div>
+  </div>
+  <div class="row r211">
+    <button class="c-play big" data-k="win+h" data-mac="ctrl+alt+d"><svg class="ic"><use href="icons.svg#microphone"/></svg>电脑听写</button>
+    <button data-k="mod+shift+o"><svg class="ic"><use href="icons.svg#message-plus"/></svg>新对话</button>
+    <button data-k="mod+l"><svg class="ic"><use href="icons.svg#link"/></svg>地址栏</button>
+  </div>
+</section>
+
+<!-- 窗口 -->
+<section class="screen" id="wins">
+  <div class="label" data-feature="windows">点一下切换到那个窗口</div>
+  <div id="winlist" data-feature="windows"></div>
+  <div class="group" id="winkeys">
+    <div class="gtitle">当前窗口</div>
+    <div class="row r22">
+      <button class="c-nav big" data-k="win+shift+right" data-only="win"><svg class="ic"><use href="icons.svg#screen-share"/></svg>移到电视屏幕</button>
+      <div class="rocker">
+        <button data-k="win+down" data-mac="mod+m"><svg class="ic"><use href="icons.svg#minus"/></svg>最小化</button>
+        <button data-k="win+up" data-mac="ctrl+mod+f"><svg class="ic"><use href="icons.svg#maximize"/></svg>最大化</button>
+      </div>
+    </div>
+    <div class="row r111">
+      <button data-k="alt+tab" data-mac="mod+tab"><svg class="ic"><use href="icons.svg#switch-horizontal"/></svg>上一个窗口</button>
+      <button data-k="win+tab" data-mac="ctrl+up"><svg class="ic"><use href="icons.svg#layout-grid"/></svg>全部窗口</button>
+      <button class="c-play" data-k="f11" data-only="win"><svg class="ic"><use href="icons.svg#arrows-maximize"/></svg>网页全屏</button>
+    </div>
+  </div>
+</section>
+
+<!-- 常驻的播放条 -->
+<div class="bar">
+  <div class="rocker c-vol">
+    <button data-k="voldown" data-repeat aria-label="音量减"><svg class="ic"><use href="icons.svg#volume-2"/></svg></button>
+    <button data-k="volup" data-repeat aria-label="音量加"><svg class="ic"><use href="icons.svg#volume"/></svg></button>
+  </div>
+  <div class="seek">
+    <button data-k="left" data-repeat aria-label="快退"><svg class="ic"><use href="icons.svg#player-track-prev"/></svg></button>
+    <button class="playbtn" data-cmd="playpause" data-state="unknown" aria-label="播放或暂停"><svg class="ic s-play"><use href="icons.svg#player-play"/></svg><svg class="ic s-pause"><use href="icons.svg#player-pause"/></svg></button>
+    <button data-k="right" data-repeat aria-label="快进"><svg class="ic"><use href="icons.svg#player-track-next"/></svg></button>
+  </div>
+  <button class="c-vol mute" data-k="mute" aria-label="静音"><svg class="ic"><use href="icons.svg#volume-off"/></svg></button>
+</div>
+
+<nav>
+  <button data-go="play"><svg class="ic"><use href="icons.svg#device-tv"/></svg>播放</button>
+  <button data-go="browse"><svg class="ic"><use href="icons.svg#world"/></svg>浏览</button>
+  <button data-go="type"><svg class="ic"><use href="icons.svg#keyboard"/></svg>输入</button>
+  <button data-go="wins"><svg class="ic"><use href="icons.svg#app-window"/></svg>窗口</button>
+</nav>
+
+<!-- 添加或修改网页快捷方式 -->
+<div id="sheet" hidden>
+  <form id="sheetform">
+    <h3 id="sheettitle">添加快捷方式</h3>
+    <label>网址<input id="sheeturl" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="bilibili.com"></label>
+    <label>名称<input id="sheetname" type="text" maxlength="12" autocomplete="off" placeholder="留空则自动读取网页名称"></label>
+    <p id="sheeterror"></p>
+    <div class="row r12">
+      <button type="button" id="sheetcancel">取消</button>
+      <button type="submit" class="primary" id="sheetsave">保存</button>
+    </div>
+    <button type="button" class="c-exit" id="sheetdelete"><svg class="ic"><use href="icons.svg#trash"/></svg>删除这个快捷方式</button>
+  </form>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
