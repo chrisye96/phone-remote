@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0e0f13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="遥控器">
+<title>遥控器</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-screen="play">
+
+<svg style="display:none">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M3 5v14l10-7zM15 5h2.6v14H15zM19.4 5H22v14h-2.6z"/></symbol>
+  <symbol id="i-playonly" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
+  <symbol id="i-rew" viewBox="0 0 24 24"><path d="M11.5 6v12L3 12zM21 6v12l-8.5-6z"/></symbol>
+  <symbol id="i-ff" viewBox="0 0 24 24"><path d="M12.5 6v12l8.5-6zM3 6v12l8.5-6z"/></symbol>
+  <symbol id="i-volup" viewBox="0 0 24 24"><path d="M2 9v6h4l5 4V5L6 9zM17 8h2v3h3v2h-3v3h-2v-3h-3v-2h3z"/></symbol>
+  <symbol id="i-voldown" viewBox="0 0 24 24"><path d="M2 9v6h4l5 4V5L6 9zM14 11h8v2h-8z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2.2c1.200 0 2.700 2.600 3.100 6.800H8.900c.4-4.200 1.900-6.800 3.100-6.800zM4.100 11a8 8 0 0 1 4.300-6.100C7.600 6.400 7.100 8.500 6.900 11zm0 2h2.800c.2 2.500.7 4.600 1.500 6.100A8 8 0 0 1 4.100 13zm4.800 0h6.200c-.4 4.200-1.900 6.800-3.100 6.800S9.300 17.200 8.900 13zm8.200 0h2.800a8 8 0 0 1-4.300 6.100c.8-1.500 1.300-3.600 1.500-6.100zm0-2c-.2-2.500-.7-4.600-1.500-6.100A8 8 0 0 1 19.900 11z"/></symbol>
+  <symbol id="i-kbd" viewBox="0 0 24 24"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 2v10h16V7zm2 2h2v2H6zm3 0h2v2H9zm3 0h2v2h-2zm3 0h3v2h-3zM6 12h2v2H6zm3 0h6v2H9zm7 0h2v2h-2z"/></symbol>
+  <symbol id="i-win" viewBox="0 0 24 24"><path d="M8 3h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-1v-2h1V7H8v1H6V5a2 2 0 0 1 2-2zM5 10h9a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2zm0 4v5h9v-5z"/></symbol>
+  <symbol id="i-tv" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6v2h3v2H7v-2h3v-2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v10h16V6zm6 2l5 3-5 3z"/></symbol>
+</svg>
+
+<header><span id="dot"></span><span id="status">正在连接…</span><span id="vol" data-feature="volume_display"></span></header>
+<div id="toast"></div>
+
+<!--
+  按钮上的属性：
+  data-k        按键组合；mod 表示 Windows 的 Ctrl / Mac 的 Command
+  data-mac      Mac 上写法不同时用的按键组合
+  data-repeat   长按连发
+  data-only     只在这个系统上显示（win / mac）
+  data-feature  属于哪个功能开关，开关关掉时整块不显示
+-->
+
+<!-- 播放 -->
+<section class="screen" id="play">
+  <div id="now" data-feature="play_state"></div>
+  <div id="prog" data-feature="progress"><span id="cur">0:00</span><div id="track"><div id="fill"></div><div id="knob"></div></div><span id="total">0:00</span></div>
+  <div class="padrow" data-feature="touchpad">
+    <div class="pad">触控板</div>
+    <div class="strip">
+      <button data-scroll="250" data-repeat>▲</button>
+      <button data-scroll="-250" data-repeat>▼</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <button data-k="mute">静音</button>
+    <button data-k="f">全屏<small>F</small></button>
+    <button data-k="esc">退出<small>Esc</small></button>
+    <button data-k="enter">确定<small>回车</small></button>
+  </div>
+
+  <div class="chips" data-feature="site_keys">
+    <button data-site="any">通用</button>
+    <button data-site="bili">B站</button>
+    <button data-site="yt">YouTube</button>
+  </div>
+
+  <div class="grid site" id="any">
+    <button data-k="up" data-repeat>↑</button>
+    <button data-k="down" data-repeat>↓</button>
+    <button data-k="c">字幕<small>C</small></button>
+    <button data-k="media">播放键<small>后台也有效</small></button>
+    <button data-rel="-30" data-feature="progress">−30 秒</button>
+    <button data-rel="30" data-feature="progress">+30 秒</button>
+    <button data-rel="90" data-feature="progress">跳片头<small>+90 秒</small></button>
+    <button id="timer" data-feature="sleep_timer">定时暂停<small>关</small></button>
+  </div>
+  <div class="grid site" id="bili" data-feature="site_keys">
+    <button data-k="[">上一集</button>
+    <button data-k="]">下一集</button>
+    <button data-k="d">弹幕</button>
+    <button data-k="m">静音<small>播放器</small></button>
+    <button data-k="up" data-repeat>音量 +<small>播放器</small></button>
+    <button data-k="down" data-repeat>音量 −<small>播放器</small></button>
+    <button data-k="q">点赞</button>
+    <button data-k="e">收藏</button>
+  </div>
+  <div class="grid site" id="yt" data-feature="site_keys">
+    <button data-k="shift+p">上一个</button>
+    <button data-k="shift+n">下一个</button>
+    <button data-k="j" data-repeat>−10 秒</button>
+    <button data-k="l" data-repeat>+10 秒</button>
+    <button data-k="shift+,">减速</button>
+    <button data-k="shift+.">加速</button>
+    <button data-k="c">字幕</button>
+    <button data-k="t">影院模式</button>
+  </div>
+</section>
+
+<!-- 浏览 -->
+<section class="screen" id="browse">
+  <div class="padrow" data-feature="touchpad">
+    <div class="pad">滑动移动鼠标　轻点单击　连点两下双击<br>双指轻点右键　双指滑动滚动</div>
+    <div class="strip">
+      <button data-scroll="250" data-repeat>▲</button>
+      <button data-scroll="-250" data-repeat>▼</button>
+    </div>
+  </div>
+  <div class="grid">
+    <button data-k="alt+left" data-mac="mod+[" data-feature="browser_keys">后退</button>
+    <button data-k="alt+right" data-mac="mod+]" data-feature="browser_keys">前进</button>
+    <button data-k="mod+r" data-feature="browser_keys">刷新</button>
+    <button data-k="mod+w" data-feature="browser_keys">关标签</button>
+    <button data-k="ctrl+shift+tab" data-feature="browser_keys">◀ 标签</button>
+    <button data-k="ctrl+tab" data-feature="browser_keys">标签 ▶</button>
+    <button data-k="mod+-" data-feature="browser_keys">缩小</button>
+    <button data-k="mod+=" data-feature="browser_keys">放大</button>
+    <button data-open="https://www.bilibili.com" data-feature="open_sites">B站</button>
+    <button data-open="https://www.youtube.com" data-feature="open_sites">YouTube</button>
+    <button data-k="mod+t" data-feature="browser_keys">新标签</button>
+  </div>
+</section>
+
+<!-- 输入 -->
+<section class="screen" id="type">
+  <textarea id="text" data-feature="text_input" enterkeyhint="send" autocomplete="off" placeholder="在这里打字，或点键盘上的麦克风说话。内容会输入到电脑当前的输入框。"></textarea>
+  <div class="sendrow" data-feature="text_input">
+    <button id="sendText">只输入</button>
+    <button id="sendEnter" class="primary">输入并回车</button>
+  </div>
+  <div class="padrow" data-feature="touchpad">
+    <div class="pad">触控板</div>
+    <div class="strip">
+      <button data-scroll="250" data-repeat>▲</button>
+      <button data-scroll="-250" data-repeat>▼</button>
+    </div>
+  </div>
+  <div class="grid">
+    <button data-k="enter">回车</button>
+    <button data-k="shift+enter">换行</button>
+    <button data-k="backspace" data-repeat>退格</button>
+    <button data-k="esc">停止<small>Esc</small></button>
+    <button data-k="mod+a">全选</button>
+    <button data-k="mod+z">撤销</button>
+    <button data-k="mod+shift+o">新对话<small>AI</small></button>
+    <button data-k="win+h" data-mac="ctrl+alt+d">电脑听写<small>开 / 关</small></button>
+    <button data-k="mod+l">地址栏<small>浏览器</small></button>
+    <button data-k="mod+t">新标签<small>浏览器</small></button>
+    <button data-k="tab" data-repeat>Tab</button>
+    <button data-k="alt+tab" data-mac="mod+tab">切换窗口</button>
+  </div>
+</section>
+
+<!-- 窗口 -->
+<section class="screen" id="wins">
+  <div class="label" data-feature="windows">点一下切换到那个窗口</div>
+  <div id="winlist" data-feature="windows"></div>
+  <div class="grid" id="winkeys">
+    <button data-k="alt+tab" data-mac="mod+tab">上一个窗口</button>
+    <button data-k="win+tab" data-mac="ctrl+up">全部窗口<small>再用触控板选</small></button>
+    <button data-k="win+up" data-mac="ctrl+mod+f">最大化</button>
+    <button data-k="win+down" data-mac="mod+m">最小化</button>
+    <button data-k="win+shift+right" data-only="win">换屏幕<small>移到电视</small></button>
+    <button data-k="f11" data-only="win">网页全屏<small>F11</small></button>
+  </div>
+</section>
+
+<!-- 常驻的播放条 -->
+<div class="bar">
+  <button data-k="voldown" data-repeat><svg><use href="#i-voldown"/></svg></button>
+  <button data-k="left" data-repeat><svg><use href="#i-rew"/></svg></button>
+  <button class="playbtn" data-k="space" data-state="unknown"><svg class="s-unknown"><use href="#i-play"/></svg><svg class="s-play"><use href="#i-playonly"/></svg><svg class="s-pause"><use href="#i-pause"/></svg></button>
+  <button data-k="right" data-repeat><svg><use href="#i-ff"/></svg></button>
+  <button data-k="volup" data-repeat><svg><use href="#i-volup"/></svg></button>
+</div>
+
+<nav>
+  <button data-go="play"><svg><use href="#i-tv"/></svg>播放</button>
+  <button data-go="browse"><svg><use href="#i-globe"/></svg>浏览</button>
+  <button data-go="type"><svg><use href="#i-kbd"/></svg>输入</button>
+  <button data-go="wins"><svg><use href="#i-win"/></svg>窗口</button>
+</nav>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

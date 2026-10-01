@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phone-remote"
+dynamic = ["version"]
+description = "用手机浏览器遥控电脑上的视频播放"
+requires-python = ">=3.9"
+
+[project.scripts]
+phone-remote = "phone_remote.__main__:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "phone_remote.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+phone_remote = ["web/**/*", "platforms/windows/*.ps1"]
