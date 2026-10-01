@@ -35,7 +35,9 @@ KEYS = {
 MAC_LETTERS = dict(a=0, s=1, d=2, f=3, h=4, g=5, z=6, x=7, c=8, v=9, b=11, q=12, w=13,
                    e=14, r=15, y=16, t=17, o=31, u=32, i=34, p=35, l=37, j=38, k=40, n=45, m=46)
 MAC_DIGITS = [29, 18, 19, 20, 21, 23, 22, 26, 28, 25]
-MAC_FKEYS = [122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111]
+# F13 以后键盘上没有，留给浏览器助手扩展当指令用；Mac 只到 F20（-1 表示没有）
+MAC_FKEYS = [122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111,
+             105, 107, 113, 106, 64, 79, 80, 90, -1, -1, -1, -1]
 for letter, code in MAC_LETTERS.items():
     KEYS[letter] = (ord(letter.upper()), code)
 for digit, code in enumerate(MAC_DIGITS):
@@ -308,6 +310,8 @@ elif sys.platform == "darwin":
             return
         if name == "media":
             name = "space"
+        if KEYS[name][1] < 0:
+            raise ValueError("key not available on macOS")
         flags = 0
         for m in mods:
             flags |= MAC_MODS[m]
@@ -389,6 +393,29 @@ else:
     sys.exit("只支持 Windows 和 macOS。")
 
 
+# 定时暂停：到点后如果还在播放，就按一下系统播放键
+TIMER = {"until": 0.0, "handle": None}
+
+
+def timer_fired():
+    TIMER.update(until=0.0, handle=None)
+    if MEDIA["playing"] is not False:
+        press("media")
+
+
+def set_timer(minutes):
+    if not 0 <= minutes <= 600:
+        raise ValueError("bad timer")
+    if TIMER["handle"]:
+        TIMER["handle"].cancel()
+    TIMER.update(until=0.0, handle=None)
+    if minutes:
+        handle = threading.Timer(minutes * 60, timer_fired)
+        handle.daemon = True
+        handle.start()
+        TIMER.update(until=time.time() + minutes * 60, handle=handle)
+
+
 def clamp(value, limit):
     return max(-limit, min(limit, int(value)))
 
@@ -398,7 +425,14 @@ def handle_action(msg):
     if action == "ping":
         pass
     elif action == "state":
-        return MEDIA
+        return dict(MEDIA, timer=max(0, int(TIMER["until"] - time.time())))
+    elif action == "timer":
+        set_timer(float(msg.get("min", 0)))
+    elif action == "open":
+        url = str(msg.get("url", ""))
+        if not url.startswith(("https://", "http://")):
+            raise ValueError("bad url")
+        webbrowser.open(url)
     elif action == "windows":
         return list_windows()
     elif action == "focus":
