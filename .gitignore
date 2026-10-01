@@ -4,3 +4,8 @@ token.txt
 __pycache__/
 *.pyc
 *.log
+
+.venv/
+build/
+dist/
+*.egg-info/

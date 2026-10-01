@@ -1,0 +1,101 @@
+"""把手机发来的指令校验后交给平台实现去执行。"""
+import socket
+import webbrowser
+
+from .keys import parse_combo
+from .timer import SleepTimer
+
+# 指令 -> 它属于哪个功能开关；不在表里的是核心功能，不能关
+ACTION_FEATURE = {
+    "move": "touchpad", "click": "touchpad", "scroll": "touchpad",
+    "text": "text_input",
+    "windows": "windows", "focus": "windows",
+    "seek": "progress",
+    "timer": "sleep_timer",
+    "open": "open_sites",
+}
+
+
+class FeatureDisabled(Exception):
+    pass
+
+
+def clamp(value, limit):
+    return max(-limit, min(limit, int(value)))
+
+
+class Dispatcher:
+    def __init__(self, platform, features, opener=webbrowser.open):
+        self.platform = platform
+        self.features = features
+        self.timer = SleepTimer(platform)
+        self._open = opener
+
+    def enabled(self, feature):
+        return self.features.get(feature, True)
+
+    def handle(self, msg):
+        """执行一条指令。没有返回值的指令返回 None。"""
+        action = msg.get("a")
+        feature = ACTION_FEATURE.get(action)
+        if feature and not self.enabled(feature):
+            raise FeatureDisabled(feature)
+        handler = getattr(self, "_do_" + str(action), None)
+        if handler is None:
+            raise ValueError("unknown action")
+        return handler(msg)
+
+    def _do_ping(self, msg):
+        pass
+
+    def _do_hello(self, msg):
+        return {"platform": self.platform.name, "host": socket.gethostname(),
+                "features": self.features}
+
+    def _do_state(self, msg):
+        state = dict(self.platform.media_state())
+        if not self.enabled("play_state"):
+            state.update(playing=None, title="")
+        if not self.enabled("progress"):
+            state.update(pos=0, dur=0)
+        if not self.enabled("volume_display"):
+            state.update(vol=None, muted=False)
+        state["timer"] = self.timer.remaining()
+        return state
+
+    def _do_seek(self, msg):
+        self.platform.media_seek(float(msg.get("to", 0)))
+
+    def _do_timer(self, msg):
+        self.timer.set(float(msg.get("min", 0)))
+
+    def _do_open(self, msg):
+        url = str(msg.get("url", ""))
+        if not url.startswith(("https://", "http://")):
+            raise ValueError("bad url")
+        self._open(url)
+
+    def _do_windows(self, msg):
+        return self.platform.list_windows()
+
+    def _do_focus(self, msg):
+        self.platform.focus_window(msg.get("id"))
+
+    def _do_key(self, msg):
+        self.platform.press(*parse_combo(msg.get("k")))
+
+    def _do_text(self, msg):
+        text = " ".join(str(msg.get("t", "")).split())[:2000]
+        if text:
+            self.platform.type_text(text)
+        if msg.get("enter"):
+            self.platform.press([], "enter")
+
+    def _do_move(self, msg):
+        self.platform.mouse_move(clamp(msg.get("dx", 0), 2000), clamp(msg.get("dy", 0), 2000))
+
+    def _do_click(self, msg):
+        self.platform.mouse_click(right=bool(msg.get("right")))
+
+    def _do_scroll(self, msg):
+        self.platform.mouse_scroll(clamp(msg.get("dy", 0), 1500))
