@@ -47,20 +47,6 @@
   #winlist button.active { box-shadow:inset 0 0 0 1.5px var(--accent); }
   #winlist p { color:var(--dim); font-size:13px; text-align:center; margin:auto; }
 
-  /* 播放页：圆盘 */
-  .ringwrap { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; }
-  .ring { --size:min(68vw, 36dvh, 290px); width:var(--size); height:var(--size); border-radius:50%; overflow:hidden; flex:none;
-          background:linear-gradient(160deg,#20232b,#16181d); box-shadow:inset 0 0 0 1px var(--line), 0 10px 30px rgba(0,0,0,.35);
-          display:grid; grid-template:1fr 1.2fr 1fr / 1fr 1.2fr 1fr; }
-  .ring button { background:transparent; box-shadow:none; border-radius:0; height:auto; font-size:13px; color:var(--dim); }
-  .ring button svg { width:26px; height:26px; color:var(--text); }
-  .ring button.on { background:rgba(255,255,255,.07); transform:none; }
-  .ring .up { grid-area:1/1/2/4; padding-top:8%; } .ring .down { grid-area:3/1/4/4; padding-bottom:8%; }
-  .ring .lt { grid-area:2/1; } .ring .rt { grid-area:2/3; }
-  .ring .mid { grid-area:2/2; border-radius:50%; background:var(--accent); color:#fff; box-shadow:0 4px 16px rgba(108,140,255,.35); }
-  .ring .mid svg { width:34px; height:34px; color:#fff; }
-  .ring .mid.on { background:var(--accent-on); transform:scale(.95); }
-
   /* 网站切换 */
   .chips { display:flex; gap:6px; background:var(--surface); border-radius:12px; padding:4px; flex:none; }
   .chips button { flex:1; height:32px; font-size:13px; border-radius:9px; background:transparent; box-shadow:none; color:var(--dim); }
@@ -76,10 +62,6 @@
   /* 播放键：播放中是实心亮色 + 暂停图标，暂停时是空心描边 + 播放图标 */
   .playbtn svg { display:none; }
   .playbtn[data-state="unknown"] .s-unknown, .playbtn[data-state="playing"] .s-pause, .playbtn[data-state="paused"] .s-play { display:block; }
-  .playbtn, .ring .playbtn { background:var(--accent); color:#fff; box-shadow:0 4px 16px rgba(108,140,255,.35); }
-  .playbtn.on, .ring .playbtn.on { background:var(--accent-on); }
-  .playbtn[data-state="paused"], .ring .playbtn[data-state="paused"] { background:var(--key); color:var(--accent); box-shadow:inset 0 0 0 2px var(--accent); }
-  .ring .playbtn[data-state="paused"] svg { color:var(--accent); }
   #now { flex:none; height:18px; font-size:13px; color:var(--dim); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #now b { color:var(--text); font-weight:500; }
   .strip { display:flex; flex-direction:column; gap:var(--gap); width:52px; }
@@ -93,9 +75,16 @@
   .primary { background:var(--accent); color:#fff; box-shadow:none; } .primary.on { background:var(--accent-on); }
   .spacer { flex:1; }
 
-  /* 常驻的音量和播放 */
-  .dock { display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:var(--gap); flex:none; }
-  body[data-screen="play"] .dock { display:none; }
+  /* 常驻的播放条：音量、快退、播放暂停、快进 */
+  .bar { flex:none; display:grid; grid-template-columns:1fr 1fr 72px 1fr 1fr; align-items:center; height:68px; padding:0 6px; margin-bottom:10px;
+         border-radius:24px; background:linear-gradient(180deg,#20232b,#17191f); box-shadow:inset 0 0 0 1px var(--line), 0 8px 24px rgba(0,0,0,.3); }
+  .bar button { height:56px; background:transparent; box-shadow:none; border-radius:16px; }
+  .bar button svg { width:24px; height:24px; }
+  .bar button.on { background:rgba(255,255,255,.07); transform:none; }
+  .bar .playbtn { width:60px; height:60px; border-radius:50%; justify-self:center; background:var(--accent); color:#fff; box-shadow:0 4px 18px rgba(108,140,255,.4); }
+  .bar .playbtn svg { width:28px; height:28px; }
+  .bar .playbtn.on { background:var(--accent-on); transform:scale(.94); }
+  .bar .playbtn[data-state="paused"] { background:var(--key); color:var(--accent); box-shadow:inset 0 0 0 2px var(--accent); }
 
   /* 底部导航 */
   nav { display:flex; flex:none; margin:0 -16px; padding:6px 16px calc(6px + env(safe-area-inset-bottom)); background:var(--surface); box-shadow:0 -1px 0 var(--line); }
@@ -117,8 +106,9 @@
   <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
   <symbol id="i-rew"viewBox="0 0 24 24"><path d="M11.5 6v12L3 12zM21 6v12l-8.5-6z"/></symbol>
   <symbol id="i-ff" viewBox="0 0 24 24"><path d="M12.5 6v12l8.5-6zM3 6v12l8.5-6z"/></symbol>
-  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></symbol>
-  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 11h14v2H5z"/></symbol>
+  <symbol id="i-volup" viewBox="0 0 24 24"><path d="M2 9v6h4l5 4V5L6 9zM17 8h2v3h3v2h-3v3h-2v-3h-3v-2h3z"/></symbol>
+  <symbol id="i-voldown" viewBox="0 0 24 24"><path d="M2 9v6h4l5 4V5L6 9zM14 11h8v2h-8z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2.2c1.200 0 2.700 2.600 3.100 6.800H8.900c.4-4.200 1.900-6.800 3.100-6.800zM4.100 11a8 8 0 0 1 4.300-6.100C7.600 6.400 7.100 8.500 6.900 11zm0 2h2.800c.2 2.500.7 4.600 1.500 6.100A8 8 0 0 1 4.100 13zm4.800 0h6.200c-.4 4.200-1.900 6.800-3.100 6.800S9.300 17.200 8.900 13zm8.200 0h2.800a8 8 0 0 1-4.300 6.100c.8-1.500 1.300-3.600 1.500-6.100zm0-2c-.2-2.500-.7-4.600-1.500-6.100A8 8 0 0 1 19.900 11z"/></symbol>
   <symbol id="i-pad" viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v9h6V5zm8 0v9h6V5zM5 16v3h14v-3z"/></symbol>
   <symbol id="i-kbd" viewBox="0 0 24 24"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 2v10h16V7zm2 2h2v2H6zm3 0h2v2H9zm3 0h2v2h-2zm3 0h3v2h-3zM6 12h2v2H6zm3 0h6v2H9zm7 0h2v2h-2z"/></symbol>
   <symbol id="i-win" viewBox="0 0 24 24"><path d="M8 3h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-1v-2h1V7H8v1H6V5a2 2 0 0 1 2-2zM5 10h9a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2zm0 4v5h9v-5z"/></symbol>
@@ -133,13 +123,11 @@
 <!-- 播放 -->
 <section class="screen" id="play">
   <div id="now"></div>
-  <div class="ringwrap">
-    <div class="ring">
-      <button class="up" data-k="volup" data-repeat><svg><use href="#i-plus"/></svg>音量</button>
-      <button class="lt" data-k="left" data-repeat><svg><use href="#i-rew"/></svg></button>
-      <button class="mid playbtn" data-k="space" data-state="unknown"><svg class="s-unknown"><use href="#i-play"/></svg><svg class="s-play"><use href="#i-playonly"/></svg><svg class="s-pause"><use href="#i-pause"/></svg></button>
-      <button class="rt" data-k="right" data-repeat><svg><use href="#i-ff"/></svg></button>
-      <button class="down" data-k="voldown" data-repeat>音量<svg><use href="#i-minus"/></svg></button>
+  <div class="padrow">
+    <div class="pad">触控板</div>
+    <div class="strip">
+      <button data-scroll="250" data-repeat>▲</button>
+      <button data-scroll="-250" data-repeat>▼</button>
     </div>
   </div>
 
@@ -184,7 +172,7 @@
   </div>
 </section>
 
-<!-- 触控板 -->
+<!-- 浏览 -->
 <section class="screen" id="padscreen">
   <div class="padrow">
     <div class="pad">滑动移动鼠标　轻点单击　连点两下双击<br>双指轻点右键　双指滑动滚动</div>
@@ -250,15 +238,17 @@
   </div>
 </section>
 
-<div class="dock">
-  <button data-k="voldown" data-repeat><svg><use href="#i-minus"/></svg></button>
+<div class="bar">
+  <button data-k="voldown" data-repeat><svg><use href="#i-voldown"/></svg></button>
+  <button data-k="left" data-repeat><svg><use href="#i-rew"/></svg></button>
   <button class="playbtn" data-k="space" data-state="unknown"><svg class="s-unknown"><use href="#i-play"/></svg><svg class="s-play"><use href="#i-playonly"/></svg><svg class="s-pause"><use href="#i-pause"/></svg></button>
-  <button data-k="volup" data-repeat><svg><use href="#i-plus"/></svg></button>
+  <button data-k="right" data-repeat><svg><use href="#i-ff"/></svg></button>
+  <button data-k="volup" data-repeat><svg><use href="#i-volup"/></svg></button>
 </div>
 
 <nav>
   <button data-go="play"><svg><use href="#i-tv"/></svg>播放</button>
-  <button data-go="pad"><svg><use href="#i-pad"/></svg>触控板</button>
+  <button data-go="pad"><svg><use href="#i-globe"/></svg>浏览</button>
   <button data-go="type"><svg><use href="#i-kbd"/></svg>输入</button>
   <button data-go="wins"><svg><use href="#i-win"/></svg>窗口</button>
 </nav>
@@ -405,7 +395,7 @@ playButtons.forEach(b => b.addEventListener("pointerdown", () => {
   setTimeout(pollState, 900);
 }));
 
-// 触控板（播放以外的页面各有一块，共用一套手势）
+// 触控板（播放、浏览、输入页各有一块，共用一套手势）
 const SPEED = 1.7;
 let pending = { dx: 0, dy: 0, scroll: 0 }, busy = false;
 
