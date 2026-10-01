@@ -79,6 +79,11 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn(b"http://phone.example/#" + TOKEN.encode(), body)
 
+    def test_port_cannot_be_taken_twice(self):
+        port = self.server.server_address[1]
+        with self.assertRaises(OSError):
+            make_server(port, TOKEN, None)
+
     def test_only_api_accepts_posts(self):
         self.assertEqual(self.request("/other", {"a": "ping"})[0], 404)
 

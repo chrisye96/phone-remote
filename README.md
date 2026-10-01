@@ -24,7 +24,11 @@ python3 -m venv .venv
 
 第一次在 Mac 上运行，需要在 系统设置 > 隐私与安全性 > 辅助功能 里给"终端"授权。
 
-启动后电脑会弹出二维码页面，用手机相机扫码即可。
+启动后没有窗口，程序在任务栏右下角的托盘里运行（Mac 上是菜单栏），并弹出二维码页面，用手机相机扫码即可。
+
+右键托盘图标可以：显示二维码、打开或关闭开机自动启动（默认关）、退出。出问题时看日志 `%APPDATA%\PhoneRemote\phone-remote.log`。
+
+想在命令行窗口里运行（方便看输出）：`.venv\Scripts\python -m phone_remote --console`。
 
 ## 遥控器的四个页面
 
@@ -63,6 +67,8 @@ src/phone_remote/
   keys.py          按键名表、组合键解析
   timer.py         定时暂停
   pairing.py       二维码页面
+  tray.py          托盘图标和菜单
+  autostart.py     开机自动启动的开关
   platforms/       每个系统一套实现，其他代码只用 base.py 里的接口
     base.py
     windows/       input.py  windows.py  media.py  audio.py
