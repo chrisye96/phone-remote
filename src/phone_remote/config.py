@@ -6,6 +6,8 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import i18n
+
 DEFAULT_PORT = 8765
 
 # 每个功能一个开关，在 config.json 的 "features" 里改成 false 就关掉。
@@ -26,7 +28,7 @@ FEATURES = {
 
 MAX_SHORTCUTS = 4
 DEFAULT_SHORTCUTS = [
-    {"name": "B站", "url": "https://www.bilibili.com", "color": "#fb7299"},
+    {"name": "Bilibili", "url": "https://www.bilibili.com", "color": "#fb7299"},
     {"name": "YouTube", "url": "https://www.youtube.com", "color": "#ff4e45"},
 ]
 
@@ -36,6 +38,7 @@ class Config:
     port: int = DEFAULT_PORT
     saved_port: int = DEFAULT_PORT  # 配置文件里写的端口；port 可能被环境变量临时改掉
     token: str = ""
+    language: str = i18n.DEFAULT
     features: dict = field(default_factory=lambda: dict.fromkeys(FEATURES, True))
     shortcuts: list = field(default_factory=lambda: [dict(s) for s in DEFAULT_SHORTCUTS])
     data_dir: Path = Path(".")
@@ -61,14 +64,25 @@ def _load_token(folder):
             if token:
                 token_file.write_text(token, encoding="utf-8")
                 return token
-    token = secrets.token_hex(8)
+    token = _new_token()
     token_file.write_text(token, encoding="utf-8")
     return token
 
 
+def _new_token():
+    # 128 bits: signatures travel over the network, so the token must also survive offline guessing
+    return secrets.token_hex(16)
+
+
+def reset_token(config):
+    """Makes a new pairing token. Every phone paired so far stops working until it scans the new QR code."""
+    config.token = _new_token()
+    (config.data_dir / "token.txt").write_text(config.token, encoding="utf-8")
+
+
 def save(config):
     (config.data_dir / "config.json").write_text(
-        json.dumps({"port": config.saved_port, "features": config.features, "shortcuts": config.shortcuts},
+        json.dumps({"port": config.saved_port, "language": config.language, "features": config.features, "shortcuts": config.shortcuts},
                    indent=2, ensure_ascii=False),
         encoding="utf-8")
 
@@ -85,6 +99,8 @@ def load():
         except ValueError:
             saved = {}
     config.port = config.saved_port = int(saved.get("port", DEFAULT_PORT))
+    if saved.get("language") in i18n.LANGUAGES:
+        config.language = saved["language"]
     for name, enabled in saved.get("features", {}).items():
         if name in FEATURES:
             config.features[name] = bool(enabled)

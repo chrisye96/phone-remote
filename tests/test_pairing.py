@@ -1,6 +1,6 @@
 import unittest
 
-from phone_remote import pairing
+from phone_remote import i18n, pairing
 
 
 class PairPageTest(unittest.TestCase):
@@ -12,8 +12,24 @@ class PairPageTest(unittest.TestCase):
         self.assertTrue("<svg" in page or "qrcode" in page)
 
     def test_hint_matches_how_the_program_runs(self):
-        self.assertIn("托盘", pairing.pair_page(self.URL, tray_mode=True))
-        self.assertIn("命令行窗口", pairing.pair_page(self.URL, tray_mode=False))
+        self.assertIn("Re-pair in the tray menu", pairing.pair_page(self.URL, tray_mode=True))
+        self.assertIn("terminal window", pairing.pair_page(self.URL, tray_mode=False))
+
+    def test_page_follows_the_chosen_language(self):
+        self.assertIn("Scan with your phone", pairing.pair_page(self.URL))
+        i18n.set_language("zh")
+        self.addCleanup(i18n.set_language, i18n.DEFAULT)
+        page = pairing.pair_page(self.URL, tray_mode=True)
+        self.assertIn("用手机相机扫码", page)
+        self.assertIn("重新配对", page)
+        self.assertIn('lang="zh"', page)
+        self.assertNotRegex(page, r"__[A-Z]+__")  # every mark in the template was filled in
+
+    def test_address_can_be_copied_with_one_click(self):
+        page = pairing.pair_page(self.URL)
+        self.assertIn('id="copy"', page)
+        self.assertIn("/js/pair.js", page)
+        self.assertIn("icons.svg#copy", page)
 
     def test_url_is_escaped(self):
         page = pairing.pair_page('http://x/#"><script>alert(1)</script>')

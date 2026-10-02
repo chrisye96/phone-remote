@@ -23,7 +23,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_first_run_creates_token_and_config(self):
         loaded = config.load()
-        self.assertEqual(len(loaded.token), 16)
+        self.assertEqual(len(loaded.token), 32)
         self.assertEqual(loaded.port, config.DEFAULT_PORT)
         self.assertTrue(all(loaded.features.values()))
         saved = json.loads((self.data / "config.json").read_text(encoding="utf-8"))
@@ -31,6 +31,22 @@ class ConfigTest(unittest.TestCase):
 
     def test_token_stays_the_same_between_runs(self):
         self.assertEqual(config.load().token, config.load().token)
+
+    def test_reset_makes_a_new_token_that_survives_a_restart(self):
+        loaded = config.load()
+        old = loaded.token
+        config.reset_token(loaded)
+        self.assertNotEqual(loaded.token, old)
+        self.assertEqual(config.load().token, loaded.token)
+
+    def test_language_is_english_until_changed_and_then_remembered(self):
+        loaded = config.load()
+        self.assertEqual(loaded.language, "en")
+        loaded.language = "zh"
+        config.save(loaded)
+        self.assertEqual(config.load().language, "zh")
+        (self.data / "config.json").write_text('{"language": "klingon"}', encoding="utf-8")
+        self.assertEqual(config.load().language, "en")
 
     def test_legacy_token_next_to_the_program_is_adopted(self):
         Path("token.txt").write_text("oldtoken12345678", encoding="utf-8")
@@ -50,7 +66,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_shortcuts_have_defaults_and_are_saved(self):
         loaded = config.load()
-        self.assertEqual([s["name"] for s in loaded.shortcuts], ["B站", "YouTube"])
+        self.assertEqual([s["name"] for s in loaded.shortcuts], ["Bilibili", "YouTube"])
         loaded.shortcuts.append({"name": "爱壹帆", "url": "https://example.com", "color": "#112233"})
         config.save(loaded)
         self.assertEqual(config.load().shortcuts[2]["name"], "爱壹帆")

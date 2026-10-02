@@ -1,6 +1,7 @@
 // 播放状态：定时问电脑，更新播放键、标题、进度条和音量。
 // 浏览器上报“播放 / 暂停”可能晚十秒左右，所以按下播放键后先按预期显示，过一会儿再以电脑为准。
 import { send, token } from "./api.js";
+import { t } from "./i18n.js";
 
 const playButtons = document.querySelectorAll(".playbtn");
 const nowCard = document.getElementById("nowcard");
@@ -53,7 +54,7 @@ function applyState(state) {
   media.title = state.title || "";
   if (newVideo) setPos(state.pos);
   else if (now > media.holdPos && Math.abs(state.pos - localPos()) > 2 && (moved || state.playing === media.playing)) setPos(state.pos);
-  volBox.textContent = state.vol === null || state.vol === undefined ? "" : state.muted ? "已静音" : "音量 " + state.vol;
+  volBox.textContent = state.vol === null || state.vol === undefined ? "" : state.muted ? t("Muted") : t("Volume {n}", { n: state.vol });
   stateListeners.forEach(fn => fn(state));
   render();
 }
