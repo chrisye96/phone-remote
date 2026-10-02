@@ -15,7 +15,7 @@ rewind-backward-30 rewind-forward-30 rewind-backward-10 rewind-forward-10 hourgl
 arrow-up arrow-down arrow-left arrow-right refresh zoom-in zoom-out x send corner-down-left
 arrow-bar-down backspace select-all arrow-back-up arrow-bar-to-right microphone message-plus link
 switch-horizontal layout-grid screen-share arrows-maximize rectangle trash player-skip-forward
-player-skip-back player-stop gauge
+player-skip-back player-stop gauge copy
 """.split()
 FILLED = "player-play player-pause player-track-next player-track-prev".split()
 
@@ -25,7 +25,7 @@ FILLED_ATTRS = 'fill="currentColor"'
 
 def symbol(path, name, attrs):
     body = re.search(r"<svg[^>]*>(.*)</svg>", path.read_text(encoding="utf-8"), re.S).group(1)
-    body = body.replace('<path stroke="none" d="M0 0h24v24H0z" fill="none"/>', "")
+    body = re.sub(r'<path stroke="none" d="M0 0h24v24H0z" fill="none"\s*/>', "", body)  # newer releases put a space before />
     body = " ".join(body.split())
     return '<symbol id="%s" viewBox="0 0 24 24"><g %s>%s</g></symbol>' % (name, attrs, body)
 

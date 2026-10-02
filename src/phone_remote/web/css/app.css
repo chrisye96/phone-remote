@@ -137,12 +137,37 @@ nav button.on { filter:none; transform:none; }
 #toast.show { opacity:1; } #toast.bad { background:#5a2a2a; }
 
 /* 添加、修改快捷方式的面板，从底部弹出 */
-#sheet { position:fixed; inset:0; z-index:10; background:rgba(0,0,0,.6); display:flex; align-items:flex-end; justify-content:center; }
-#sheetform { width:100%; max-width:520px; background:var(--panel); border:1px solid var(--line); border-radius:22px 22px 0 0; padding:18px 16px calc(18px + env(safe-area-inset-bottom));
-             display:flex; flex-direction:column; gap:12px; }
-#sheetform h3 { margin:0; font-size:16px; font-weight:600; }
-#sheetform label { font-size:12px; color:var(--dim); display:flex; flex-direction:column; gap:6px; }
-#sheetform input { font:inherit; font-size:16px; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:0 12px; height:46px; outline:none; user-select:text; -webkit-user-select:text; }
-#sheetform input:focus { border-color:var(--play); }
-#sheeterror { margin:-4px 2px; font-size:12px; color:var(--exit-ic); min-height:16px; }
+.sheet { position:fixed; inset:0; z-index:10; background:rgba(0,0,0,.6); display:flex; align-items:flex-end; justify-content:center; }
+.sheet form { width:100%; max-width:520px; background:var(--panel); border:1px solid var(--line); border-radius:22px 22px 0 0; padding:18px 16px calc(18px + env(safe-area-inset-bottom)); }
+.sheet form, #devadd { display:flex; flex-direction:column; gap:12px; }
+.sheet h3 { margin:0; font-size:16px; font-weight:600; }
+.sheet label { font-size:12px; color:var(--dim); display:flex; flex-direction:column; gap:6px; }
+.sheet input { font:inherit; font-size:16px; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:0 12px; height:46px; outline:none; user-select:text; -webkit-user-select:text; }
+.sheet input:focus { border-color:var(--play); }
+.sheet .error { margin:-4px 2px; font-size:12px; color:var(--exit-ic); min-height:16px; }
+.sheet .hint { margin:-8px 2px 0; font-size:12px; color:var(--dim); line-height:1.6; }
+.sheet button:disabled { opacity:.45; }
+
+/* Computer switcher in the header: a native menu that looks like plain text */
+#device { font:inherit; color:var(--text); background:transparent; border:0; outline:none; padding:0; max-width:46%; text-overflow:ellipsis; }
+#device option { color:#000; }
+
+/* Language switch in the header: both languages side by side, the current one lit */
+#lang { height:20px; padding:0 3px; margin-left:8px; flex:none; display:flex; align-items:center; border-radius:10px; border:1px solid var(--line); background:transparent; box-shadow:none; font-size:10px; color:var(--dim); }
+#lang span { padding:1px 6px; border-radius:8px; }
+#lang .sel { background:var(--key); color:var(--text); }
+#lang.on { filter:none; transform:none; }
+.translating body { visibility:hidden; }
+
+/* Wide screens (iPad): touchpad on the left at full height, keys in a column on the right.
+   The height condition keeps phones in landscape on the phone layout. */
+@media (min-width:700px) and (min-height:600px) {
+  body { max-width:none; }
+  body[data-screen="play"] #play, body[data-screen="browse"] #browse, body[data-screen="type"] #type, body[data-screen="wins"] #wins {
+    display:grid; grid-template-columns:minmax(0,1fr) clamp(350px, 40vw, 460px); grid-template-rows:repeat(3, auto) minmax(0,1fr); column-gap:14px; }
+  .screen > * { grid-column:2; }
+  .screen > .padrow, #winlist { grid-column:1; grid-row:1 / -1; }
+  .bar { width:100%; max-width:560px; align-self:center; }
+  nav { justify-content:center; } nav button { max-width:140px; }
+}
 #sheetdelete { display:flex; align-items:center; justify-content:center; gap:7px; font-size:13px; } #sheetdelete .ic { margin:0; width:18px; height:18px; }

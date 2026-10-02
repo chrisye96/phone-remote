@@ -1,5 +1,6 @@
 // 定时暂停：每按一次换一档
 import { send } from "./api.js";
+import { t } from "./i18n.js";
 import { onState, pollState } from "./media.js";
 import { toast } from "./status.js";
 
@@ -10,14 +11,14 @@ let step = -1;
 
 export function initTimer() {
   onState(state => {
-    label.textContent = state.timer ? "剩 " + Math.ceil(state.timer / 60) + " 分钟" : "定时暂停";
+    label.textContent = state.timer ? t("{n} min left", { n: Math.ceil(state.timer / 60) }) : t("Sleep timer");
     button.classList.toggle("c-play", !!state.timer);
   });
   button.addEventListener("pointerdown", () => {
     button.classList.add("on");
     step = (step + 1) % STEPS.length;
     const min = STEPS[step];
-    send({ a: "timer", min }).then(ok => { if (ok) { toast(min ? min + " 分钟后暂停" : "已取消定时"); pollState(); } });
+    send({ a: "timer", min }).then(ok => { if (ok) { toast(min ? t("Pausing in {n} min", { n: min }) : t("Timer cancelled")); pollState(); } });
   });
-  ["pointerup", "pointercancel", "pointerleave"].forEach(t => button.addEventListener(t, () => button.classList.remove("on")));
+  ["pointerup", "pointercancel", "pointerleave"].forEach(type => button.addEventListener(type, () => button.classList.remove("on")));
 }

@@ -1,13 +1,14 @@
 // 文字输入：手机上打字或听写，发到电脑当前的输入框里
 import { send } from "./api.js";
+import { t } from "./i18n.js";
 import { toast } from "./status.js";
 
 const textInput = document.getElementById("text");
 
 function sendText(enter) {
-  const t = textInput.value.trim();
-  if (!t && !enter) { toast("先在上面输入文字"); return; }
-  send({ a: "text", t, enter }).then(ok => { if (ok) { textInput.value = ""; toast(enter ? "已输入并回车" : "已输入"); } });
+  const text = textInput.value.trim();
+  if (!text && !enter) { toast(t("Type something above first")); return; }
+  send({ a: "text", t: text, enter }).then(ok => { if (ok) { textInput.value = ""; toast(enter ? t("Typed and pressed Enter") : t("Typed")); } });
 }
 
 export function initText() {

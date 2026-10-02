@@ -33,6 +33,7 @@ export function initNav() {
   // 网址里可以带 ?screen=browse&site=bili 直接打开某一页
   const query = new URLSearchParams(location.search);
   const screen = query.get("screen") || store.get("screen") || "";
-  go(document.querySelector("section.screen#" + CSS.escape(screen)) ? screen : "play");
+  // An empty name (first visit, nothing stored yet) would make an invalid selector and stop the whole page
+  go(screen && document.querySelector("section.screen#" + CSS.escape(screen)) ? screen : "play");
   setSite(query.get("site") || store.get("site") || "any");
 }
