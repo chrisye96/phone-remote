@@ -1,5 +1,6 @@
 // 窗口列表：点一项就把那个窗口切到最前
 import { send } from "./api.js";
+import { t } from "./i18n.js";
 import { onEnter } from "./nav.js";
 
 const winList = document.getElementById("winlist");
@@ -10,7 +11,7 @@ function loadWindows() {
     winList.textContent = "";
     if (!Array.isArray(list) || !list.length) {
       const p = document.createElement("p");
-      p.textContent = list === false ? "读取不到窗口列表" : "没有打开的窗口";
+      p.textContent = list === false ? t("Can't read the window list") : t("No open windows");
       winList.appendChild(p);
       return;
     }
@@ -25,7 +26,7 @@ function loadWindows() {
       name.textContent = w.title;
       if (w.app) { const app = document.createElement("small"); app.textContent = w.app; name.appendChild(app); }
       btn.append(avatar, name);
-      if (w.active) { const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = "当前"; btn.appendChild(tag); }
+      if (w.active) { const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = t("Current"); btn.appendChild(tag); }
       btn.addEventListener("click", () => send({ a: "focus", id: w.id }).then(() => setTimeout(loadWindows, 350)));
       winList.appendChild(btn);
     });

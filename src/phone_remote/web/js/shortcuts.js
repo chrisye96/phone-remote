@@ -1,5 +1,6 @@
 // 常用网页：点一下在电脑上打开，长按修改或删除，最后一格是“添加”
 import { send } from "./api.js";
+import { t } from "./i18n.js";
 import { toast } from "./status.js";
 
 const box = document.getElementById("shortcuts");
@@ -13,7 +14,7 @@ let shortcuts = [], max = 4, editing = null;   // editing：正在改第几个�
 function openSheet(index) {
   editing = index;
   const item = index === null ? { url: "", name: "" } : shortcuts[index];
-  title.textContent = index === null ? "添加快捷方式" : "修改快捷方式";
+  title.textContent = index === null ? t("Add shortcut") : t("Edit shortcut");
   urlInput.value = item.url;
   nameInput.value = item.name;
   error.textContent = "";
@@ -41,7 +42,7 @@ function tile(item, index) {
   btn.addEventListener("pointerup", () => {
     clearTimeout(timer);
     btn.classList.remove("on");
-    if (!held) send({ a: "open", i: index }).then(ok => { if (ok) toast("已在电脑上打开 " + item.name); });
+    if (!held) send({ a: "open", i: index }).then(ok => { if (ok) toast(t("Opened {name} on the computer", { name: item.name })); });
   });
   ["pointercancel", "pointerleave"].forEach(t => btn.addEventListener(t, () => { clearTimeout(timer); btn.classList.remove("on"); }));
   btn.addEventListener("contextmenu", e => e.preventDefault());
@@ -56,7 +57,7 @@ export function renderShortcuts(list, limit) {
   if (list.length < max) {
     const add = document.createElement("button");
     add.className = "shortcut add";
-    add.textContent = "+ 添加";
+    add.textContent = t("+ Add");
     add.addEventListener("click", () => openSheet(null));
     box.appendChild(add);
   }
@@ -66,16 +67,16 @@ export function initShortcuts() {
   form.addEventListener("submit", e => {
     e.preventDefault();
     const url = urlInput.value.trim();
-    if (!url) { error.textContent = "先填网址"; return; }
+    if (!url) { error.textContent = t("Enter an address first"); return; }
     const message = { a: "shortcut_save", url, name: nameInput.value.trim() };
     if (editing !== null) message.i = editing;
     saveButton.disabled = true;
-    saveButton.textContent = "正在读取网页…";
+    saveButton.textContent = t("Reading the page…");
     send(message).then(list => {
       saveButton.disabled = false;
-      saveButton.textContent = "保存";
+      saveButton.textContent = t("Save");
       if (Array.isArray(list)) { renderShortcuts(list); closeSheet(); }
-      else error.textContent = "保存不了：网址要像 bilibili.com 或 https://… 这样";
+      else error.textContent = t("Can't save: the address should look like bilibili.com or https://…");
     });
   });
   deleteButton.addEventListener("click", () => {

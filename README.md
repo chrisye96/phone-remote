@@ -1,14 +1,16 @@
-# 手机遥控器
+# Phone Remote
 
-在电脑上运行一个小程序，手机浏览器打开网页，就能遥控电脑上的视频播放：音量、播放暂停、快进快退、触控板、滚动、文字输入，以及 B 站、YouTube、浏览器和 AI 客户端的常用快捷键。
+**English** | [中文](README.zh-CN.md)
 
-Windows 和 macOS 通用，用 Python 编写。手机和电脑需要在同一个 Wi-Fi 下。
+Run a small program on your computer, open a web page on your phone, and control what is playing on the computer: volume, play and pause, seeking, a touchpad, scrolling, text input, and the usual shortcuts for Bilibili, YouTube, browsers and AI chat apps.
 
-## 运行
+Works on Windows and macOS, written in Python. The phone and the computer need to be on the same Wi-Fi. Nothing is installed on the phone.
 
-Windows：双击 `start-windows.bat`。第一次运行会在仓库里建一个 `.venv` 虚拟环境并安装依赖，需要联网，大约一分钟。
+## Running it
 
-macOS（先安装一次，以后只需要最后一行）：
+Windows: double-click `start-windows.bat`. The first run creates a `.venv` virtual environment in the repository and installs the dependencies, which needs an internet connection and takes about a minute.
+
+macOS (install once, after that only the last line is needed):
 
 ```bash
 python3 -m venv .venv
@@ -22,85 +24,118 @@ python3 -m venv .venv
 .venv/bin/python -m phone_remote
 ```
 
-第一次在 Mac 上运行，需要在 系统设置 > 隐私与安全性 > 辅助功能 里给"终端"授权。
+The first time on a Mac, allow "Terminal" under System Settings > Privacy & Security > Accessibility.
 
-启动后没有窗口，程序在任务栏右下角的托盘里运行（Mac 上是菜单栏），并弹出二维码页面，用手机相机扫码即可。
+There is no window. The program runs in the system tray at the bottom right of the taskbar (the menu bar on a Mac) and opens a page with a QR code. Scan it with your phone's camera.
 
-右键托盘图标可以：显示二维码、打开或关闭开机自动启动（默认关）、退出。出问题时看日志 `%APPDATA%\PhoneRemote\phone-remote.log`。
+Right-click the tray icon to show the QR code again, turn starting at login on or off (off by default), re-pair, change the language, or quit. If something goes wrong, look at the log in `%APPDATA%\PhoneRemote\phone-remote.log`.
 
-想在命令行窗口里运行（方便看输出）：`.venv\Scripts\python -m phone_remote --console`。
+To run it in a terminal window instead, which makes its output visible: `.venv\Scripts\python -m phone_remote --console`.
 
-## 打包成免安装的程序
+### Language
 
-双击 `scripts\build-windows.bat`，会在 `dist\` 里生成一个 `PhoneRemote.exe`（约 20 MB）。把它拷到别的 Windows 电脑上双击就能用，不需要装 Python。
+The interface is English by default and can be switched to Chinese. There are two separate settings:
 
-## 遥控器的四个页面
+- **The remote on the phone**: tap `EN | 中` in the top right corner. Each phone remembers its own choice.
+- **The tray menu and QR page on the computer**: Language in the tray menu. In terminal mode, set `language` to `zh` in the configuration file.
 
-![四个页面](docs/screens.png)
+## Building a standalone program
 
-- **播放**：标题和可拖动的进度条、触控板、全屏 / 退出 / 确定，以及通用、B 站、YouTube、音乐四组专用键。
-- **浏览**：触控板、浏览器的后退前进、刷新、缩放、标签页切换，以及“常用”网页快捷方式。
-- **输入**：在手机上打字或听写，发到电脑当前的输入框；还有回车、退格、全选、撤销、电脑听写等按键。
-- **窗口**：列出电脑上打开的窗口，点一下切换过去；可以最大化、最小化、移到另一块屏幕。Mac 上列出的是应用。
+Double-click `scripts\build-windows.bat`. It produces `PhoneRemote.exe` (about 20 MB) in `dist\`. Copy it to another Windows computer and double-click it; Python is not needed there.
 
-底部常驻一条播放条：音量减和加、快退、播放暂停、快进、静音。
+## The four screens
 
-按键的颜色表示功能：蓝色是播放和主操作，青色是音量，绿色是确认，黄色是跳转，红色是退出、关闭和删除。
+![The four screens](docs/screens.png)
 
-### 常用网页
+(The screenshot shows an older version with Chinese labels.)
 
-浏览页的“常用”里最多放 4 个网页快捷方式，点一下就在电脑的浏览器里打开。点“+ 添加”填网址（写 `bilibili.com` 这样就行），名称留空会自动读取网页名称，圆点的颜色取自网页的主题色或图标。长按一个快捷方式可以修改或删除。它们保存在配置文件的 `shortcuts` 里。
+- **Play**: title and a draggable progress bar, touchpad, Fullscreen / Exit / OK, and four sets of keys for general use, Bilibili, YouTube and music.
+- **Browse**: touchpad, browser back and forward, reload, zoom, tab switching, and shortcuts to your usual sites.
+- **Type**: type or dictate on the phone and send the text to whatever input has focus on the computer, plus Enter, Backspace, Select all, Undo, dictation on the computer and so on. "New AI chat" sends Ctrl/Cmd+Shift+O, which starts a new conversation in the ChatGPT and Claude apps and sites.
+- **Windows**: lists the windows open on the computer; tap one to bring it to the front. Maximize and minimize are here too. "To other screen" (Windows only) moves the current window to the next monitor, for example sending a video to a TV that is plugged in as a second screen. On a Mac the list shows apps.
 
-## 功能开关
+A playback bar stays at the bottom of every screen: volume down and up, rewind, play or pause, fast forward, mute.
 
-每个功能都可以单独关掉。第一次运行后会生成配置文件（启动时会打印它的位置，Windows 上在 `%APPDATA%\PhoneRemote\config.json`），把 `features` 里对应的一项改成 `false`，重启程序即可。关掉后电脑端会拒绝对应的指令，手机页面上也不再显示那一块。
+Key colours show what a key does: blue for playback and the main action, teal for volume, green for confirming, yellow for navigation, red for exit, close and delete.
 
-| 开关 | 功能 |
+### Site shortcuts
+
+The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens the site in the computer's browser. Tap "+ Add" and enter an address (`bilibili.com` is enough). Leave the name empty to use the page's own title; the dot takes its colour from the site's theme colour or icon. Hold a shortcut to edit or delete it. They are stored under `shortcuts` in the configuration file.
+
+### Tablets
+
+On a wide screen such as an iPad, the touchpad takes the whole left side and the keys sit in a column on the right, in both orientations. Phones keep the single-column layout.
+
+### Controlling more than one computer
+
+Run the program on each computer. Scan one computer's QR code to open the remote, then tap the computer's name at the top:
+
+- **Add computer…**: paste the address from the other computer's QR page (scan its QR code with the camera, hold the link it finds and choose Copy Link). You can give it a name at the same time.
+- Tap a name to switch to that computer.
+- **Rename…** and **Remove** apply to the current one.
+
+The name defaults to the computer's own host name. The list is kept in the phone's browser, so another phone has to add the computers again. Every computer needs a version of the program that has this feature.
+
+## Security
+
+- **The pairing code never crosses the network.** It exists only in the QR code and on the phone. Each command carries a signature computed from the code, plus the time. Someone capturing traffic cannot learn the code, and replaying a captured command does nothing.
+- **Wrong guesses get locked out.** After 10 bad signatures from one address, that address is ignored for 5 minutes.
+- **Re-pair.** Choose Re-pair in the tray menu (`--reset-pairing` in terminal mode) to switch to a new pairing code at once. Every phone paired before stops working and has to scan again. Do this if you lose a phone or someone else has seen the QR code.
+- **Commands are not encrypted.** Someone capturing traffic on the same network can see which keys you press and what you type. That is fine at home or on your own phone hotspot. On office, dorm or cafe Wi-Fi, do not type passwords on the Type screen.
+
+When the computer moves to another network, such as a phone hotspot, its address changes. Right-click the tray icon, choose Show QR code and scan again. If Windows treats the network as "Public", the firewall may block the phone; allow the program when prompted, or set the network to "Private".
+
+## Feature switches
+
+Every feature can be turned off on its own. The first run creates a configuration file (its location is printed on start; on Windows it is `%APPDATA%\PhoneRemote\config.json`). Set the entry under `features` to `false` and restart. The computer then refuses the matching commands and the phone no longer shows that part.
+
+| Switch | Feature |
 |---|---|
-| `touchpad` | 触控板：移动鼠标、点击、滚动 |
-| `text_input` | 文字输入 |
-| `windows` | 窗口列表和切换 |
-| `play_state` | 显示正在播放还是暂停，以及标题 |
-| `progress` | 进度条、拖动跳转、±30 秒 |
-| `volume_display` | 显示音量数值 |
-| `sleep_timer` | 定时暂停 |
-| `open_sites` | 网页快捷方式 |
-| `site_keys` | B 站、YouTube 的专用按键 |
-| `browser_keys` | 浏览器按键 |
+| `touchpad` | Touchpad: move the pointer, click, scroll |
+| `text_input` | Text input |
+| `windows` | Window list and switching |
+| `play_state` | Shows whether something is playing or paused, and its title |
+| `progress` | Progress bar, dragging to seek, ±30 seconds |
+| `volume_display` | Shows the volume level |
+| `sleep_timer` | Sleep timer |
+| `open_sites` | Site shortcuts |
+| `site_keys` | Keys specific to Bilibili and YouTube |
+| `browser_keys` | Browser keys |
 
-音量、播放暂停、快进快退和基本按键是核心功能，不能关。
+Volume, play and pause, seeking and the basic keys are the core and cannot be turned off.
 
-## 代码结构
+## Code layout
 
 ```
 src/phone_remote/
-  __main__.py      入口
-  config.py        端口、配对码、功能开关
-  server.py        HTTP 服务器：页面文件、配对校验
-  actions.py       指令校验和分发
-  keys.py          按键名表、组合键解析
-  timer.py         定时暂停
-  pairing.py       二维码页面
-  siteinfo.py      读取网页的名称和代表色（添加快捷方式时用）
-  tray.py          托盘图标和菜单
-  autostart.py     开机自动启动的开关
-  platforms/       每个系统一套实现，其他代码只用 base.py 里的接口
+  __main__.py      entry point
+  config.py        port, pairing code, feature switches
+  server.py        HTTP server: page files, checking signatures
+  actions.py       validating and dispatching commands
+  keys.py          key names, parsing key combinations
+  timer.py         sleep timer
+  pairing.py       QR page
+  siteinfo.py      reads a site's name and colour (used when adding a shortcut)
+  tray.py          tray icon and menu
+  autostart.py     starting at login
+  i18n.py          interface language on the computer (the phone page's is web/js/i18n.js)
+  platforms/       one implementation per system; other code only uses the interface in base.py
     base.py
     windows/       input.py  windows.py  media.py  audio.py
     macos/         input.py  windows.py  media.py
-  web/             手机页面：index.html、css/、js/（按功能分模块）、icons.svg
-tests/             自动测试，不碰真实的键盘鼠标
-scripts/           打包脚本、图标合成脚本
-docs/              重构计划
+  web/             the phone page: index.html, css/, js/ (one module per feature), icons.svg
+tests/             automated tests; they never touch the real keyboard or mouse
+scripts/           build script, icon sprite script
+docs/              refactoring plan
 ```
 
-运行测试：双击 `run-tests.bat`。
+Run the tests by double-clicking `run-tests.bat`.
 
-## 分支
+## Branches
 
-- `main`：可以直接用的稳定版本。
-- `dev`：日常开发。新功能从 `dev` 拉 `feature/*` 分支，完成后合回 `dev`，验证过再合到 `main`。
+- `main`: the stable version, ready to use.
+- `dev`: day-to-day development. New work branches off `dev` as `feature/*`, merges back into `dev`, and reaches `main` once verified.
 
-## 图标
+## Icons
 
-图标来自 [Tabler Icons](https://tabler.io/icons)（MIT 协议），只把用到的几十个合成进了 `src/phone_remote/web/icons.svg`，运行时不依赖外网。增减图标见 `scripts/build-icons.py`。
+Icons come from [Tabler Icons](https://tabler.io/icons) (MIT License). Only the few dozen in use are bundled into `src/phone_remote/web/icons.svg`, so nothing is fetched from the internet at run time. To add or remove icons, see `scripts/build-icons.py`.
