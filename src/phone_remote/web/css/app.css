@@ -64,8 +64,12 @@ body[data-screen="play"] #play, body[data-screen="browse"] #browse, body[data-sc
 
 /* 正在播放：标题和进度条 */
 .card { padding:10px 12px; gap:8px; }
-#now { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-#now.paused { color:var(--dim); }
+#now { display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; white-space:nowrap; }
+#nowkind { width:18px; height:18px; margin:0; color:var(--play-ic); }
+#nowtitle { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+#nowtitle span { font-weight:400; color:var(--dim); }
+#nowapp { flex:none; font-size:11px; font-weight:400; color:var(--dim); }
+#now.paused #nowtitle, #now.paused #nowkind { color:var(--dim); }
 #prog { display:flex; align-items:center; gap:9px; font-size:11px; color:var(--dim); font-variant-numeric:tabular-nums; }
 #track { flex:1; height:24px; position:relative; touch-action:none; }
 #track::before, #fill { content:""; position:absolute; left:0; top:9px; height:6px; border-radius:3px; }

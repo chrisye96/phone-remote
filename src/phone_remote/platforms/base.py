@@ -3,7 +3,9 @@
 
 def empty_media_state():
     """playing 为 True / False，读不到时为 None；pos 和 dur 是秒，vol 是 0-100。"""
-    return {"playing": None, "title": "", "pos": 0, "dur": 0, "vol": None, "muted": False}
+    # kind is "music", "video" or "" (see mediakind.py); app is the name of what is playing it
+    return {"playing": None, "title": "", "artist": "", "kind": "", "app": "",
+            "pos": 0, "dur": 0, "vol": None, "muted": False}
 
 
 class Platform:

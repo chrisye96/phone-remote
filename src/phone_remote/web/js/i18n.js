@@ -29,6 +29,7 @@ const TABLES = {
     "General": "通用",
     "Bilibili": "B站",
     "Music": "音乐",
+    "Video": "视频",
     "Back 30s": "退 30 秒",
     "Fwd 30s": "进 30 秒",
     "Back 10s": "退 10 秒",

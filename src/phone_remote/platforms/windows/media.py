@@ -9,6 +9,7 @@ import asyncio
 import datetime
 import threading
 
+from ...mediakind import classify
 from ..base import empty_media_state
 from . import audio
 
@@ -98,7 +99,9 @@ class MediaWatcher:
         status = info.playback_status
         state["playing"] = {Status.PLAYING: True, Status.PAUSED: False, Status.STOPPED: False}.get(status)
         try:
-            state["title"] = (await session.try_get_media_properties_async()).title or ""
+            props = await session.try_get_media_properties_async()
+            state["title"], state["artist"] = props.title or "", props.artist or ""
+            state["kind"], state["app"] = classify(session.source_app_user_model_id, state["artist"], props.album_title)
         except OSError:
             pass
         timeline = session.get_timeline_properties()
