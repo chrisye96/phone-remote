@@ -41,9 +41,19 @@ python3 -m venv .venv
 
 想在命令行窗口里运行（方便看输出）：`.venv\Scripts\python -m phone_remote --console`。
 
+### 更新
+
+程序每天向 GitHub 问一次最新发布版的版本号。有新版本时，托盘菜单里会多出一项“有新版本”，点它会打开[发布页](https://github.com/chrisye96/phone-remote/releases/latest)，在那里下载新的 `PhoneRemote.exe` 替换旧的即可。程序不会自动下载或安装任何东西。从源码运行的话用 `git pull`。
+
+这是程序唯一会主动访问互联网的地方。不想要的话，把配置文件里的 `check_updates` 改成 `false`。
+
+手机上的遥控器页面不需要更新：它是电脑上的程序提供的，电脑是什么版本它就是什么版本。
+
 ## 打包成免安装的程序
 
 双击 `scripts\build-windows.bat`，会在 `dist\` 里生成一个 `PhoneRemote.exe`（约 20 MB）。把它拷到别的 Windows 电脑上双击就能用，不需要装 Python。
+
+正式发版由 GitHub Actions 用同样的方式打包：推送 `v0.5.0` 这样的 tag 会跑测试、打包 exe 并发布到发布页（`.github/workflows/release.yml`）。每个 PR 也会跑测试并试打包一次。
 
 ## 遥控器的四个页面
 
@@ -120,6 +130,7 @@ src/phone_remote/
   siteinfo.py      读取网页的名称和代表色（添加快捷方式时用）
   tray.py          托盘图标和菜单
   autostart.py     开机自动启动的开关
+  update.py        向 GitHub 查询有没有新版本
   i18n.py          电脑端的界面语言（手机页面的在 web/js/i18n.js）
   platforms/       每个系统一套实现，其他代码只用 base.py 里的接口
     base.py

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "phone-remote"
 dynamic = ["version"]
-description = "用手机浏览器遥控电脑上的视频播放"
+description = "Control your computer's media playback, mouse and keyboard from your phone's browser"
 requires-python = ">=3.9"
 dependencies = [
     "pystray",
