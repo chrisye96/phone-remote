@@ -8,7 +8,7 @@ import threading
 import webbrowser
 
 from . import config as config_module
-from . import i18n, tray
+from . import i18n, tray, update
 from .actions import Dispatcher
 from .i18n import t
 from .pairing import phone_url
@@ -47,6 +47,11 @@ def main():
         config_module.save(config)
         i18n.set_language(code)
 
+    def announce_update():
+        found = update.newer_version()
+        if found:
+            print("\n" + t("A newer version is available: v%s") % found + "  " + update.RELEASES_PAGE)
+
     def reset_pairing():
         config_module.reset_token(config)
         server.token = config.token
@@ -84,9 +89,12 @@ def main():
     try:
         if use_tray:
             threading.Thread(target=server.serve_forever, daemon=True).start()
-            tray.run(show_qr, on_quit=server.shutdown, on_reset=reset_pairing, on_language=change_language)
+            tray.run(show_qr, on_quit=server.shutdown, on_reset=reset_pairing, on_language=change_language,
+                     check_updates=config.check_updates)
         else:
             print(t("Keep this window open while you use the remote. Closing it quits."))
+            if config.check_updates:
+                threading.Thread(target=announce_update, daemon=True).start()
             server.serve_forever()
     except KeyboardInterrupt:
         pass

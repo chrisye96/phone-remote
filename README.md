@@ -41,9 +41,19 @@ The interface is English by default and can be switched to Chinese. There are tw
 - **The remote on the phone**: tap `EN | 中` in the top right corner. Each phone remembers its own choice.
 - **The tray menu and QR page on the computer**: Language in the tray menu. In terminal mode, set `language` to `zh` in the configuration file.
 
+### Updates
+
+Once a day the program asks GitHub for the version number of the latest release. When there is a newer one, the tray menu gains an "Update available" item that opens the [releases page](https://github.com/chrisye96/phone-remote/releases/latest); download the new `PhoneRemote.exe` there and replace the old one. Nothing is downloaded or installed automatically. If you run from source, `git pull` instead.
+
+That one request is the only time the program contacts the internet on its own. To turn it off, set `check_updates` to `false` in the configuration file.
+
+The remote page on the phone needs no updating: the computer serves it, so it is always the computer's version.
+
 ## Building a standalone program
 
 Double-click `scripts\build-windows.bat`. It produces `PhoneRemote.exe` (about 20 MB) in `dist\`. Copy it to another Windows computer and double-click it; Python is not needed there.
+
+Releases are built the same way by GitHub Actions: pushing a tag such as `v0.5.0` runs the tests, builds the exe and publishes it on the releases page (`.github/workflows/release.yml`). Pull requests get the tests and a trial build.
 
 ## The four screens
 
@@ -120,6 +130,7 @@ src/phone_remote/
   siteinfo.py      reads a site's name and colour (used when adding a shortcut)
   tray.py          tray icon and menu
   autostart.py     starting at login
+  update.py        asks GitHub whether a newer release exists
   i18n.py          interface language on the computer (the phone page's is web/js/i18n.js)
   platforms/       one implementation per system; other code only uses the interface in base.py
     base.py
