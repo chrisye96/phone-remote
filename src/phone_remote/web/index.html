@@ -38,7 +38,8 @@
 <!-- Play -->
 <section class="screen" id="play">
   <div class="card" id="nowcard" hidden>
-    <div id="now" data-feature="play_state"></div>
+    <!-- What kind of thing is playing (music or video), its title and artist, and the app playing it -->
+    <div id="now" data-feature="play_state"><svg class="ic" id="nowkind" role="img" hidden><use href=""/></svg><span id="nowtitle"></span><small id="nowapp"></small></div>
     <div id="prog" data-feature="progress"><span id="cur">0:00</span><div id="track"><div id="fill"></div><div id="knob"></div></div><span id="total">0:00</span></div>
   </div>
   <div class="padrow" data-feature="touchpad">

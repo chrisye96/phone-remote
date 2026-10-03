@@ -6,6 +6,9 @@ import { t } from "./i18n.js";
 const playButtons = document.querySelectorAll(".playbtn");
 const nowCard = document.getElementById("nowcard");
 const nowBox = document.getElementById("now"), volBox = document.getElementById("vol");
+const nowTitle = document.getElementById("nowtitle"), nowApp = document.getElementById("nowapp");
+const kindIcon = document.getElementById("nowkind");
+const KINDS = { music: { icon: "music", label: "Music" }, video: { icon: "movie", label: "Video" } };
 const curBox = document.getElementById("cur"), totalBox = document.getElementById("total");
 const track = document.getElementById("track"), fill = document.getElementById("fill"), knob = document.getElementById("knob");
 const media = { playing: null, title: "", pos: 0, dur: 0, at: 0, holdPlay: 0, holdPos: 0, serverPos: 0 };
@@ -30,7 +33,19 @@ function render() {
   const name = media.playing === true ? "playing" : media.playing === false ? "paused" : "unknown";
   playButtons.forEach(b => { b.dataset.state = name; });
   const hasTitle = media.playing !== null && media.title;
-  nowBox.textContent = hasTitle ? media.title : "";
+  nowTitle.textContent = hasTitle ? media.title : "";
+  if (hasTitle && media.artist) {
+    const artist = document.createElement("span");
+    artist.textContent = " · " + media.artist;
+    nowTitle.appendChild(artist);
+  }
+  nowApp.textContent = hasTitle ? media.app : "";
+  const kind = hasTitle && KINDS[media.kind];
+  kindIcon.toggleAttribute("hidden", !kind);   // an <svg> has no .hidden property, only the attribute
+  if (kind) {
+    kindIcon.firstChild.setAttribute("href", "icons.svg#" + kind.icon);
+    kindIcon.setAttribute("aria-label", t(kind.label));
+  }
   nowBox.classList.toggle("paused", media.playing === false);
   nowCard.hidden = !((hasTitle && nowBox.isConnected) || (media.dur && track.isConnected));
   document.body.classList.toggle("notimeline", !media.dur);
@@ -52,6 +67,9 @@ function applyState(state) {
   }
   media.dur = state.dur || 0;
   media.title = state.title || "";
+  media.artist = state.artist || "";
+  media.kind = state.kind || "";
+  media.app = state.app || "";
   if (newVideo) setPos(state.pos);
   else if (now > media.holdPos && Math.abs(state.pos - localPos()) > 2 && (moved || state.playing === media.playing)) setPos(state.pos);
   volBox.textContent = state.vol === null || state.vol === undefined ? "" : state.muted ? t("Muted") : t("Volume {n}", { n: state.vol });
