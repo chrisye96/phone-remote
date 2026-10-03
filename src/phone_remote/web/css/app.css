@@ -1,10 +1,12 @@
 /* 三层亮度：背景最暗，面板居中，按键最亮。颜色按功能分：
    蓝 播放和主操作 / 青 音量 / 绿 确认 / 黄 跳转 / 红 退出、关闭、删除，其余是灰色。 */
 :root {
-  --bg:#0a0c11; --panel:#141821; --key:#2b313d; --key-on:#3a4252; --line:rgba(255,255,255,.12);
+  /* Surfaces lean toward the logo's navy (#10233a); --brand is its signal cyan */
+  --bg:#08101a; --panel:#111b2a; --key:#27334a; --key-on:#35435d; --line:rgba(255,255,255,.12);
+  --brand:#38e1d0; --brand-on:#2cc4b4; --brand-ink:#10233a;
   --text:#f4f6fa; --dim:#a3abbb; --ok:#3ddc97; --bad:#e5645f;
   --play:#5b8cff; --play-on:#4673e0; --play-bg:#243357; --play-ic:#8fb0ff;
-  --vol-bg:#17403b; --vol-ic:#5fe0c5; --confirm-bg:#1d4630; --confirm-ic:#6fe3a2;
+  --vol-bg:#15403f; --vol-ic:#38e1d0; --confirm-bg:#1d4630; --confirm-ic:#6fe3a2;
   --nav-bg:#473a1c; --nav-ic:#ffd27a; --exit-bg:#4a2a2a; --exit-ic:#ff9c8f;
   --keyh:clamp(42px, 6.6dvh, 52px); --gap:8px;
 }
@@ -73,7 +75,7 @@ body[data-screen="play"] #play, body[data-screen="browse"] #browse, body[data-sc
 #prog { display:flex; align-items:center; gap:9px; font-size:11px; color:var(--dim); font-variant-numeric:tabular-nums; }
 #track { flex:1; height:24px; position:relative; touch-action:none; }
 #track::before, #fill { content:""; position:absolute; left:0; top:9px; height:6px; border-radius:3px; }
-#track::before { right:0; background:#333a48; }
+#track::before { right:0; background:#2d3a52; }
 #fill { width:0; background:var(--play); }
 #knob { position:absolute; left:0; top:4px; width:16px; height:16px; margin-left:-8px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.5); }
 body.notimeline #prog { display:none; }
@@ -82,7 +84,7 @@ body.notimeline [data-rel] { opacity:.4; }
 /* 触控板：虚线边加点阵底纹，和按键区分开 */
 .padrow { flex:1; min-height:84px; display:flex; gap:var(--gap); }
 .pad { flex:1; border-radius:18px; border:1.5px dashed rgba(255,255,255,.22); touch-action:none;
-       background:radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.4px) 0 0/16px 16px, #10141c;
+       background:radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.4px) 0 0/16px 16px, #0c1522;
        display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--dim); font-size:12px; text-align:center; line-height:1.8; }
 .pad .ic { width:22px; height:22px; margin:0; }
 .pad.on { border-color:rgba(143,176,255,.7); }
@@ -122,11 +124,11 @@ textarea::placeholder, input::placeholder { color:#6f7888; }
 .seek button { background:transparent; border:0; box-shadow:none; height:56px; border-radius:28px; }
 .seek button.on { background:rgba(255,255,255,.1); filter:none; transform:none; }
 /* 播放键：播放中是实心蓝色加暂停图标，暂停时是空心描边加播放图标 */
-.seek .playbtn { width:60px; height:60px; border-radius:50%; justify-self:center; background:var(--play); color:#fff; box-shadow:0 0 0 5px rgba(91,140,255,.22); }
+.seek .playbtn { width:60px; height:60px; border-radius:50%; justify-self:center; background:var(--brand); color:var(--brand-ink); box-shadow:0 0 0 5px rgba(56,225,208,.2); }
 .playbtn .ic { width:28px; height:28px; display:none; }
 .playbtn[data-state="playing"] .s-pause, .playbtn[data-state="paused"] .s-play, .playbtn[data-state="unknown"] .s-play { display:block; }
-.seek .playbtn.on { background:var(--play-on); transform:scale(.94); }
-.seek .playbtn[data-state="paused"] { background:var(--key); color:var(--play-ic); box-shadow:inset 0 0 0 2px var(--play); }
+.seek .playbtn.on { background:var(--brand-on); transform:scale(.94); }
+.seek .playbtn[data-state="paused"] { background:var(--key); color:var(--brand); box-shadow:inset 0 0 0 2px var(--brand); }
 
 /* 底部导航 */
 nav { display:flex; flex:none; margin:0 -14px; padding:6px 14px calc(6px + env(safe-area-inset-bottom)); background:var(--panel); border-top:1px solid var(--line); }
@@ -136,7 +138,7 @@ nav button.sel { color:#fff; background:var(--play-bg); } nav button.sel .ic { c
 nav button.on { filter:none; transform:none; }
 
 /* 提示 */
-#toast { position:fixed; left:50%; top:calc(40px + env(safe-area-inset-top)); transform:translateX(-50%); max-width:86vw; background:#2f3644; color:var(--text);
+#toast { position:fixed; left:50%; top:calc(40px + env(safe-area-inset-top)); transform:translateX(-50%); max-width:86vw; background:#2a3650; color:var(--text);
          padding:9px 14px; border-radius:12px; font-size:13px; box-shadow:0 6px 24px rgba(0,0,0,.5); opacity:0; pointer-events:none; transition:opacity .2s; z-index:20; }
 #toast.show { opacity:1; } #toast.bad { background:#5a2a2a; }
 

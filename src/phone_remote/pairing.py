@@ -30,10 +30,11 @@ def phone_url(port, token):
 
 
 _PAIR_PAGE = """<!doctype html><html lang="__LANG__"><meta charset="utf-8"><title>__TITLE__</title>
-<style>body{font-family:system-ui,sans-serif;background:#14161a;color:#eee;text-align:center;padding:40px 24px;line-height:1.6}
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-32.png" sizes="32x32">
+<style>body{font-family:system-ui,sans-serif;background:#08101a;color:#eee;text-align:center;padding:40px 24px;line-height:1.6}
 h1{margin:0 0 6px}p{color:#aab;margin:6px 0}
 #qr{display:inline-block;background:#fff;padding:12px;border-radius:12px;margin:22px}#qr svg{display:block}
-#copy{font:inherit;color:#eee;background:#262a31;border:1px solid transparent;border-radius:10px;padding:10px 14px;margin:8px 0 22px;
+#copy{font:inherit;color:#eee;background:#1a2638;border:1px solid transparent;border-radius:10px;padding:10px 14px;margin:8px 0 22px;
 cursor:pointer;display:inline-flex;align-items:center;gap:12px;max-width:100%}
 #copy:hover{border-color:#4b5261}#copy code{font-size:19px;overflow-wrap:anywhere}
 #copy svg{width:22px;height:22px;flex:none;color:#aab}#copy.done svg{color:#3ddc97}

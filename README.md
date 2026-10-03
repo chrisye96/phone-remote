@@ -1,3 +1,5 @@
+<img src="docs/logo.svg" width="96" alt="Phone Remote logo">
+
 # Phone Remote
 
 **English** | [中文](README.zh-CN.md)
@@ -56,7 +58,7 @@ Double-click `scripts\build-windows.bat`. It produces `PhoneRemote.exe` (about 2
 
 A playback bar stays at the bottom of every screen: volume down and up, rewind, play or pause, fast forward, mute.
 
-Key colours show what a key does: blue for playback and the main action, teal for volume, green for confirming, yellow for navigation, red for exit, close and delete.
+Key colours show what a key does: blue for playback and the main action, cyan for volume, green for confirming, yellow for navigation, red for exit, close and delete. The play / pause key is the cyan of the logo, since it is the key you press most.
 
 ### Site shortcuts
 
@@ -125,7 +127,7 @@ src/phone_remote/
     macos/         input.py  windows.py  media.py
   web/             the phone page: index.html, css/, js/ (one module per feature), icons.svg
 tests/             automated tests; they never touch the real keyboard or mouse
-scripts/           build script, icon sprite script
+scripts/           build script, icon sprite and logo scripts
 docs/              refactoring plan
 ```
 
@@ -139,3 +141,5 @@ Run the tests by double-clicking `run-tests.bat`.
 ## Icons
 
 Icons come from [Tabler Icons](https://tabler.io/icons) (MIT License). Only the few dozen in use are bundled into `src/phone_remote/web/icons.svg`, so nothing is fetched from the internet at run time. To add or remove icons, see `scripts/build-icons.py`.
+
+The logo is drawn in `src/phone_remote/logo.py`: a larger version for 48 px and up, and a simpler one with a single signal arc for 16 and 32 px. `scripts/build-logo.py` writes every file from it: the favicons and home screen icons in `web/`, `docs/logo.svg`, and the Windows icon `scripts/phone-remote.ico`. The tray icon is drawn from the same module when the program starts.

@@ -1,10 +1,10 @@
 """托盘图标（Mac 上是菜单栏图标）：显示二维码、开机自启、退出。"""
-from . import autostart, i18n
+from . import autostart, i18n, logo
 from .i18n import t
 
 try:
     import pystray
-    from PIL import Image, ImageDraw
+    import PIL  # noqa: F401  logo.render needs Pillow
 except ImportError:  # 没装这两个库就退回到命令行窗口模式
     pystray = None
 
@@ -13,13 +13,9 @@ def available():
     return pystray is not None
 
 
-def _icon_image(size=64):
-    image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(image)
-    draw.rounded_rectangle((2, 2, size - 2, size - 2), radius=size // 4, fill=(108, 140, 255, 255))
-    draw.polygon([(size * 0.38, size * 0.27), (size * 0.38, size * 0.73), (size * 0.75, size * 0.5)],
-                 fill=(255, 255, 255, 255))
-    return image
+def _icon_image():
+    # The tray shows it at 16 to 32 px, so the small version of the logo, drawn with room to scale
+    return logo.render(64, logo.SMALL)
 
 
 def run(show_qr, on_quit, on_reset, on_language):
