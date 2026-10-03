@@ -3,12 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0a0c11">
+<meta name="theme-color" content="#08101a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Remote">
 <title>Remote</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="css/app.css">
 <!-- Keeps the English text from flashing before js/i18n.js swaps in another language -->
 <script>try { if (localStorage.lang === "zh") document.documentElement.className = "translating"; } catch (e) {}</script>
@@ -30,7 +34,8 @@
   data-repeat   repeats while held
   data-only     only shown on this system (win / mac)
   data-feature  the feature switch it belongs to; removed when the switch is off
-  Button colours: c-play blue (playback, main action)  c-vol teal (volume)  c-ok green (confirm)
+  Button colours: c-play blue (playback, main action)  c-vol cyan (volume)  c-ok green (confirm)
+                  the play / pause key itself is brand cyan, the colour of the logo's signal
                   c-nav yellow (navigation)  c-exit red (exit, close, delete)
   Icons: <svg class="ic"><use href="icons.svg#name"/></svg>, the list is in scripts/build-icons.py
 -->

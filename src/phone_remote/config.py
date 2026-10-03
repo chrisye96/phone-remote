@@ -39,6 +39,7 @@ class Config:
     saved_port: int = DEFAULT_PORT  # 配置文件里写的端口；port 可能被环境变量临时改掉
     token: str = ""
     language: str = i18n.DEFAULT
+    check_updates: bool = True  # ask GitHub once a day whether a newer release exists
     features: dict = field(default_factory=lambda: dict.fromkeys(FEATURES, True))
     shortcuts: list = field(default_factory=lambda: [dict(s) for s in DEFAULT_SHORTCUTS])
     data_dir: Path = Path(".")
@@ -82,7 +83,8 @@ def reset_token(config):
 
 def save(config):
     (config.data_dir / "config.json").write_text(
-        json.dumps({"port": config.saved_port, "language": config.language, "features": config.features, "shortcuts": config.shortcuts},
+        json.dumps({"port": config.saved_port, "language": config.language, "check_updates": config.check_updates,
+                    "features": config.features, "shortcuts": config.shortcuts},
                    indent=2, ensure_ascii=False),
         encoding="utf-8")
 
@@ -101,6 +103,7 @@ def load():
     config.port = config.saved_port = int(saved.get("port", DEFAULT_PORT))
     if saved.get("language") in i18n.LANGUAGES:
         config.language = saved["language"]
+    config.check_updates = saved.get("check_updates") is not False
     for name, enabled in saved.get("features", {}).items():
         if name in FEATURES:
             config.features[name] = bool(enabled)

@@ -36,7 +36,8 @@ if sys.platform == "win32":
             return False
 
     def set_enabled(enabled, name=ENTRY_NAME):
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE) as key:
+        # CreateKeyEx opens the key, and makes it first on a fresh account that has no Run key yet
+        with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE) as key:
             if enabled:
                 winreg.SetValueEx(key, name, 0, winreg.REG_SZ, subprocess.list2cmdline(launch_command()))
             elif is_enabled(name):

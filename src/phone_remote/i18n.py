@@ -15,6 +15,8 @@ _TABLES = {
         "Re-pair (unpairs every phone)": "重新配对（已配对的手机全部失效）",
         "Language": "语言",
         "Quit": "退出",
+        "Update available: v%s (opens the download page)": "有新版本 v%s（点击打开下载页）",
+        "A newer version is available: v%s": "有新版本可用：v%s",
         # console
         "Port %d is already in use. Phone Remote is probably running already.": "端口 %d 已被占用，程序可能已经在运行。",
         "Phone Remote is running. Open this address on your phone, or scan the QR code that just opened:":

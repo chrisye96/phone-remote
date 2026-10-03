@@ -1,0 +1,48 @@
+# Runs the tests and builds PhoneRemote.exe for every pull request, so a broken build shows up early.
+# Pushing a version tag (v0.5.0) does the same and then publishes the exe as a GitHub release,
+# which is what the program's "update available" notice points people to.
+name: Build
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write  # creating the release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m venv .venv
+          .venv\Scripts\python -m pip install -q -e .
+      - name: Test
+        shell: cmd
+        run: run-tests.bat
+      - name: Tag matches the version in the code
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          $version = & .venv\Scripts\python -c "import phone_remote; print(phone_remote.__version__)"
+          if ("v$version" -ne $env:GITHUB_REF_NAME) { throw "Tag $env:GITHUB_REF_NAME does not match __version__ $version" }
+      - name: Build the exe
+        shell: cmd
+        run: scripts\build-windows.bat
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhoneRemote
+          path: dist/PhoneRemote.exe
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create $env:GITHUB_REF_NAME dist/PhoneRemote.exe --title $env:GITHUB_REF_NAME --generate-notes --verify-tag
