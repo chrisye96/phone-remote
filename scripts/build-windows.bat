@@ -6,7 +6,7 @@ if not exist ".venv\Scripts\python.exe" (
   exit /b 1
 )
 ".venv\Scripts\python.exe" -m pip install -q pyinstaller
-".venv\Scripts\python.exe" -m PyInstaller --noconfirm --clean --onefile --windowed --name PhoneRemote ^
+".venv\Scripts\python.exe" -m PyInstaller --noconfirm --clean --onefile --windowed --name PhoneRemote --icon "%CD%\scripts\phone-remote.ico" ^
   --add-data "%CD%\src\phone_remote\web;phone_remote\web" ^
   --collect-submodules winrt --collect-submodules pystray ^
   --specpath build --workpath build --distpath dist "%CD%\scripts\entry.py"
