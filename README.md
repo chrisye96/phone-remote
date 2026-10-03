@@ -49,7 +49,7 @@ Double-click `scripts\build-windows.bat`. It produces `PhoneRemote.exe` (about 2
 
 (The screenshot shows an older version with Chinese labels.)
 
-- **Play**: title and a draggable progress bar, touchpad, Fullscreen / Exit / OK, and four sets of keys for general use, Bilibili, YouTube and music.
+- **Play**: what is playing (an icon for music or video, the title and artist, and the app playing it), a draggable progress bar, touchpad, Fullscreen / Exit / OK, and four sets of keys for general use, Bilibili, YouTube and music.
 - **Browse**: touchpad, browser back and forward, reload, zoom, tab switching, and shortcuts to your usual sites.
 - **Type**: type or dictate on the phone and send the text to whatever input has focus on the computer, plus Enter, Backspace, Select all, Undo, dictation on the computer and so on. "New AI chat" sends Ctrl/Cmd+Shift+O, which starts a new conversation in the ChatGPT and Claude apps and sites.
 - **Windows**: lists the windows open on the computer; tap one to bring it to the front. Maximize and minimize are here too. "To other screen" (Windows only) moves the current window to the next monitor, for example sending a video to a TV that is plugged in as a second screen. On a Mac the list shows apps.

@@ -15,7 +15,7 @@ rewind-backward-30 rewind-forward-30 rewind-backward-10 rewind-forward-10 hourgl
 arrow-up arrow-down arrow-left arrow-right refresh zoom-in zoom-out x send corner-down-left
 arrow-bar-down backspace select-all arrow-back-up arrow-bar-to-right microphone message-plus link
 switch-horizontal layout-grid screen-share arrows-maximize rectangle trash player-skip-forward
-player-skip-back player-stop gauge copy
+player-skip-back player-stop gauge copy music movie
 """.split()
 FILLED = "player-play player-pause player-track-next player-track-prev".split()
 

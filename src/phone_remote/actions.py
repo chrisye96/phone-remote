@@ -66,7 +66,7 @@ class Dispatcher:
     def _do_state(self, msg):
         state = dict(self.platform.media_state())
         if not self.enabled("play_state"):
-            state.update(playing=None, title="")
+            state.update(playing=None, title="", artist="", kind="", app="")
         if not self.enabled("progress"):
             state.update(pos=0, dur=0)
         if not self.enabled("volume_display"):
