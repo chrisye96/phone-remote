@@ -16,6 +16,7 @@ class ClassifyTest(unittest.TestCase):
 
     def test_unknown_apps_get_a_readable_name_and_a_guess_from_the_metadata(self):
         self.assertEqual(classify("SomePlayer.exe"), ("", "SomePlayer"))
+        self.assertEqual(classify("PowerArchiver.exe"), ("", "PowerArchiver"))  # contains "arc", is not the Arc browser
         self.assertEqual(classify("Vendor.App_abc123!Player", "Artist"), ("music", "Player"))
         self.assertEqual(classify(None), ("", ""))
 

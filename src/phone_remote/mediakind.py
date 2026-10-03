@@ -32,7 +32,7 @@ KNOWN_APPS = [
     ("qqlive", "video", "Tencent Video"),
 ]
 BROWSERS = [("msedge", "Edge"), ("chrome", "Chrome"), ("firefox", "Firefox"), ("opera", "Opera"),
-            ("brave", "Brave"), ("vivaldi", "Vivaldi"), ("arc", "Arc")]
+            ("brave", "Brave"), ("vivaldi", "Vivaldi"), ("thebrowsercompany", "Arc")]  # not "arc": too many names contain it
 
 
 def _readable(app_id):
