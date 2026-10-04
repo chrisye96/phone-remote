@@ -1,5 +1,5 @@
-# Runs the tests and builds PhoneRemote.exe for every pull request, so a broken build shows up early.
-# Pushing a version tag (v0.5.0) does the same and then publishes the exe as a GitHub release,
+# Runs the tests and builds PhoneRemote.exe and the Mac apps for every pull request, so a broken build shows up early.
+# Pushing a version tag (v0.5.0) does the same and then publishes them as a GitHub release,
 # which is what the program's "update available" notice points people to.
 name: Build
 
@@ -15,8 +15,6 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
-    permissions:
-      contents: write  # creating the release
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,11 +37,73 @@ jobs:
         run: scripts\build-windows.bat
       - uses: actions/upload-artifact@v4
         with:
-          name: PhoneRemote
+          name: PhoneRemote-Windows
           path: dist/PhoneRemote.exe
+
+  macos:
+    # An app built on one kind of Mac does not run on the other, so there is one for each.
+    # The oldest systems on offer, because an app does not run on a macOS older than the one that built it.
+    strategy:
+      matrix:
+        include:
+          - runner: macos-15
+            chip: AppleSilicon
+          - runner: macos-15-intel
+            chip: Intel
+    runs-on: ${{ matrix.runner }}
+    env:
+      ZIP: PhoneRemote-macOS-${{ matrix.chip }}.zip
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -q -e .
+      - name: Test
+        run: PYTHONPATH=src:tests .venv/bin/python -m unittest discover -s tests
+      - name: Build the app
+        run: sh scripts/build-macos.sh "$ZIP"
+      - name: The app from the zip starts and serves the remote
+        run: |
+          ditto -x -k "dist/$ZIP" "$RUNNER_TEMP/unzipped"
+          export REMOTE_DATA_DIR="$RUNNER_TEMP/data" REMOTE_PORT=8799
+          mkdir -p "$REMOTE_DATA_DIR"
+          "$RUNNER_TEMP/unzipped/PhoneRemote.app/Contents/MacOS/PhoneRemote" --background &
+          app=$!
+          for attempt in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8799/pair > /dev/null && break
+            sleep 1
+          done
+          cat "$REMOTE_DATA_DIR/phone-remote.log" || true
+          curl -sf http://127.0.0.1:8799/pair > /dev/null         # the QR page
+          curl -sf http://127.0.0.1:8799/js/main.js > /dev/null   # the remote's files travel inside the app
+          grep -q "tray=True" "$REMOTE_DATA_DIR/phone-remote.log"   # it runs in the menu bar, as it will for people
+          kill $app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhoneRemote-macOS-${{ matrix.chip }}
+          path: dist/${{ env.ZIP }}
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # creating the release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
       - name: Publish the release
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         # The notes file says, in English and Chinese, which file to download; the generated list of changes follows it
-        run: gh release create $env:GITHUB_REF_NAME dist/PhoneRemote.exe --title $env:GITHUB_REF_NAME --notes-file .github/release-notes.md --generate-notes --verify-tag
+        run: >
+          gh release create "$GITHUB_REF_NAME" dist/PhoneRemote.exe
+          dist/PhoneRemote-macOS-AppleSilicon.zip dist/PhoneRemote-macOS-Intel.zip
+          --title "$GITHUB_REF_NAME" --notes-file .github/release-notes.md --generate-notes --verify-tag
