@@ -70,14 +70,22 @@ class DispatcherTest(unittest.TestCase):
 
     def test_text_is_collapsed_and_enter_is_optional(self):
         dispatcher, platform, _ = make()
-        dispatcher.handle({"a": "text", "t": "  hello \n  world  ", "enter": True})
+        dispatcher.handle({"a": "text", "t": "  hello   big  world  ", "enter": True})
         dispatcher.handle({"a": "text", "t": "   "})
-        self.assertEqual(platform.calls, [("type_text", "hello world"), ("press", [], "enter")])
+        self.assertEqual(platform.calls, [("type_text", "hello big world"), ("press", [], "enter")])
+
+    def test_line_breaks_are_typed_as_shift_enter(self):
+        # Plain Enter would send a half-written message in most chat boxes
+        dispatcher, platform, _ = make()
+        dispatcher.handle({"a": "text", "t": "first line\n\nthird  line\r\nfourth\n", "enter": True})
+        new_line = ("press", ["shift"], "enter")
+        self.assertEqual(platform.calls, [("type_text", "first line"), new_line, new_line, ("type_text", "third line"),
+                                          new_line, ("type_text", "fourth"), ("press", [], "enter")])
 
     def test_text_is_capped(self):
         dispatcher, platform, _ = make()
-        dispatcher.handle({"a": "text", "t": "x" * 5000})
-        self.assertEqual(len(platform.calls[0][1]), 2000)
+        dispatcher.handle({"a": "text", "t": "x" * (actions.MAX_TEXT + 5000)})
+        self.assertEqual(len(platform.calls[0][1]), actions.MAX_TEXT)
 
     def test_open_only_opens_saved_shortcuts(self):
         dispatcher, _, opened = make()

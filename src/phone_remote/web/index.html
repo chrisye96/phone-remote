@@ -19,7 +19,7 @@
 </head>
 <body data-screen="play">
 
-<header><span id="dot"></span><span id="status">Connecting…</span><select id="device" aria-label="Switch computer"></select><span id="vol" data-feature="volume_display"></span><button id="lang" aria-label="Language"><span data-lang="en">EN</span><span data-lang="zh">中</span></button></header>
+<header><span id="dot"></span><span id="status">Connecting…</span><select id="device" aria-label="Switch computer"></select><span id="vol" data-feature="volume_display"></span><button id="gear" aria-label="Settings"><svg class="ic"><use href="icons.svg#settings"/></svg></button></header>
 <div id="toast"></div>
 
 <!--
@@ -38,6 +38,10 @@
                   the play / pause key itself is brand cyan, the colour of the logo's signal
                   c-nav yellow (navigation)  c-exit red (exit, close, delete)
   Icons: <svg class="ic"><use href="icons.svg#name"/></svg>, the list is in scripts/build-icons.py
+
+  Layout classes (css/app.css decides what each means at each screen size):
+  roomy-only    shown on tablets only, where there is space to spare
+  pair          two groups that sit side by side on an upright tablet and stack everywhere else
 -->
 
 <!-- Play -->
@@ -62,30 +66,12 @@
   </div>
 
   <div class="group" id="sitegroup">
+    <div class="sitepanel">
     <div class="tabs" data-feature="site_keys">
       <button data-site="any">General</button>
       <button data-site="bili" style="--site:#fb7299"><em></em>Bilibili</button>
       <button data-site="yt" style="--site:#ff4e45"><em></em>YouTube</button>
       <button data-site="music" style="--site:#1ed760"><em></em>Music</button>
-    </div>
-
-    <div class="site" id="any">
-      <div class="row r211">
-        <div class="rocker c-play" data-feature="progress">
-          <button data-rel="-30"><svg class="ic"><use href="icons.svg#rewind-backward-30"/></svg>Back 30s</button>
-          <button data-rel="30"><svg class="ic"><use href="icons.svg#rewind-forward-30"/></svg>Fwd 30s</button>
-        </div>
-        <button data-rel="90" data-feature="progress"><svg class="ic"><use href="icons.svg#player-skip-forward"/></svg>Skip intro</button>
-        <button id="timer" data-feature="sleep_timer"><svg class="ic"><use href="icons.svg#hourglass"/></svg><span>Sleep timer</span></button>
-      </div>
-      <div class="row r211">
-        <div class="rocker">
-          <button data-k="up" data-repeat><svg class="ic"><use href="icons.svg#arrow-up"/></svg>Up</button>
-          <button data-k="down" data-repeat><svg class="ic"><use href="icons.svg#arrow-down"/></svg>Down</button>
-        </div>
-        <button data-k="c"><svg class="ic"><use href="icons.svg#badge-cc"/></svg>Subtitles</button>
-        <button data-k="space"><svg class="ic"><use href="icons.svg#space"/></svg>Space</button>
-      </div>
     </div>
 
     <div class="site" id="bili" data-feature="site_keys" style="--site:#fb7299">
@@ -99,9 +85,9 @@
       </div>
       <div class="row r31">
         <div class="rocker c-vol">
-          <button data-k="down" data-repeat><svg class="ic"><use href="icons.svg#minus"/></svg>Player volume</button>
+          <button data-k="down" data-repeat><svg class="ic"><use href="icons.svg#minus"/></svg>Player vol</button>
           <button data-k="m"><svg class="ic"><use href="icons.svg#volume-off"/></svg>Mute</button>
-          <button data-k="up" data-repeat><svg class="ic"><use href="icons.svg#plus"/></svg>Player volume</button>
+          <button data-k="up" data-repeat><svg class="ic"><use href="icons.svg#plus"/></svg>Player vol</button>
         </div>
         <button data-k="e"><svg class="ic"><use href="icons.svg#star"/></svg>Favorite</button>
       </div>
@@ -140,6 +126,33 @@
         </div>
       </div>
     </div>
+    </div>
+
+    <div class="site" id="any">
+      <div class="gtitle roomy-only">General</div>
+      <div class="row r211">
+        <div class="rocker c-play" data-feature="progress">
+          <button data-rel="-30"><svg class="ic"><use href="icons.svg#rewind-backward-30"/></svg>Back 30s</button>
+          <button data-rel="30"><svg class="ic"><use href="icons.svg#rewind-forward-30"/></svg>Fwd 30s</button>
+        </div>
+        <button data-rel="90" data-feature="progress"><svg class="ic"><use href="icons.svg#player-skip-forward"/></svg>Skip intro</button>
+        <button id="timer" data-feature="sleep_timer"><svg class="ic"><use href="icons.svg#hourglass"/></svg><span>Sleep timer</span></button>
+      </div>
+      <div class="row r211">
+        <div class="rocker">
+          <button data-k="up" data-repeat><svg class="ic"><use href="icons.svg#arrow-up"/></svg>Up</button>
+          <button data-k="down" data-repeat><svg class="ic"><use href="icons.svg#arrow-down"/></svg>Down</button>
+        </div>
+        <button data-k="c"><svg class="ic"><use href="icons.svg#badge-cc"/></svg>Subtitles</button>
+        <button data-k="space"><svg class="ic"><use href="icons.svg#space"/></svg>Space</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- The same shortcuts as on the Browse screen -->
+  <div class="group roomy-only" data-feature="open_sites">
+    <div class="gtitle">Sites<small>Hold one to edit it</small></div>
+    <div class="row r1111 shortcuts"></div>
   </div>
 </section>
 
@@ -153,7 +166,8 @@
     </div>
   </div>
 
-  <div class="group" data-feature="browser_keys">
+  <div class="pair" data-feature="browser_keys">
+  <div class="group">
     <div class="gtitle">Page</div>
     <div class="row r212">
       <div class="rocker c-nav">
@@ -166,6 +180,8 @@
         <button data-k="mod+=" aria-label="Zoom in"><svg class="ic"><use href="icons.svg#zoom-in"/></svg></button>
       </div>
     </div>
+  </div>
+  <div class="group">
     <div class="gtitle">Tabs</div>
     <div class="row r211">
       <div class="rocker c-nav">
@@ -176,18 +192,20 @@
       <button class="c-exit" data-k="mod+w"><svg class="ic"><use href="icons.svg#x"/></svg>Close tab</button>
     </div>
   </div>
+  </div>
 
   <div class="group" data-feature="open_sites">
     <div class="gtitle">Sites<small>Hold one to edit it</small></div>
-    <div class="row r1111" id="shortcuts"></div>
+    <div class="row r1111 shortcuts"></div>
   </div>
 </section>
 
 <!-- Type -->
 <section class="screen" id="type">
   <div class="compose" data-feature="text_input">
-    <textarea id="text" enterkeyhint="send" autocomplete="off" placeholder="Type here, or tap the mic on your keyboard to dictate"></textarea>
+    <textarea id="text" enterkeyhint="enter" autocomplete="off" placeholder="Type here, or tap the mic on your keyboard to dictate"></textarea>
     <div class="row r12">
+      <button id="closeText" class="expanded-only">Close</button>
       <button id="sendText">Type only</button>
       <button id="sendEnter" class="primary"><svg class="ic"><use href="icons.svg#send"/></svg>Type and press Enter</button>
     </div>
@@ -199,7 +217,9 @@
       <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
     </div>
   </div>
+  <div class="pair">
   <div class="group">
+    <div class="gtitle roomy-only">Editing</div>
     <div class="row r211">
       <button class="c-ok big" data-k="enter"><svg class="ic"><use href="icons.svg#corner-down-left"/></svg>Enter</button>
       <button data-k="shift+enter"><svg class="ic"><use href="icons.svg#arrow-bar-down"/></svg>New line</button>
@@ -209,19 +229,38 @@
       <button data-k="mod+a"><svg class="ic"><use href="icons.svg#select-all"/></svg>Select all</button>
       <button data-k="mod+z"><svg class="ic"><use href="icons.svg#arrow-back-up"/></svg>Undo</button>
       <button data-k="tab" data-repeat><svg class="ic"><use href="icons.svg#arrow-bar-to-right"/></svg>Tab</button>
-      <button class="c-exit" data-k="esc"><svg class="ic"><use href="icons.svg#player-stop"/></svg>Stop</button>
+      <button data-k="mod+l"><svg class="ic"><use href="icons.svg#link"/></svg>Address bar</button>
     </div>
   </div>
-  <div class="row r211">
-    <button class="c-play big" data-k="win+h" data-mac="ctrl+alt+d"><svg class="ic"><use href="icons.svg#microphone"/></svg>Dictate on PC</button>
-    <!-- Ctrl/Cmd+Shift+O starts a new conversation in the ChatGPT and Claude apps and sites -->
-    <button data-k="mod+shift+o"><svg class="ic"><use href="icons.svg#message-plus"/></svg>New AI chat</button>
-    <button data-k="mod+l"><svg class="ic"><use href="icons.svg#link"/></svg>Address bar</button>
+  <!-- Keys named after what they are, because each means something different from one program to the next:
+       Esc stops an AI reply or closes a dialog, Ctrl+C interrupts a terminal, Shift+Tab switches mode in Claude Code. -->
+  <div class="group">
+    <div class="gtitle roomy-only">Control</div>
+    <div class="row r1111">
+      <button data-k="up" data-repeat><svg class="ic"><use href="icons.svg#arrow-up"/></svg>Up</button>
+      <button data-k="down" data-repeat><svg class="ic"><use href="icons.svg#arrow-down"/></svg>Down</button>
+      <button data-k="shift+tab"><svg class="ic"><use href="icons.svg#switch-horizontal"/></svg>Shift+Tab</button>
+      <!-- Ctrl/Cmd+Shift+O starts a new conversation in ChatGPT -->
+      <button data-k="mod+shift+o"><svg class="ic"><use href="icons.svg#message-plus"/></svg>New AI chat</button>
+    </div>
+    <div class="row r112">
+      <button class="c-exit" data-k="esc"><svg class="ic"><use href="icons.svg#player-stop"/></svg>Esc</button>
+      <button class="c-exit" data-k="ctrl+c"><svg class="ic"><use href="icons.svg#x"/></svg>Ctrl+C</button>
+      <button class="c-play big" data-k="win+h" data-mac="ctrl+alt+d"><svg class="ic"><use href="icons.svg#microphone"/></svg>Dictate on PC</button>
+    </div>
+  </div>
   </div>
 </section>
 
 <!-- Windows -->
 <section class="screen" id="wins">
+  <div class="padrow roomy-only" data-feature="touchpad">
+    <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg><span>Slide to move, tap to click<br>Hold, then slide to drag<br>Two fingers: tap to right-click, slide to scroll</span></div>
+    <div class="rocker col">
+      <button data-scroll="250" data-repeat><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
+      <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
+    </div>
+  </div>
   <div class="label" data-feature="windows">Tap a window to bring it to the front</div>
   <div id="winlist" data-feature="windows"></div>
   <div class="group" id="winkeys">
@@ -292,6 +331,24 @@
       <button type="button" id="devcancel">Cancel</button>
       <button type="submit" class="primary" id="devsave">Save</button>
     </div>
+  </form>
+</div>
+
+<!-- Settings, opened from the gear in the header. Each choice takes effect as soon as it is tapped. -->
+<div id="setsheet" class="sheet" hidden>
+  <form id="setform">
+    <h3>Settings</h3>
+    <div class="field">
+      <div class="flabel">Language</div>
+      <div class="seg" id="setlang"><button type="button" data-value="en">English</button><button type="button" data-value="zh">中文</button></div>
+    </div>
+    <div class="field">
+      <div class="flabel">Touchpad side when the screen is wide</div>
+      <div class="seg" id="setside"><button type="button" data-value="left">Left</button><button type="button" data-value="right">Right</button></div>
+      <p class="hint">Right suits steering the pointer with your right thumb.</p>
+    </div>
+    <p class="hint" id="setversion"></p>
+    <button type="submit" class="primary">Done</button>
   </form>
 </div>
 

@@ -10,7 +10,7 @@ const error = document.getElementById("deverror"), saveButton = document.getElem
 let adding = false;   // the sheet either adds a computer or renames the active one
 
 // The name the user gave, else the computer's own name, else its address
-function label(d) { return d.alias || d.name || d.url.replace(/^https?:\/\//, ""); }
+export function label(d) { return d.alias || d.name || d.url.replace(/^https?:\/\//, ""); }
 
 export function renderDevices() {
   select.textContent = "";
@@ -20,11 +20,6 @@ export function renderDevices() {
   option("+", t("Add computer…"));
   if (active) option("=", t("Rename {name}…", { name: label(active) }));
   if (devices.length > 1) option("-", t("Remove {name}", { name: label(active) }));
-  if (active && active.version) {   // which version that computer runs; not something to pick
-    const version = new Option(t("Version {v}", { v: active.version }), "");
-    version.disabled = true;
-    select.add(version);
-  }
   select.value = active ? active.url : "";
 }
 

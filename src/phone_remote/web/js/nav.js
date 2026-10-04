@@ -18,8 +18,15 @@ export function go(screen) {
   if (enterHandlers[screen]) enterHandlers[screen]();
 }
 
+// Same condition as the tablet rules in css/app.css
+const roomy = window.matchMedia("(min-width:700px) and (min-height:600px)");
+
 export function setSite(site) {
   if (!document.getElementById(site)) site = "any";
+  // A tablet always shows the general keys, so there the tabs only choose among the sites
+  if (roomy.matches && site === "any") site = document.getElementById(store.get("lastsite")) ? store.get("lastsite") : "bili";
+  if (!document.getElementById(site)) site = "any";   // the site keys are switched off on this computer
+  if (site !== "any") store.set("lastsite", site);
   pick(".tabs button[data-site]", "site", site, "site");
   document.querySelectorAll(".site").forEach(d => d.classList.toggle("sel", d.id === site));
   // 整块面板的边框跟着选中的网站变色
@@ -36,4 +43,5 @@ export function initNav() {
   // An empty name (first visit, nothing stored yet) would make an invalid selector and stop the whole page
   go(screen && document.querySelector("section.screen#" + CSS.escape(screen)) ? screen : "play");
   setSite(query.get("site") || store.get("site") || "any");
+  roomy.addEventListener("change", () => setSite(store.get("site") || "any"));
 }
