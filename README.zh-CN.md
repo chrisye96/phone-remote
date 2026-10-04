@@ -10,6 +10,8 @@ Windows 和 macOS 通用，用 Python 编写。手机和电脑需要在同一个
 
 ## 运行
 
+最省事的是[发布页](https://github.com/chrisye96/phone-remote/releases/latest)上打包好的程序，不需要装 Python：Windows 下载 `PhoneRemote.exe`，Apple 芯片的 Mac（M1 及以后）下载 `PhoneRemote-macOS-AppleSilicon.zip`，Intel 处理器的 Mac 下载 `PhoneRemote-macOS-Intel.zip`。Mac 上第一次启动的步骤写在发布页里。想从源码运行的话：
+
 Windows：双击 `start-windows.bat`。第一次运行会在仓库里建一个 `.venv` 虚拟环境并安装依赖，需要联网，大约一分钟。
 
 macOS（先安装一次，以后只需要最后一行）：
@@ -26,7 +28,7 @@ python3 -m venv .venv
 .venv/bin/python -m phone_remote
 ```
 
-第一次在 Mac 上运行，需要在 系统设置 > 隐私与安全性 > 辅助功能 里给"终端"授权。
+第一次在 Mac 上运行，需要在 系统设置 > 隐私与安全性 > 辅助功能 里给"终端"授权（用打包好的应用时，授权的是 "PhoneRemote"）。
 
 启动后没有窗口，程序在任务栏右下角的托盘里运行（Mac 上是菜单栏），并弹出二维码页面，用手机相机扫码即可。
 
@@ -43,7 +45,7 @@ python3 -m venv .venv
 
 ### 更新
 
-程序每天向 GitHub 问一次最新发布版的版本号。有新版本时，托盘菜单里会多出一项“有新版本”，点它会打开[发布页](https://github.com/chrisye96/phone-remote/releases/latest)，在那里下载新的 `PhoneRemote.exe` 替换旧的即可。程序不会自动下载或安装任何东西。从源码运行的话用 `git pull`。
+程序每天向 GitHub 问一次最新发布版的版本号。有新版本时，托盘菜单里会多出一项“有新版本”，点它会打开[发布页](https://github.com/chrisye96/phone-remote/releases/latest)，在那里下载新的文件（`PhoneRemote.exe`，或者对应你那台 Mac 的 zip）替换旧的即可。程序不会自动下载或安装任何东西。从源码运行的话用 `git pull`。
 
 这是程序唯一会主动访问互联网的地方。不想要的话，把配置文件里的 `check_updates` 改成 `false`。
 
@@ -51,9 +53,11 @@ python3 -m venv .venv
 
 ## 打包成免安装的程序
 
-双击 `scripts\build-windows.bat`，会在 `dist\` 里生成一个 `PhoneRemote.exe`（约 20 MB）。把它拷到别的 Windows 电脑上双击就能用，不需要装 Python。
+Windows：双击 `scripts\build-windows.bat`，会在 `dist\` 里生成一个 `PhoneRemote.exe`（约 20 MB）。把它拷到别的 Windows 电脑上双击就能用，不需要装 Python。
 
-正式发版由 GitHub Actions 用同样的方式打包：推送 `v0.5.0` 这样的 tag 会跑测试、打包 exe 并发布到发布页（`.github/workflows/release.yml`）。每个 PR 也会跑测试并试打包一次。
+macOS：运行 `sh scripts/build-macos.sh`，会在 `dist/` 里生成 `PhoneRemote.app` 和它的 zip。这个应用只能在同一种 Mac 上运行（Apple 芯片或 Intel），而且没有用 Apple 开发者账号签名，所以拿到别的 Mac 上第一次打开时需要手动确认。
+
+正式发版由 GitHub Actions 用同样的方式打包：推送 `v0.5.0` 这样的 tag 会跑测试、打包 exe 和两个 Mac 应用并发布到发布页（`.github/workflows/release.yml`）。每个 PR 也会跑测试并试打包一次。
 
 ## 遥控器的四个页面
 

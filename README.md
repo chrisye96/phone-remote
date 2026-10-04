@@ -10,6 +10,8 @@ Works on Windows and macOS, written in Python. The phone and the computer need t
 
 ## Running it
 
+The easy way is the packaged program on the [releases page](https://github.com/chrisye96/phone-remote/releases/latest), which needs no Python: `PhoneRemote.exe` for Windows, `PhoneRemote-macOS-AppleSilicon.zip` for a Mac with an Apple chip (M1 or later), `PhoneRemote-macOS-Intel.zip` for a Mac with an Intel processor. The release page lists the steps for the first start on a Mac. To run from source instead:
+
 Windows: double-click `start-windows.bat`. The first run creates a `.venv` virtual environment in the repository and installs the dependencies, which needs an internet connection and takes about a minute.
 
 macOS (install once, after that only the last line is needed):
@@ -26,7 +28,7 @@ python3 -m venv .venv
 .venv/bin/python -m phone_remote
 ```
 
-The first time on a Mac, allow "Terminal" under System Settings > Privacy & Security > Accessibility.
+The first time on a Mac, allow "Terminal" under System Settings > Privacy & Security > Accessibility (with the packaged app, allow "PhoneRemote" instead).
 
 There is no window. The program runs in the system tray at the bottom right of the taskbar (the menu bar on a Mac) and opens a page with a QR code. Scan it with your phone's camera.
 
@@ -43,7 +45,7 @@ The interface is English by default and can be switched to Chinese. There are tw
 
 ### Updates
 
-Once a day the program asks GitHub for the version number of the latest release. When there is a newer one, the tray menu gains an "Update available" item that opens the [releases page](https://github.com/chrisye96/phone-remote/releases/latest); download the new `PhoneRemote.exe` there and replace the old one. Nothing is downloaded or installed automatically. If you run from source, `git pull` instead.
+Once a day the program asks GitHub for the version number of the latest release. When there is a newer one, the tray menu gains an "Update available" item that opens the [releases page](https://github.com/chrisye96/phone-remote/releases/latest); download the new file there (`PhoneRemote.exe`, or the zip for your Mac) and replace the old one. Nothing is downloaded or installed automatically. If you run from source, `git pull` instead.
 
 That one request is the only time the program contacts the internet on its own. To turn it off, set `check_updates` to `false` in the configuration file.
 
@@ -51,9 +53,11 @@ The remote page on the phone needs no updating: the computer serves it, so it is
 
 ## Building a standalone program
 
-Double-click `scripts\build-windows.bat`. It produces `PhoneRemote.exe` (about 20 MB) in `dist\`. Copy it to another Windows computer and double-click it; Python is not needed there.
+Windows: double-click `scripts\build-windows.bat`. It produces `PhoneRemote.exe` (about 20 MB) in `dist\`. Copy it to another Windows computer and double-click it; Python is not needed there.
 
-Releases are built the same way by GitHub Actions: pushing a tag such as `v0.5.0` runs the tests, builds the exe and publishes it on the releases page (`.github/workflows/release.yml`). Pull requests get the tests and a trial build.
+macOS: run `sh scripts/build-macos.sh`. It produces `PhoneRemote.app` and a zip of it in `dist/`. The app only runs on the kind of Mac that built it (Apple chip or Intel), and it is not signed with an Apple developer account, so another Mac asks for confirmation the first time it is opened.
+
+Releases are built the same way by GitHub Actions: pushing a tag such as `v0.5.0` runs the tests, builds the exe and both Mac apps, and publishes them on the releases page (`.github/workflows/release.yml`). Pull requests get the tests and a trial build.
 
 ## The four screens
 
