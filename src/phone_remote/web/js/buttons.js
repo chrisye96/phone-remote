@@ -1,8 +1,11 @@
 // 通用按钮：按下立即触发，带 data-repeat 的长按连发
 import { env, send } from "./api.js";
 
+// data-cmd name -> function that builds the message, for commands that carry more than their name
+export const commands = {};
+
 function command(btn) {
-  if (btn.dataset.cmd) return { a: btn.dataset.cmd };
+  if (btn.dataset.cmd) return commands[btn.dataset.cmd] ? commands[btn.dataset.cmd]() : { a: btn.dataset.cmd };
   if (btn.dataset.scroll) return { a: "scroll", dy: Number(btn.dataset.scroll) };
   if (btn.dataset.open) return { a: "open", url: btn.dataset.open };
   return { a: "key", k: (env.platform === "mac" && btn.dataset.mac) || btn.dataset.k };

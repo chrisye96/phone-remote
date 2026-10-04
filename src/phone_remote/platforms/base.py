@@ -4,8 +4,9 @@
 def empty_media_state():
     """playing 为 True / False，读不到时为 None；pos 和 dur 是秒，vol 是 0-100。"""
     # kind is "music", "video" or "" (see mediakind.py); app is the name of what is playing it
+    # rate is how fast pos moves while playing: 1 normally, 0 while the video is stuck loading
     return {"playing": None, "title": "", "artist": "", "kind": "", "app": "",
-            "pos": 0, "dur": 0, "vol": None, "muted": False}
+            "pos": 0, "dur": 0, "rate": 1, "vol": None, "muted": False}
 
 
 class Platform:
@@ -55,10 +56,14 @@ class Platform:
     def media_state(self):
         return empty_media_state()
 
-    def media_toggle(self):
+    def media_toggle(self, play=None, title=None):
         """让正在播放（或刚暂停）的那个程序播放 / 暂停，不管它在不在前台。
 
-        做到了返回 True；没有可控制的播放时返回 False，调用方会改按空格。
+        play is the way the phone wants to go (True / False); None flips whatever the state is.
+        title is what the phone is showing. When something else has become current since, the press
+        is dropped instead of starting or stopping the wrong thing. None skips that check.
+
+        做到了（或有意丢弃了）返回 True；没有可控制的播放时返回 False，调用方会改按空格。
         """
         return False
 

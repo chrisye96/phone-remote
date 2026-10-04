@@ -37,8 +37,8 @@ class FakePlatform(Platform):
     def media_state(self):
         return self.media
 
-    def media_toggle(self):
-        self.calls.append(("media_toggle",))
+    def media_toggle(self, play=None, title=None):
+        self.calls.append(("media_toggle", play, title))
         return self.can_toggle
 
     def media_seek(self, seconds):
