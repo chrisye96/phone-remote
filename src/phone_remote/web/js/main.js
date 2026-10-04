@@ -5,6 +5,7 @@ import { initDevices, renderDevices } from "./devices.js";
 import { initLanguage } from "./i18n.js";
 import { initMedia } from "./media.js";
 import { initNav, setSite } from "./nav.js";
+import { initSettings } from "./settings.js";
 import { initShortcuts, renderShortcuts } from "./shortcuts.js";
 import { initText } from "./text.js";
 import { initTimer } from "./timer.js";
@@ -12,6 +13,7 @@ import { initTouchpads } from "./touchpad.js";
 import { initWindows } from "./windows.js";
 
 initLanguage();   // first, so everything after it sees the translated page
+initSettings();
 initButtons();
 initTouchpads();
 initText();
@@ -30,8 +32,8 @@ function applyEnvironment(info) {
   document.querySelectorAll("[data-only]").forEach(el => { if (el.dataset.only !== info.platform) el.remove(); });
   document.querySelectorAll("[data-feature]").forEach(el => { if (info.features[el.dataset.feature] === false) el.remove(); });
   // 里面的东西都被去掉了的行和面板，一起去掉
-  document.querySelectorAll(".row, .site").forEach(el => { if (!el.children.length && el.id !== "shortcuts") el.remove(); });
-  document.querySelectorAll(".group, .card").forEach(el => { if (!el.querySelector("button, #now, #prog, #shortcuts")) el.remove(); });
+  document.querySelectorAll(".row, .site, .sitepanel").forEach(el => { if (!el.children.length && !el.classList.contains("shortcuts")) el.remove(); });
+  document.querySelectorAll(".group, .card").forEach(el => { if (!el.querySelector("button, #now, #prog, .shortcuts")) el.remove(); });
   renderShortcuts(info.shortcuts || [], info.max_shortcuts);
   const selected = document.querySelector(".tabs button.sel");
   setSite(selected ? selected.dataset.site : "any");

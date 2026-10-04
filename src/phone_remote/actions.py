@@ -23,6 +23,7 @@ ACTION_FEATURE = {
 # A held mouse button is let go when the phone has said nothing about it for this long,
 # so a locked screen or lost Wi-Fi cannot leave the computer stuck in the middle of a drag.
 HOLD_SECONDS = 3
+MAX_TEXT = 10000  # characters typed in one go
 
 BARE_HOST = re.compile(r"^[\w-]+(\.[\w-]+)+([/:?#]|$)")
 
@@ -137,9 +138,14 @@ class Dispatcher:
         self.platform.press(*parse_combo(msg.get("k")))
 
     def _do_text(self, msg):
-        text = " ".join(str(msg.get("t", "")).split())[:2000]
-        if text:
-            self.platform.type_text(text)
+        # Line breaks are kept; within a line, runs of spaces (dictation leaves them) become one
+        lines = [" ".join(line.split()) for line in str(msg.get("t", ""))[:MAX_TEXT].strip().splitlines()]
+        for index, line in enumerate(lines):
+            if index:
+                # Shift+Enter, not Enter: in chat boxes Enter would send what has been typed so far
+                self.platform.press(["shift"], "enter")
+            if line:
+                self.platform.type_text(line)
         if msg.get("enter"):
             self.platform.press([], "enter")
 

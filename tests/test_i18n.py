@@ -37,7 +37,7 @@ class TranslationTest(unittest.TestCase):
 
     def test_phone_page_has_no_untranslated_chinese_left_in_it(self):
         page = (WEB / "index.html").read_text(encoding="utf-8")
-        self.assertEqual(re.findall(r"[一-鿿]+", page), ["中"])  # only the language switch itself
+        self.assertEqual(re.findall(r"[一-鿿]+", page), ["中文"])  # only the language's own name, in Settings
 
 
 if __name__ == "__main__":

@@ -21,6 +21,7 @@ STATIC_TYPES = {
     ".png": "image/png",
 }
 LOCAL_ADDRESSES = ("127.0.0.1", "::1")
+MAX_BODY = 65536     # bytes; room for the longest text the phone may send, in any script
 AUTH_WINDOW = 60     # seconds a signed command stays valid
 MAX_FAILURES = 10    # wrong signatures from one address before it is locked out
 LOCKOUT = 300        # seconds the lockout lasts, counted from the first failure
@@ -124,7 +125,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length") or 0)
-        if 0 < length < 16384:
+        if 0 < length < MAX_BODY:
             body = self.rfile.read(length)
         else:
             body = b""

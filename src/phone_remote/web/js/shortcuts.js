@@ -3,7 +3,8 @@ import { send } from "./api.js";
 import { t } from "./i18n.js";
 import { toast } from "./status.js";
 
-const box = document.getElementById("shortcuts");
+// The Browse screen has the row of shortcuts; on a tablet the Play screen shows the same row
+const boxes = document.querySelectorAll(".shortcuts");
 const sheet = document.getElementById("sheet"), form = document.getElementById("sheetform");
 const title = document.getElementById("sheettitle"), error = document.getElementById("sheeterror");
 const urlInput = document.getElementById("sheeturl"), nameInput = document.getElementById("sheetname");
@@ -52,15 +53,17 @@ function tile(item, index) {
 export function renderShortcuts(list, limit) {
   shortcuts = list;
   if (limit) max = limit;
-  box.textContent = "";
-  list.forEach((item, index) => box.appendChild(tile(item, index)));
-  if (list.length < max) {
-    const add = document.createElement("button");
-    add.className = "shortcut add";
-    add.textContent = t("+ Add");
-    add.addEventListener("click", () => openSheet(null));
-    box.appendChild(add);
-  }
+  boxes.forEach(box => {
+    box.textContent = "";
+    list.forEach((item, index) => box.appendChild(tile(item, index)));
+    if (list.length < max) {
+      const add = document.createElement("button");
+      add.className = "shortcut add";
+      add.textContent = t("+ Add");
+      add.addEventListener("click", () => openSheet(null));
+      box.appendChild(add);
+    }
+  });
 }
 
 export function initShortcuts() {
