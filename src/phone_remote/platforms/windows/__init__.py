@@ -21,6 +21,7 @@ class WindowsPlatform(Platform):
     type_text = staticmethod(_input.type_text)
     mouse_move = staticmethod(_input.mouse_move)
     mouse_click = staticmethod(_input.mouse_click)
+    mouse_button = staticmethod(_input.mouse_button)
     mouse_scroll = staticmethod(_input.mouse_scroll)
     list_windows = staticmethod(_windows.list_windows)
     focus_window = staticmethod(_windows.focus_window)

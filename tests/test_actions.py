@@ -1,6 +1,9 @@
+import time
 import unittest
+from unittest import mock
 
 from fakes import FakePlatform
+from phone_remote import actions
 from phone_remote.actions import Dispatcher, FeatureDisabled
 from phone_remote.config import FEATURES
 
@@ -40,6 +43,30 @@ class DispatcherTest(unittest.TestCase):
         dispatcher.handle({"a": "click", "right": True})
         self.assertEqual(platform.calls, [("mouse_move", 2000, -2000), ("mouse_scroll", 1500),
                                           ("mouse_click", True)])
+
+    def test_button_is_held_once_and_let_go_once(self):
+        dispatcher, platform, _ = make()
+        dispatcher.handle({"a": "button", "down": True})
+        dispatcher.handle({"a": "button", "down": True})   # the phone repeats this while the finger stays down
+        dispatcher.handle({"a": "move", "dx": 5, "dy": 0})
+        dispatcher.handle({"a": "button", "down": False})
+        dispatcher.handle({"a": "button", "down": False})  # letting go twice does nothing more
+        self.assertEqual(platform.calls, [("mouse_button", True), ("mouse_move", 5, 0), ("mouse_button", False)])
+
+    def test_held_button_is_let_go_when_the_phone_goes_quiet(self):
+        dispatcher, platform, _ = make()
+        with mock.patch.object(actions, "HOLD_SECONDS", 0.05):
+            dispatcher.handle({"a": "button", "down": True})
+            time.sleep(0.3)
+        self.assertEqual(platform.calls, [("mouse_button", True), ("mouse_button", False)])
+        dispatcher.handle({"a": "button", "down": False})  # the late "let go" from the phone is harmless
+        self.assertEqual(len(platform.calls), 2)
+
+    def test_button_belongs_to_the_touchpad_switch(self):
+        dispatcher, platform, _ = make(touchpad=False)
+        with self.assertRaises(FeatureDisabled):
+            dispatcher.handle({"a": "button", "down": True})
+        self.assertEqual(platform.calls, [])
 
     def test_text_is_collapsed_and_enter_is_optional(self):
         dispatcher, platform, _ = make()

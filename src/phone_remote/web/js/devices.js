@@ -20,6 +20,11 @@ export function renderDevices() {
   option("+", t("Add computer…"));
   if (active) option("=", t("Rename {name}…", { name: label(active) }));
   if (devices.length > 1) option("-", t("Remove {name}", { name: label(active) }));
+  if (active && active.version) {   // which version that computer runs; not something to pick
+    const version = new Option(t("Version {v}", { v: active.version }), "");
+    version.disabled = true;
+    select.add(version);
+  }
   select.value = active ? active.url : "";
 }
 

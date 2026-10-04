@@ -3,7 +3,7 @@ import threading
 import time
 import webbrowser
 
-from . import autostart, i18n, logo, update
+from . import HOMEPAGE, SUPPORT_URL, __version__, autostart, i18n, logo, update
 from .i18n import t
 
 try:
@@ -34,9 +34,12 @@ def run(show_qr, on_quit, on_reset, on_language, check_updates=True):
     def language_item(code, name):
         def choose(icon, item):
             on_language(code)
-            icon.title = t("Phone Remote")
+            icon.title = title()
             icon.update_menu()
         return pystray.MenuItem(name, choose, checked=lambda item: i18n.language == code, radio=True)
+
+    def title():
+        return t("Phone Remote") + " " + __version__
 
     newer = []  # holds the newer version's number once one is found
 
@@ -63,6 +66,9 @@ def run(show_qr, on_quit, on_reset, on_language, check_updates=True):
         pystray.MenuItem(lambda item: t("Language"),
                          pystray.Menu(*[language_item(code, name) for code, name in i18n.LANGUAGES.items()])),
         pystray.Menu.SEPARATOR,
+        pystray.MenuItem(lambda item: t("About (v%s)") % __version__, lambda icon, item: webbrowser.open(HOMEPAGE)),
+        pystray.MenuItem(lambda item: t("Buy me a coffee"), lambda icon, item: webbrowser.open(SUPPORT_URL),
+                         visible=bool(SUPPORT_URL)),
         pystray.MenuItem(lambda item: t("Quit"), quit_app),
     )
-    pystray.Icon("phone-remote", _icon_image(), t("Phone Remote"), menu).run(setup=ready)
+    pystray.Icon("phone-remote", _icon_image(), title(), menu).run(setup=ready)

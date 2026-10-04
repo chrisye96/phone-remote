@@ -30,7 +30,7 @@ The first time on a Mac, allow "Terminal" under System Settings > Privacy & Secu
 
 There is no window. The program runs in the system tray at the bottom right of the taskbar (the menu bar on a Mac) and opens a page with a QR code. Scan it with your phone's camera.
 
-Right-click the tray icon to show the QR code again, turn starting at login on or off (off by default), re-pair, change the language, or quit. If something goes wrong, look at the log in `%APPDATA%\PhoneRemote\phone-remote.log`.
+Right-click the tray icon to show the QR code again, turn starting at login on or off (off by default), re-pair, change the language, or quit. The About item shows the version you are running and opens this project's page; the version is also at the bottom of the QR page, and on the phone at the end of the computer menu. If something goes wrong, look at the log in `%APPDATA%\PhoneRemote\phone-remote.log`.
 
 To run it in a terminal window instead, which makes its output visible: `.venv\Scripts\python -m phone_remote --console`.
 
@@ -65,6 +65,8 @@ Releases are built the same way by GitHub Actions: pushing a tag such as `v0.5.0
 - **Browse**: touchpad, browser back and forward, reload, zoom, tab switching, and shortcuts to your usual sites.
 - **Type**: type or dictate on the phone and send the text to whatever input has focus on the computer, plus Enter, Backspace, Select all, Undo, dictation on the computer and so on. "New AI chat" sends Ctrl/Cmd+Shift+O, which starts a new conversation in the ChatGPT and Claude apps and sites.
 - **Windows**: lists the windows open on the computer; tap one to bring it to the front. Maximize and minimize are here too. "To other screen" (Windows only) moves the current window to the next monitor, for example sending a video to a TV that is plugged in as a second screen. On a Mac the list shows apps.
+
+The touchpad works like a laptop's: slide to move the pointer, tap to click, tap with two fingers to right-click, slide with two fingers to scroll (a quick flick keeps scrolling and slows to a stop). To drag, rest a finger on it until the border turns solid, then slide; lifting the finger lets go.
 
 A playback bar stays at the bottom of every screen: volume down and up, rewind, play or pause, fast forward, mute.
 
@@ -148,6 +150,12 @@ Run the tests by double-clicking `run-tests.bat`.
 
 - `main`: the stable version, ready to use.
 - `dev`: day-to-day development. New work branches off `dev` as `feature/*`, merges back into `dev`, and reaches `main` once verified.
+
+## Support
+
+Phone Remote is free. If it is useful to you, you can buy me a coffee:
+
+<a href="https://buymeacoffee.com/chrisye"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="40"></a>
 
 ## Icons
 
