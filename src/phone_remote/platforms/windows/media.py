@@ -40,16 +40,31 @@ class MediaWatcher:
     def state(self):
         return self._state
 
-    def toggle(self):
-        """播放 / 暂停当前的媒体。系统直接通知那个程序，所以它在后台也有效。"""
+    def toggle(self, play=None, title=None):
+        """播放 / 暂停当前的媒体。系统直接通知那个程序，所以它在后台也有效。
+
+        play and title are what the phone wants and what it is showing; see Platform.media_toggle.
+        """
         if not (self._loop and self._session):
             return False
-        asyncio.run_coroutine_threadsafe(self._toggle(), self._loop)
+        asyncio.run_coroutine_threadsafe(self._toggle(self._session, play, title), self._loop)
         return True
 
-    async def _toggle(self):
+    async def _toggle(self, session, play, title):
         try:
-            await self._session.try_toggle_play_pause_async()
+            if title is not None:
+                # A browser has one session for all its tabs, and moves it to another tab (say a paused
+                # show in the background) when the front tab's video goes away. The phone has not seen
+                # that yet, so ask again what the session holds right now instead of trusting the last poll.
+                props = await session.try_get_media_properties_async()
+                if (props.title or "") != title:
+                    return
+            if play is None:
+                await session.try_toggle_play_pause_async()
+            elif play:
+                await session.try_play_async()
+            else:
+                await session.try_pause_async()
         except OSError:
             pass
 
@@ -109,7 +124,10 @@ class MediaWatcher:
         position = timeline.position.total_seconds()
         if duration > 0 and status == Status.PLAYING:
             # 系统只在跳转、暂停时更新进度，播放中的当前位置要自己推算
+            # A speed of 0 is real: browsers report it while the video is stuck loading, still "playing".
+            # Only an app that reports no speed at all is taken to play at normal speed.
+            state["rate"] = 1 if info.playback_rate is None else info.playback_rate
             elapsed = datetime.datetime.now(datetime.timezone.utc) - timeline.last_updated_time
-            position += elapsed.total_seconds() * (info.playback_rate or 1)
+            position += elapsed.total_seconds() * state["rate"]
         state["pos"] = round(max(0, min(duration, position)), 1)
         state["dur"] = round(duration, 1)

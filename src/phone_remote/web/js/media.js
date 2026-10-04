@@ -1,6 +1,7 @@
 // 播放状态：定时问电脑，更新播放键、标题、进度条和音量。
 // 浏览器上报“播放 / 暂停”可能晚十秒左右，所以按下播放键后先按预期显示，过一会儿再以电脑为准。
 import { send, token } from "./api.js";
+import { commands } from "./buttons.js";
 import { t } from "./i18n.js";
 
 const playButtons = document.querySelectorAll(".playbtn");
@@ -11,7 +12,8 @@ const kindIcon = document.getElementById("nowkind");
 const KINDS = { music: { icon: "music", label: "Music" }, video: { icon: "movie", label: "Video" } };
 const curBox = document.getElementById("cur"), totalBox = document.getElementById("total");
 const track = document.getElementById("track"), fill = document.getElementById("fill"), knob = document.getElementById("knob");
-const media = { playing: null, title: "", pos: 0, dur: 0, at: 0, holdPlay: 0, holdPos: 0, serverPos: 0 };
+// rate is how fast the position moves while playing: 0 when the video is stuck loading
+const media = { playing: null, title: "", pos: 0, dur: 0, rate: 1, at: 0, holdPlay: 0, holdPos: 0, serverPos: 0 };
 const stateListeners = [];
 let dragging = null;
 
@@ -24,7 +26,7 @@ function clock(sec) {
   return h ? h + ":" + String(m).padStart(2, "0") + ":" + s : m + ":" + s;
 }
 function localPos() {
-  const pos = media.playing ? media.pos + (performance.now() - media.at) / 1000 : media.pos;
+  const pos = media.playing ? media.pos + (performance.now() - media.at) / 1000 * media.rate : media.pos;
   return Math.max(0, Math.min(media.dur, pos));
 }
 function setPos(pos) { media.pos = pos; media.at = performance.now(); }
@@ -43,7 +45,10 @@ function render() {
   const kind = hasTitle && KINDS[media.kind];
   kindIcon.toggleAttribute("hidden", !kind);   // an <svg> has no .hidden property, only the attribute
   if (kind) {
-    kindIcon.firstChild.setAttribute("href", "icons.svg#" + kind.icon);
+    // Only when it changes: setting href again, even to the same value, makes the browser fetch
+    // icons.svg again, and the icon blinks while that is on its way
+    const href = "icons.svg#" + kind.icon;
+    if (kindIcon.firstChild.getAttribute("href") !== href) kindIcon.firstChild.setAttribute("href", href);
     kindIcon.setAttribute("aria-label", t(kind.label));
   }
   nowBox.classList.toggle("paused", media.playing === false);
@@ -62,6 +67,8 @@ function applyState(state) {
   const newVideo = state.dur !== media.dur || state.title !== media.title;
   const moved = Math.abs(state.pos - media.serverPos) > 2;   // 电脑上的进度跳了，说明发生过跳转
   media.serverPos = state.pos;
+  const rate = state.rate === undefined ? 1 : state.rate;   // an older computer does not send it
+  if (rate !== media.rate) { setPos(now > media.holdPos ? state.pos : localPos()); media.rate = rate; }
   if (newVideo || now > media.holdPlay || media.playing === null || state.playing === null) {
     if (state.playing !== media.playing) { setPos(localPos()); media.playing = state.playing; }
   }
@@ -102,13 +109,17 @@ export function initMedia() {
   document.addEventListener("visibilitychange", pollState);
   pollState();
 
-  playButtons.forEach(b => b.addEventListener("pointerdown", () => {
-    if (media.playing === null) return;
+  // The play button says which way to go and what this page is showing, so that a second press, or
+  // one sent before the next poll, cannot start something else that has become current on the computer
+  commands.playpause = () => {
+    if (media.playing === null) return { a: "playpause" };
+    const msg = { a: "playpause", play: !media.playing, title: media.title };
     setPos(localPos());
     media.playing = !media.playing;
     media.holdPlay = performance.now() + 12000;
     render();
-  }));
+    return msg;
+  };
 
   track.addEventListener("pointerdown", e => { track.setPointerCapture(e.pointerId); dragging = trackPos(e); render(); });
   track.addEventListener("pointermove", e => { if (dragging !== null) { dragging = trackPos(e); render(); } });
