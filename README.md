@@ -66,6 +66,8 @@ Releases are built the same way by GitHub Actions: pushing a tag such as `v0.5.0
 - **Type**: type or dictate on the phone and send the text to whatever input has focus on the computer, plus Enter, Backspace, Select all, Undo, dictation on the computer and so on. "New AI chat" sends Ctrl/Cmd+Shift+O, which starts a new conversation in the ChatGPT and Claude apps and sites.
 - **Windows**: lists the windows open on the computer; tap one to bring it to the front. Maximize and minimize are here too. "To other screen" (Windows only) moves the current window to the next monitor, for example sending a video to a TV that is plugged in as a second screen. On a Mac the list shows apps.
 
+The touchpad works like a laptop's: slide to move the pointer, tap to click, tap with two fingers to right-click, slide with two fingers to scroll (a quick flick keeps scrolling and slows to a stop). To drag, rest a finger on it until the border turns solid, then slide; lifting the finger lets go.
+
 A playback bar stays at the bottom of every screen: volume down and up, rewind, play or pause, fast forward, mute.
 
 Key colours show what a key does: blue for playback and the main action, cyan for volume, green for confirming, yellow for navigation, red for exit, close and delete. The play / pause key is the cyan of the logo, since it is the key you press most.
