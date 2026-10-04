@@ -1,5 +1,8 @@
 import unittest
 
+from unittest import mock
+
+import phone_remote
 from phone_remote import i18n, pairing
 
 
@@ -24,6 +27,19 @@ class PairPageTest(unittest.TestCase):
         self.assertIn("重新配对", page)
         self.assertIn('lang="zh"', page)
         self.assertNotRegex(page, r"__[A-Z]+__")  # every mark in the template was filled in
+
+    def test_page_shows_the_version_and_where_the_project_lives(self):
+        page = pairing.pair_page(self.URL)
+        self.assertIn("Phone Remote v" + phone_remote.__version__, page)
+        self.assertIn('href="https://github.com/chrisye96/phone-remote"', page)
+
+    def test_support_link_shows_only_when_one_is_set(self):
+        with mock.patch.object(pairing, "SUPPORT_URL", ""):
+            self.assertNotIn("Buy me a coffee", pairing.pair_page(self.URL))
+        with mock.patch.object(pairing, "SUPPORT_URL", "https://example.com/tip?a=1&b=2"):
+            page = pairing.pair_page(self.URL)
+        self.assertIn('href="https://example.com/tip?a=1&amp;b=2"', page)
+        self.assertIn("Buy me a coffee", page)
 
     def test_address_can_be_copied_with_one_click(self):
         page = pairing.pair_page(self.URL)

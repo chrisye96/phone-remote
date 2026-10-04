@@ -4,7 +4,7 @@ import json
 import socket
 import sys
 
-from . import i18n
+from . import HOMEPAGE, SUPPORT_URL, __version__, i18n
 from .i18n import t
 
 try:
@@ -38,11 +38,13 @@ h1{margin:0 0 6px}p{color:#aab;margin:6px 0}
 cursor:pointer;display:inline-flex;align-items:center;gap:12px;max-width:100%}
 #copy:hover{border-color:#4b5261}#copy code{font-size:19px;overflow-wrap:anywhere}
 #copy svg{width:22px;height:22px;flex:none;color:#aab}#copy.done svg{color:#3ddc97}
-.notes{max-width:620px;margin:0 auto;font-size:14px}</style>
+.notes{max-width:620px;margin:0 auto;font-size:14px}
+.about{margin-top:28px;font-size:13px;color:#7f8aa0}.about a{color:#8fb0ff;text-decoration:none}.about a:hover{text-decoration:underline}</style>
 <h1>__HEADING__</h1><p>__WIFI__</p><div id="qr">__QR__</div>
 <p>__MANUAL__</p>
 <button id="copy" type="button" title="__COPY__" aria-label="__COPY__"><code>__URL__</code><svg><use href="/icons.svg#copy"/></svg></button>
 <div class="notes"><p>__SECRET__</p><p>__HOME__</p><p>__HINT__</p></div>
+<p class="about">__ABOUT__</p>
 <script type="module" src="/js/pair.js"></script>__SCRIPT__</html>"""
 _CDN_SCRIPT = """<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>new QRCode(document.getElementById("qr"),{text:__URL_JSON__,width:260,height:260})</script>"""
@@ -70,7 +72,13 @@ def pair_page(url, tray_mode=False):
              "__MANUAL__": "Can't scan? Open this address in your phone's browser:", "__COPY__": "Copy",
              "__HOME__": "Add the page to your home screen to open it like an app next time.",
              "__SECRET__": secret, "__HINT__": hint}
-    page = _PAIR_PAGE.replace("__LANG__", i18n.language)
+    # Version and links: this page doubles as the program's About page
+    about = [html.escape(t("Phone Remote")) + " v" + __version__,
+             '<a href="%s" target="_blank" rel="noopener">GitHub</a>' % HOMEPAGE]
+    if SUPPORT_URL:
+        about.append('<a href="%s" target="_blank" rel="noopener">%s</a>'
+                     % (html.escape(SUPPORT_URL, quote=True), html.escape(t("Buy me a coffee"))))
+    page = _PAIR_PAGE.replace("__LANG__", i18n.language).replace("__ABOUT__", " · ".join(about))
     for mark, text in texts.items():
         page = page.replace(mark, html.escape(t(text)))
     # The address goes in last so nothing in it can be mistaken for one of the marks above

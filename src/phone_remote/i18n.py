@@ -15,6 +15,8 @@ _TABLES = {
         "Re-pair (unpairs every phone)": "重新配对（已配对的手机全部失效）",
         "Language": "语言",
         "Quit": "退出",
+        "About (v%s)": "关于（v%s）",
+        "Buy me a coffee": "请我喝杯咖啡",
         "Update available: v%s (opens the download page)": "有新版本 v%s（点击打开下载页）",
         "A newer version is available: v%s": "有新版本可用：v%s",
         # console

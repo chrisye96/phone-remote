@@ -4,7 +4,7 @@ import socket
 import threading
 import webbrowser
 
-from . import siteinfo
+from . import __version__, siteinfo
 from .config import MAX_SHORTCUTS
 from .keys import parse_combo
 from .timer import SleepTimer
@@ -66,7 +66,7 @@ class Dispatcher:
         pass
 
     def _do_hello(self, msg):
-        return {"platform": self.platform.name, "host": socket.gethostname(),
+        return {"platform": self.platform.name, "host": socket.gethostname(), "version": __version__,
                 "features": self.features,
                 "shortcuts": self.shortcuts, "max_shortcuts": MAX_SHORTCUTS}
 

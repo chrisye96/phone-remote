@@ -30,7 +30,7 @@ The first time on a Mac, allow "Terminal" under System Settings > Privacy & Secu
 
 There is no window. The program runs in the system tray at the bottom right of the taskbar (the menu bar on a Mac) and opens a page with a QR code. Scan it with your phone's camera.
 
-Right-click the tray icon to show the QR code again, turn starting at login on or off (off by default), re-pair, change the language, or quit. If something goes wrong, look at the log in `%APPDATA%\PhoneRemote\phone-remote.log`.
+Right-click the tray icon to show the QR code again, turn starting at login on or off (off by default), re-pair, change the language, or quit. The About item shows the version you are running and opens this project's page; the version is also at the bottom of the QR page, and on the phone at the end of the computer menu. If something goes wrong, look at the log in `%APPDATA%\PhoneRemote\phone-remote.log`.
 
 To run it in a terminal window instead, which makes its output visible: `.venv\Scripts\python -m phone_remote --console`.
 
@@ -148,6 +148,12 @@ Run the tests by double-clicking `run-tests.bat`.
 
 - `main`: the stable version, ready to use.
 - `dev`: day-to-day development. New work branches off `dev` as `feature/*`, merges back into `dev`, and reaches `main` once verified.
+
+## Support
+
+Phone Remote is free. If it is useful to you, you can buy me a coffee:
+
+<a href="https://buymeacoffee.com/chrisye"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="40"></a>
 
 ## Icons
 

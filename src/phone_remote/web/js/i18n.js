@@ -144,6 +144,7 @@ const TABLES = {
     "Leave empty to use the computer's own name": "留空则用电脑自己的名字",
     "Incomplete address: it should look like 192.168.1.5:8765/#code, including the part after #": "网址不完整：要像 192.168.1.5:8765/#配对码 这样，# 后面的也要带上",
     "This computer is already added": "这台电脑已经添加过了",
+    "Version {v}": "版本 {v}",
   },
 };
 

@@ -25,7 +25,7 @@ initNav();
 // 去掉这台电脑用不上的部分：别的系统专用的按键、被关掉的功能
 function applyEnvironment(info) {
   env.platform = info.platform;
-  nameActive(info.host);
+  nameActive(info.host, info.version);
   renderDevices();
   document.querySelectorAll("[data-only]").forEach(el => { if (el.dataset.only !== info.platform) el.remove(); });
   document.querySelectorAll("[data-feature]").forEach(el => { if (info.features[el.dataset.feature] === false) el.remove(); });

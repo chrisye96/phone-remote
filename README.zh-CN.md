@@ -30,7 +30,7 @@ python3 -m venv .venv
 
 启动后没有窗口，程序在任务栏右下角的托盘里运行（Mac 上是菜单栏），并弹出二维码页面，用手机相机扫码即可。
 
-右键托盘图标可以：显示二维码、打开或关闭开机自动启动（默认关）、重新配对、切换语言、退出。出问题时看日志 `%APPDATA%\PhoneRemote\phone-remote.log`。
+右键托盘图标可以：显示二维码、打开或关闭开机自动启动（默认关）、重新配对、切换语言、退出。“关于”一项显示当前运行的版本号，点它会打开本项目的主页；版本号也显示在二维码页面底部，以及手机上电脑菜单的最后一行。出问题时看日志 `%APPDATA%\PhoneRemote\phone-remote.log`。
 
 ### 语言
 
@@ -148,6 +148,12 @@ docs/              重构计划
 
 - `main`：可以直接用的稳定版本。
 - `dev`：日常开发。新功能从 `dev` 拉 `feature/*` 分支，完成后合回 `dev`，验证过再合到 `main`。
+
+## 支持
+
+手机遥控器是免费的。如果它对你有用，可以请我喝杯咖啡：
+
+<a href="https://buymeacoffee.com/chrisye"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="40"></a>
 
 ## 图标
 

@@ -51,8 +51,13 @@ export function removeDevice(url) {
   saveDevices();
   location.reload();
 }
-// Remembers the computer's own name once it has answered
-export function nameActive(name) { if (active && name && active.name !== name) { active.name = name; saveDevices(); } }
+// Remembers the computer's own name and program version once it has answered
+export function nameActive(name, version) {
+  if (!active || (active.name === name && active.version === version)) return;
+  if (name) active.name = name;
+  active.version = version;
+  saveDevices();
+}
 
 // Info about the computer, filled in by main.js after connecting
 export const env = { platform: "win" };
