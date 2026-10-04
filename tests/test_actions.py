@@ -152,13 +152,19 @@ class DispatcherTest(unittest.TestCase):
     def test_playpause_uses_system_media_control_when_possible(self):
         dispatcher, platform, _ = make()
         dispatcher.handle({"a": "playpause"})
-        self.assertEqual(platform.calls, [("media_toggle",)])
+        self.assertEqual(platform.calls, [("media_toggle", None, None)])
+
+    def test_playpause_passes_on_what_the_phone_wants_and_shows(self):
+        dispatcher, platform, _ = make()
+        dispatcher.handle({"a": "playpause", "play": False, "title": "Front video"})
+        dispatcher.handle({"a": "playpause", "play": "yes", "title": 7})  # nonsense is left out
+        self.assertEqual(platform.calls, [("media_toggle", False, "Front video"), ("media_toggle", None, None)])
 
     def test_playpause_falls_back_to_space(self):
         dispatcher, platform, _ = make()
         platform.can_toggle = False
         dispatcher.handle({"a": "playpause"})
-        self.assertEqual(platform.calls, [("media_toggle",), ("press", [], "space")])
+        self.assertEqual(platform.calls, [("media_toggle", None, None), ("press", [], "space")])
 
     def test_track_keys_are_system_keys(self):
         dispatcher, platform, _ = make()

@@ -84,7 +84,11 @@ class Dispatcher:
 
     def _do_playpause(self, msg):
         # 优先让系统去通知正在播放的程序，这样音乐软件在后台、视频没被点中时也有效
-        if not self.platform.media_toggle():
+        # The phone adds which way it wants to go and what it is showing, so that a second press, or
+        # one sent while its picture was out of date, cannot start something else (see media_toggle)
+        play, title = msg.get("play"), msg.get("title")
+        if not self.platform.media_toggle(play if isinstance(play, bool) else None,
+                                          title if isinstance(title, str) else None):
             self.platform.press([], "space")
 
     def _do_seek(self, msg):

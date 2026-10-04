@@ -29,8 +29,8 @@ class WindowsPlatform(Platform):
     def media_state(self):
         return self._media.state()
 
-    def media_toggle(self):
-        return self._media.toggle()
+    def media_toggle(self, play=None, title=None):
+        return self._media.toggle(play, title)
 
     def media_seek(self, seconds):
         self._media.seek(seconds)
