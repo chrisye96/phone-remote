@@ -21,6 +21,7 @@ const TABLES = {
     // touchpad
     "Slide to move, tap to click": "滑动移动鼠标　轻点单击",
     "Two fingers: tap to right-click, slide to scroll": "双指轻点右键　双指滑动滚动",
+    "Hold, then slide to drag": "按住不动，再滑动是拖动",
 
     // play
     "Fullscreen": "全屏",
@@ -47,7 +48,7 @@ const TABLES = {
     "Next episode": "下一集",
     "Danmaku": "弹幕",
     "Like": "点赞",
-    "Player volume": "播放器音量",
+    "Player vol": "播放器音量",
     "Mute": "静音",
     "Favorite": "收藏",
     "Prev video": "上一个",
@@ -103,9 +104,11 @@ const TABLES = {
     "Backspace": "退格",
     "Select all": "全选",
     "Undo": "撤销",
-    "Stop": "停止",
     "Dictate on PC": "电脑听写",
     "New AI chat": "AI 新对话",
+    "Editing": "编辑",
+    "Control": "控制",
+    "Close": "收起",
     "Address bar": "地址栏",
 
     // windows
@@ -143,6 +146,13 @@ const TABLES = {
     "Leave empty to use the computer's own name": "留空则用电脑自己的名字",
     "Incomplete address: it should look like 192.168.1.5:8765/#code, including the part after #": "网址不完整：要像 192.168.1.5:8765/#配对码 这样，# 后面的也要带上",
     "This computer is already added": "这台电脑已经添加过了",
+    "Settings": "设置",
+    "Touchpad side when the screen is wide": "横屏时触控板在哪一侧",
+    "Left": "左边",
+    "Right": "右边",
+    "Right suits steering the pointer with your right thumb.": "放右边适合用右手拇指控制指针。",
+    "Done": "完成",
+    "Phone Remote {v} on {name}": "{name} 上的手机遥控器 {v}",
   },
 };
 
@@ -170,11 +180,8 @@ function translatePage() {
   document.documentElement.lang = lang;
 }
 
+// The language itself is chosen in Settings (settings.js)
 export function initLanguage() {
   if (lang !== "en") translatePage();
   document.documentElement.classList.remove("translating");
-  const button = document.getElementById("lang");
-  button.querySelectorAll("[data-lang]").forEach(el => el.classList.toggle("sel", el.dataset.lang === lang));
-  // Two languages, so one tap switches to the other. The page reloads because labels are set in many places.
-  button.addEventListener("click", () => { store.set("lang", lang === "en" ? "zh" : "en"); location.reload(); });
 }

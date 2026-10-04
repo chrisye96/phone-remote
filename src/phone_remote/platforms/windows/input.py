@@ -71,6 +71,10 @@ def mouse_click(right=False):
     user32.mouse_event(up, 0, 0, 0, 0)
 
 
+def mouse_button(down):
+    user32.mouse_event(0x0002 if down else 0x0004, 0, 0, 0, 0)
+
+
 def mouse_scroll(dy):
     # 滚轮一格是 120，大约对应 100 像素
     user32.mouse_event(0x0800, 0, 0, int(dy * 1.2), 0)

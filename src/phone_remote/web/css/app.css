@@ -26,7 +26,7 @@ header { display:flex; align-items:center; gap:7px; height:26px; flex:none; font
 
 /* 按键：顶部一道高光、底部一道阴影，看起来是凸起可按的 */
 button { font:inherit; color:var(--text); background:var(--key); border:0; border-top:1px solid rgba(255,255,255,.14); border-radius:14px;
-         height:var(--keyh); font-size:12px; padding:0 2px; box-shadow:0 2px 0 rgba(0,0,0,.45); touch-action:manipulation;
+         height:var(--keyh); min-width:0; font-size:12px; line-height:1.15; padding:0 2px; box-shadow:0 2px 0 rgba(0,0,0,.45); touch-action:manipulation;
          transition:transform .08s, filter .08s; }
 button.on { filter:brightness(1.35); transform:translateY(1px) scale(.98); }
 button.c-play { background:var(--play-bg); } .c-play .ic { color:var(--play-ic); }
@@ -50,7 +50,7 @@ button.primary { background:var(--play); color:#fff; } button.primary .ic { widt
 /* 排版：一行里各格的宽度比例 */
 .row { display:grid; gap:var(--gap); }
 .r211 { grid-template-columns:2fr 1fr 1fr; } .r212 { grid-template-columns:1.7fr .9fr 1.4fr; } .r22 { grid-template-columns:1fr 1fr; } .r31 { grid-template-columns:3fr 1fr; }
-.r111 { grid-template-columns:repeat(3,1fr); } .r1111 { grid-template-columns:repeat(4,1fr); } .r12 { grid-template-columns:1fr 1.6fr; }
+.r112 { grid-template-columns:1fr 1fr 2fr; } .r111 { grid-template-columns:repeat(3,1fr); } .r1111 { grid-template-columns:repeat(4,1fr); } .r12 { grid-template-columns:1fr 1.6fr; }
 .row > :only-child { grid-column:1 / -1; }
 
 /* 面板：把一组相关的按键装在一起 */
@@ -59,6 +59,8 @@ button.primary { background:var(--play); color:#fff; } button.primary .ic { widt
 .gtitle { font-size:11px; color:var(--dim); margin:0 3px -3px; letter-spacing:.5px; display:flex; }
 .gtitle small { margin-left:auto; font-size:10px; opacity:.7; letter-spacing:0; }
 .label { font-size:11px; color:var(--dim); margin:1px 3px -4px; letter-spacing:.5px; flex:none; }
+/* Wrappers that only become boxes on bigger screens; on a phone their children lay out as if they were not there */
+.pair, .sitepanel { display:contents; }
 
 /* 页面 */
 .screen { flex:1; min-height:0; display:none; flex-direction:column; gap:9px; padding:5px 0 9px; }
@@ -88,6 +90,8 @@ body.notimeline [data-rel] { opacity:.4; }
        display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--dim); font-size:12px; text-align:center; line-height:1.8; }
 .pad .ic { width:22px; height:22px; margin:0; }
 .pad.on { border-color:rgba(143,176,255,.7); }
+/* The mouse button is held down: a drag is in progress */
+.pad.hold { border-style:solid; border-color:var(--brand); background-color:#0f2630; }
 
 /* 网站分页：选中哪个网站，整块面板的边框就是它的颜色 */
 .tabs { display:flex; gap:4px; }
@@ -105,6 +109,12 @@ body.notimeline [data-rel] { opacity:.4; }
 .compose { padding:10px; }
 textarea { font:inherit; font-size:16px; color:var(--text); background:transparent; border:0; padding:2px 4px; height:46px; resize:none; outline:none; user-select:text; -webkit-user-select:text; }
 textarea::placeholder, input::placeholder { color:#6f7888; }
+/* While typing, the text box covers the screen down to the top of the on-screen keyboard (js/text.js keeps --vvh and --vvt current) */
+.compose.expanded { position:fixed; z-index:9; left:0; right:0; top:var(--vvt, 0px); height:var(--vvh, 100dvh); border:0; border-radius:0;
+                    padding:calc(10px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left)); }
+.compose.expanded textarea { flex:1; height:auto; background:var(--bg); border:1px solid var(--play); border-radius:14px; padding:10px 12px; line-height:1.5; }
+.compose.expanded .expanded-only { display:block; }
+.compose.expanded .row { grid-template-columns:1fr 1.2fr 2fr; }
 
 /* 窗口列表 */
 #winlist { flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; gap:6px; border-radius:14px; }
@@ -158,22 +168,100 @@ nav button.on { filter:none; transform:none; }
 #device { font:inherit; color:var(--text); background:transparent; border:0; outline:none; padding:0; max-width:46%; text-overflow:ellipsis; }
 #device option { color:#000; }
 
-/* Language switch in the header: both languages side by side, the current one lit */
-#lang { height:20px; padding:0 3px; margin-left:8px; flex:none; display:flex; align-items:center; border-radius:10px; border:1px solid var(--line); background:transparent; box-shadow:none; font-size:10px; color:var(--dim); }
-#lang span { padding:1px 6px; border-radius:8px; }
-#lang .sel { background:var(--key); color:var(--text); }
-#lang.on { filter:none; transform:none; }
+/* Gear in the header that opens Settings */
+#gear { width:28px; height:26px; padding:0; margin-left:4px; flex:none; background:transparent; border:0; box-shadow:none; color:var(--dim); }
+#gear .ic { width:18px; height:18px; margin:0 auto; }
+#gear.on { filter:none; transform:none; color:var(--text); }
 .translating body { visibility:hidden; }
 
-/* Wide screens (iPad): touchpad on the left at full height, keys in a column on the right.
-   The height condition keeps phones in landscape on the phone layout. */
+/* Settings sheet: each setting is a row of choices, the current one lit */
+.field { display:flex; flex-direction:column; gap:6px; }
+.flabel { font-size:12px; color:var(--dim); }
+.field .hint { margin:0 2px; }
+.seg { display:flex; gap:4px; padding:4px; border-radius:14px; background:var(--bg); border:1px solid var(--line); }
+.seg button { flex:1; height:40px; font-size:14px; border-radius:10px; background:transparent; border:0; box-shadow:none; color:var(--dim); }
+.seg button.sel { background:var(--key); color:var(--text); }
+.sheet form { max-height:100dvh; overflow-y:auto; }
+
+/* Parts that only some layouts show. Kept after every other plain rule so that those cannot switch them back on. */
+.roomy-only { display:none; }
+.expanded-only:not(.compose.expanded *) { display:none; }
+
+/* ---- Tablets, either way up: enough room to show more at once ---- */
 @media (min-width:700px) and (min-height:600px) {
   body { max-width:none; }
-  body[data-screen="play"] #play, body[data-screen="browse"] #browse, body[data-screen="type"] #type, body[data-screen="wins"] #wins {
-    display:grid; grid-template-columns:minmax(0,1fr) clamp(350px, 40vw, 460px); grid-template-rows:repeat(3, auto) minmax(0,1fr); column-gap:14px; }
-  .screen > * { grid-column:2; }
-  .screen > .padrow, #winlist { grid-column:1; grid-row:1 / -1; }
-  .bar { width:100%; max-width:560px; align-self:center; }
-  nav { justify-content:center; } nav button { max-width:140px; }
+  .roomy-only { display:flex; }
+  /* The general keys and the keys for one site show together, as two panels, instead of sharing one behind tabs */
+  #sitegroup { background:none; border:0; border-radius:0; padding:0; gap:10px; }
+  #any, .sitepanel { display:flex; flex-direction:column; gap:var(--gap); background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:9px; }
+  #any { order:-1; }
+  .sitepanel { border-color:color-mix(in srgb, var(--site, transparent) 55%, var(--line)); }
+  .tabs [data-site="any"] { display:none; }
+  #any .gtitle { height:28px; align-items:center; font-size:12px; margin:0 3px; }   /* as tall as the row of tabs beside it */
+}
+
+/* ---- Upright tablet: touchpad across the top, keys in two columns under it ---- */
+@media (min-width:700px) and (min-height:600px) and (orientation:portrait) {
+  .pair, #sitegroup { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
+  .bar { grid-template-columns:220px 1fr 104px; }
+  #wins .padrow { flex:1.6; }
+  #winkeys { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--gap) 12px; }
+  #winkeys .gtitle { grid-column:1 / -1; }
+}
+
+/* ---- Held sideways, phone or tablet: navigation down one edge, keys in the middle, touchpad on the other side ----
+   The showing screen is display:contents, so its parts sit straight on the page's grid: every part in the keys
+   column in turn, the touchpad over the full height of its own column, and the playback bar at the foot of the keys. */
+@media (orientation:landscape) and (min-width:600px) {
+  body { --rail:88px; --keys:clamp(360px, 37vw, 460px);
+         max-width:none; display:grid; grid-template-columns:var(--rail) var(--keys) minmax(0,1fr);
+         grid-template-rows:auto repeat(6, auto) minmax(0,1fr) auto; column-gap:12px;
+         padding:calc(6px + env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
+  header { grid-column:1 / -1; grid-row:1; margin-bottom:6px; }
+  nav { grid-column:1; grid-row:2 / -1; flex-direction:column; gap:6px; margin:0; padding:6px; border:1px solid var(--line); border-radius:16px; }
+  nav button { flex:1; height:auto; }
+  body[data-screen="play"] #play, body[data-screen="browse"] #browse, body[data-screen="type"] #type, body[data-screen="wins"] #wins { display:contents; }
+  .screen > *, .pair > * { grid-column:2; margin-bottom:var(--gap); }
+  .screen > .padrow { grid-column:3; grid-row:2 / -1; margin-bottom:0; min-height:0; }
+  .bar { grid-column:2; grid-row:-2; margin:0; }
+  /* Windows: keys first, then the list filling the stretchy row above the playback bar */
+  #winkeys { grid-row:2; } #wins .label { grid-row:3; } #winlist { grid-row:8; }
+
+  /* Touchpad on the left instead (Settings) */
+  body.lefty { grid-template-columns:minmax(0,1fr) var(--keys) var(--rail); }
+  body.lefty nav { grid-column:3; }
+  body.lefty .screen > .padrow { grid-column:1; flex-direction:row-reverse; }
+}
+
+/* ---- Phone held sideways: the same three columns, with everything made to fit about 340 px of height ---- */
+@media (orientation:landscape) and (min-width:600px) and (max-height:599px) {
+  body { --rail:62px; --keys:clamp(270px, 40vw, 330px); --keyh:clamp(32px, 11.5dvh, 44px); --gap:6px; column-gap:10px; }
+  header { height:22px; }
+  .gtitle, .label { display:none; }
+  .group, .compose { padding:7px; border-radius:16px; }
+  .tabs button { height:26px; }
+  nav button { font-size:10px; }
+  .pad { font-size:11px; line-height:1.6; }
+  .bar { grid-template-columns:92px 1fr 46px; }
+  .bar .rocker button, .bar .mute { height:46px; }
+  .seek { height:52px; } .seek button { height:44px; } .seek .playbtn { width:46px; height:46px; box-shadow:0 0 0 3px rgba(56,225,208,.2); }
+  .playbtn .ic { width:22px; height:22px; }
+  /* Now playing: the title joins the status line at the top, the progress bar becomes a thin line over the keys */
+  #nowcard { display:contents; }
+  #now { grid-column:1 / -1; grid-row:1; justify-self:center; align-self:center; max-width:36%; margin-bottom:6px; font-size:12px; pointer-events:none; }
+  #nowapp { display:none; }
+  #prog { grid-column:2; margin-bottom:var(--gap); }
+  #track::before, #fill { top:10px; height:4px; }
+  #knob { top:6px; width:12px; height:12px; margin-left:-6px; }
+  /* Type: the text box goes above the touchpad, where there is height to spare */
+  #type .compose { grid-column:3; grid-row:2; }
+  #type .padrow { grid-row:3 / -1; }
+  textarea { height:36px; }
+  /* Windows: no room for the list under the keys, so it takes the touchpad's place */
+  #winlist { grid-column:3; grid-row:2 / -1; margin-bottom:0; }
+  body.lefty #type .compose, body.lefty #winlist { grid-column:1; }
+  /* The expanded text box: buttons beside it, since the keyboard leaves little height */
+  .compose.expanded { flex-direction:row; }
+  .compose.expanded .row { grid-template-columns:1fr; width:190px; align-content:start; }
 }
 #sheetdelete { display:flex; align-items:center; justify-content:center; gap:7px; font-size:13px; } #sheetdelete .ic { margin:0; width:18px; height:18px; }

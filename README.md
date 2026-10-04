@@ -30,7 +30,7 @@ The first time on a Mac, allow "Terminal" under System Settings > Privacy & Secu
 
 There is no window. The program runs in the system tray at the bottom right of the taskbar (the menu bar on a Mac) and opens a page with a QR code. Scan it with your phone's camera.
 
-Right-click the tray icon to show the QR code again, turn starting at login on or off (off by default), re-pair, change the language, or quit. If something goes wrong, look at the log in `%APPDATA%\PhoneRemote\phone-remote.log`.
+Right-click the tray icon to show the QR code again, turn starting at login on or off (off by default), re-pair, change the language, or quit. The About item shows the version you are running and opens this project's page; the version is also at the bottom of the QR page, and on the phone in Settings (the gear in the top right corner). If something goes wrong, look at the log in `%APPDATA%\PhoneRemote\phone-remote.log`.
 
 To run it in a terminal window instead, which makes its output visible: `.venv\Scripts\python -m phone_remote --console`.
 
@@ -38,7 +38,7 @@ To run it in a terminal window instead, which makes its output visible: `.venv\S
 
 The interface is English by default and can be switched to Chinese. There are two separate settings:
 
-- **The remote on the phone**: tap `EN | 中` in the top right corner. Each phone remembers its own choice.
+- **The remote on the phone**: tap the gear in the top right corner and choose under Language. Each phone remembers its own choice.
 - **The tray menu and QR page on the computer**: Language in the tray menu. In terminal mode, set `language` to `zh` in the configuration file.
 
 ### Updates
@@ -63,8 +63,10 @@ Releases are built the same way by GitHub Actions: pushing a tag such as `v0.5.0
 
 - **Play**: what is playing (an icon for music or video, the title and artist, and the app playing it), a draggable progress bar, touchpad, Fullscreen / Exit / OK, and four sets of keys for general use, Bilibili, YouTube and music.
 - **Browse**: touchpad, browser back and forward, reload, zoom, tab switching, and shortcuts to your usual sites.
-- **Type**: type or dictate on the phone and send the text to whatever input has focus on the computer, plus Enter, Backspace, Select all, Undo, dictation on the computer and so on. "New AI chat" sends Ctrl/Cmd+Shift+O, which starts a new conversation in the ChatGPT and Claude apps and sites.
+- **Type**: type or dictate on the phone and send the text to whatever input has focus on the computer. Tapping the text box makes it fill the screen, so long text is easy to write; line breaks are kept (they are typed as Shift+Enter, because plain Enter would send a half-written message in most chat boxes), up to 10,000 characters. Below it are editing keys (Enter, New line, Backspace, Select all, Undo, Tab, Address bar) and control keys named after what they are, since each means something different from one program to the next: Up, Down, Shift+Tab, Esc, Ctrl+C. "New AI chat" sends Ctrl/Cmd+Shift+O, which starts a new conversation in ChatGPT.
 - **Windows**: lists the windows open on the computer; tap one to bring it to the front. Maximize and minimize are here too. "To other screen" (Windows only) moves the current window to the next monitor, for example sending a video to a TV that is plugged in as a second screen. On a Mac the list shows apps.
+
+The touchpad works like a laptop's: slide to move the pointer, tap to click, tap with two fingers to right-click, slide with two fingers to scroll (a quick flick keeps scrolling and slows to a stop). To drag, rest a finger on it until the border turns solid, then slide; lifting the finger lets go.
 
 A playback bar stays at the bottom of every screen: volume down and up, rewind, play or pause, fast forward, mute.
 
@@ -74,9 +76,15 @@ Key colours show what a key does: blue for playback and the main action, cyan fo
 
 The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens the site in the computer's browser. Tap "+ Add" and enter an address (`bilibili.com` is enough). Leave the name empty to use the page's own title; the dot takes its colour from the site's theme colour or icon. Hold a shortcut to edit or delete it. They are stored under `shortcuts` in the configuration file.
 
-### Tablets
+### Tablets, and holding the phone sideways
 
-On a wide screen such as an iPad, the touchpad takes the whole left side and the keys sit in a column on the right, in both orientations. Phones keep the single-column layout.
+The page rearranges itself to use the screen it is on:
+
+- **Phone held sideways**: navigation down the left edge, keys in the middle, the touchpad on the right over the full height.
+- **Tablet held sideways**: the same three columns with larger keys. There is room to show the general keys and one site's keys together, and the site shortcuts on the Play screen.
+- **Upright tablet**: the touchpad across the top and the keys in two columns under it.
+
+If you would rather steer the pointer with your left thumb, open Settings (the gear) and move the touchpad to the left; it applies whenever the screen is wide.
 
 ### Controlling more than one computer
 
@@ -148,6 +156,12 @@ Run the tests by double-clicking `run-tests.bat`.
 
 - `main`: the stable version, ready to use.
 - `dev`: day-to-day development. New work branches off `dev` as `feature/*`, merges back into `dev`, and reaches `main` once verified.
+
+## Support
+
+Phone Remote is free. If it is useful to you, you can buy me a coffee:
+
+<a href="https://buymeacoffee.com/chrisye"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="40"></a>
 
 ## Icons
 

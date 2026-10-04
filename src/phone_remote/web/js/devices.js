@@ -10,7 +10,7 @@ const error = document.getElementById("deverror"), saveButton = document.getElem
 let adding = false;   // the sheet either adds a computer or renames the active one
 
 // The name the user gave, else the computer's own name, else its address
-function label(d) { return d.alias || d.name || d.url.replace(/^https?:\/\//, ""); }
+export function label(d) { return d.alias || d.name || d.url.replace(/^https?:\/\//, ""); }
 
 export function renderDevices() {
   select.textContent = "";
