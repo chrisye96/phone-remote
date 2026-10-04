@@ -1,6 +1,7 @@
 """把手机发来的指令校验后交给平台实现去执行。"""
 import re
 import socket
+import threading
 import webbrowser
 
 from . import siteinfo
@@ -10,7 +11,7 @@ from .timer import SleepTimer
 
 # 指令 -> 它属于哪个功能开关；不在表里的是核心功能，不能关
 ACTION_FEATURE = {
-    "move": "touchpad", "click": "touchpad", "scroll": "touchpad",
+    "move": "touchpad", "click": "touchpad", "scroll": "touchpad", "button": "touchpad",
     "text": "text_input",
     "windows": "windows", "focus": "windows",
     "seek": "progress",
@@ -18,6 +19,10 @@ ACTION_FEATURE = {
     "open": "open_sites", "shortcut_save": "open_sites", "shortcut_delete": "open_sites",
 }
 
+
+# A held mouse button is let go when the phone has said nothing about it for this long,
+# so a locked screen or lost Wi-Fi cannot leave the computer stuck in the middle of a drag.
+HOLD_SECONDS = 3
 
 BARE_HOST = re.compile(r"^[\w-]+(\.[\w-]+)+([/:?#]|$)")
 
@@ -40,6 +45,8 @@ class Dispatcher:
         self._site_info = site_info
         self.timer = SleepTimer(platform)
         self._open = opener
+        self._hold = None  # timer that lets go of a held mouse button
+        self._hold_lock = threading.Lock()
 
     def enabled(self, feature):
         return self.features.get(feature, True)
@@ -144,3 +151,29 @@ class Dispatcher:
 
     def _do_scroll(self, msg):
         self.platform.mouse_scroll(clamp(msg.get("dy", 0), 1500))
+
+    def _do_button(self, msg):
+        """Hold the left mouse button down, or let it go, for dragging.
+
+        The phone repeats "down" while the finger stays on the touchpad; each one restarts the countdown.
+        """
+        down = bool(msg.get("down"))
+        with self._hold_lock:
+            held = self._hold is not None
+            if held:
+                self._hold.cancel()
+                self._hold = None
+            if down:
+                if not held:
+                    self.platform.mouse_button(True)
+                self._hold = threading.Timer(HOLD_SECONDS, self._let_go)
+                self._hold.daemon = True
+                self._hold.start()
+            elif held:
+                self.platform.mouse_button(False)
+
+    def _let_go(self):
+        with self._hold_lock:
+            if self._hold is not None:
+                self._hold = None
+                self.platform.mouse_button(False)

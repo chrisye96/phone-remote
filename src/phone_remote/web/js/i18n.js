@@ -21,6 +21,7 @@ const TABLES = {
     // touchpad
     "Slide to move, tap to click": "滑动移动鼠标　轻点单击",
     "Two fingers: tap to right-click, slide to scroll": "双指轻点右键　双指滑动滚动",
+    "Hold, then slide to drag": "按住不动，再滑动是拖动",
 
     // play
     "Fullscreen": "全屏",

@@ -86,11 +86,20 @@ def _cursor():
     return point
 
 
+_held = [False]
+
+
 def mouse_move(dx, dy):
     point = _cursor()
     point.x += dx
     point.y += dy
-    _post(cg.CGEventCreateMouseEvent(None, 5, point, 0))
+    # macOS wants "dragged" (6) rather than "moved" (5) while the button is down, or nothing follows the pointer
+    _post(cg.CGEventCreateMouseEvent(None, 6 if _held[0] else 5, point, 0))
+
+
+def mouse_button(down):
+    _held[0] = down
+    _post(cg.CGEventCreateMouseEvent(None, 1 if down else 2, _cursor(), 0))
 
 
 _last_click = [0.0]

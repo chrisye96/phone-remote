@@ -35,6 +35,10 @@ class Platform:
     def mouse_click(self, right=False):
         raise NotImplementedError
 
+    def mouse_button(self, down):
+        """Hold the left button down (True) or let it go (False); moving while it is down drags."""
+        raise NotImplementedError
+
     def mouse_scroll(self, dy):
         """dy 为正表示向上滚，单位大致是像素。"""
         raise NotImplementedError

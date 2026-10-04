@@ -22,6 +22,9 @@ class FakePlatform(Platform):
     def mouse_click(self, right=False):
         self.calls.append(("mouse_click", right))
 
+    def mouse_button(self, down):
+        self.calls.append(("mouse_button", down))
+
     def mouse_scroll(self, dy):
         self.calls.append(("mouse_scroll", dy))
 
