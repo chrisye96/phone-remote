@@ -39,8 +39,11 @@ cursor:pointer;display:inline-flex;align-items:center;gap:12px;max-width:100%}
 #copy:hover{border-color:#4b5261}#copy code{font-size:19px;overflow-wrap:anywhere}
 #copy svg{width:22px;height:22px;flex:none;color:#aab}#copy.done svg{color:#3ddc97}
 .notes{max-width:620px;margin:0 auto;font-size:14px}
+.warn{max-width:620px;margin:0 auto 30px;padding:6px 20px 14px;text-align:left;font-size:14px;
+background:#2b2412;border:1px solid #c9a227;border-radius:12px}
+.warn h2{font-size:16px;margin:14px 0 4px;color:#f1d27a}.warn p{color:#eee}
 .about{margin-top:28px;font-size:13px;color:#7f8aa0}.about a{color:#8fb0ff;text-decoration:none}.about a:hover{text-decoration:underline}</style>
-<h1>__HEADING__</h1><p>__WIFI__</p><div id="qr">__QR__</div>
+__WARN__<h1>__HEADING__</h1><p>__WIFI__</p><div id="qr">__QR__</div>
 <p>__MANUAL__</p>
 <button id="copy" type="button" title="__COPY__" aria-label="__COPY__"><code>__URL__</code><svg><use href="/icons.svg#copy"/></svg></button>
 <div class="notes"><p>__SECRET__</p><p>__HOME__</p><p>__HINT__</p></div>
@@ -54,9 +57,29 @@ _TRAY_HINT = ("You can close this page. Phone Remote keeps running in the system
 _MAC_HINT = ("You can close this page. Phone Remote keeps running in the menu bar; "
              "click its icon to see this page again or to quit.")
 _CONSOLE_HINT = "You can close this page, but keep the Phone Remote terminal window open."
+_PERMISSION_TITLE = "One more step on a Mac"
+_PERMISSION_STEPS = ("Phone Remote is not allowed to press keys or move the mouse on this Mac yet. "
+                     "Open System Settings > Privacy & Security > Accessibility and turn on %s "
+                     "(use the + button if it is not in the list). Then quit Phone Remote and open it again.")
 
 
-def pair_page(url, tray_mode=False):
+def _permission_notice():
+    """What to do when macOS has not allowed the program to control the computer.
+
+    The packaged app has no terminal to print this in, so the page is the only place to say it.
+    It comes in every language, one whole block after the other with English first, instead of
+    following the chosen language: on a first start nobody has found the language switch yet.
+    """
+    blocks = []
+    for code in i18n.LANGUAGES:
+        # The setting lists the app that runs the program: the packaged app itself, or else the terminal
+        app = "PhoneRemote" if getattr(sys, "frozen", False) else t("Terminal", code)
+        blocks.append('<div lang="%s"><h2>%s</h2><p>%s</p></div>' % (
+            code, html.escape(t(_PERMISSION_TITLE, code)), html.escape(t(_PERMISSION_STEPS, code) % app)))
+    return '<div class="warn">%s</div>' % "".join(blocks)
+
+
+def pair_page(url, tray_mode=False, needs_permission=False):
     if segno:
         qr, script = segno.make(url, error="m").svg_inline(scale=7, border=1), ""
     else:
@@ -79,6 +102,7 @@ def pair_page(url, tray_mode=False):
         about.append('<a href="%s" target="_blank" rel="noopener">%s</a>'
                      % (html.escape(SUPPORT_URL, quote=True), html.escape(t("Buy me a coffee"))))
     page = _PAIR_PAGE.replace("__LANG__", i18n.language).replace("__ABOUT__", " · ".join(about))
+    page = page.replace("__WARN__", _permission_notice() if needs_permission else "")
     for mark, text in texts.items():
         page = page.replace(mark, html.escape(t(text)))
     # The address goes in last so nothing in it can be mistaken for one of the marks above

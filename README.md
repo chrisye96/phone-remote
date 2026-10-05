@@ -28,7 +28,7 @@ python3 -m venv .venv
 .venv/bin/python -m phone_remote
 ```
 
-The first time on a Mac, allow "Terminal" under System Settings > Privacy & Security > Accessibility (with the packaged app, allow "PhoneRemote" instead).
+The first time on a Mac, allow "Terminal" under System Settings > Privacy & Security > Accessibility (with the packaged app, allow "PhoneRemote" instead). While that is missing, the QR page shows the steps at the top.
 
 There is no window. The program runs in the system tray at the bottom right of the taskbar (the menu bar on a Mac) and opens a page with a QR code. Scan it with your phone's camera.
 

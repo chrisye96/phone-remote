@@ -111,7 +111,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/pair":
             if self.client_address[0] not in LOCAL_ADDRESSES:
                 return self.reply(404)
-            page = pair_page(self.server.phone_url(), self.server.tray_mode)
+            page = pair_page(self.server.phone_url(), self.server.tray_mode, not self.server.has_permission())
             return self.reply(200, page.encode("utf-8"), STATIC_TYPES[".html"])
         self.reply_static("index.html" if path == "/" else path.lstrip("/"))
 
@@ -170,4 +170,5 @@ def make_server(port, token, dispatcher, phone_url=lambda: ""):
     server.dispatcher = dispatcher
     server.phone_url = phone_url
     server.tray_mode = False  # 决定二维码页面上提示“托盘”还是“命令行窗口”
+    server.has_permission = lambda: True  # asked each time the QR page is shown; the page explains when it says no
     return server

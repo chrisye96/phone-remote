@@ -46,6 +46,13 @@ _TABLES = {
             "这个页面可以关掉。程序留在屏幕顶部的菜单栏里，点它的图标可以再次打开这个页面，或者退出。",
         "You can close this page, but keep the Phone Remote terminal window open.":
             "这个页面可以关掉，但不要关闭遥控器的命令行窗口。",
+        "One more step on a Mac": "在 Mac 上还差一步",
+        "Phone Remote is not allowed to press keys or move the mouse on this Mac yet. "
+        "Open System Settings > Privacy & Security > Accessibility and turn on %s "
+        "(use the + button if it is not in the list). Then quit Phone Remote and open it again.":
+            "手机遥控器现在还不能在这台 Mac 上按键或移动鼠标。打开 系统设置 > 隐私与安全性 > 辅助功能，"
+            "把 %s 打开（列表里没有就点 + 号添加），然后退出手机遥控器并重新打开。",
+        "Terminal": "终端",
     },
 }
 
@@ -57,5 +64,6 @@ def set_language(code):
     language = code if code in LANGUAGES else DEFAULT
 
 
-def t(text):
-    return _TABLES.get(language, {}).get(text, text)
+def t(text, code=None):
+    """The text in the chosen language, or in the language named by code."""
+    return _TABLES.get(code or language, {}).get(text, text)

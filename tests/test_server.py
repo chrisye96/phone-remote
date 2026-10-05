@@ -122,6 +122,11 @@ class ServerTest(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertEqual(self.request(path)[0], 404)
 
+    def test_pair_page_says_when_the_program_may_not_control_the_computer(self):
+        self.assertNotIn(b"Accessibility", self.request("/pair")[1])
+        self.server.has_permission = lambda: False
+        self.assertIn(b"Accessibility", self.request("/pair")[1])
+
     def test_pair_page_shows_the_phone_url_to_this_computer(self):
         status, body, _ = self.request("/pair")
         self.assertEqual(status, 200)
