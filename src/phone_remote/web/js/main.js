@@ -12,6 +12,10 @@ import { initTimer } from "./timer.js";
 import { initTouchpads } from "./touchpad.js";
 import { initWindows } from "./windows.js";
 
+// Holding a finger down is a gesture here (repeat a key, drag with the touchpad, edit a shortcut), never a request
+// for the browser's long-press menu. Text boxes keep theirs, since that is where Paste lives.
+document.addEventListener("contextmenu", e => { if (!e.target.closest("input, textarea")) e.preventDefault(); });
+
 initLanguage();   // first, so everything after it sees the translated page
 initSettings();
 initButtons();

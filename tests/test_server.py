@@ -115,6 +115,8 @@ class ServerTest(unittest.TestCase):
         self.assertIn(b"js/main.js", body)
         self.assertIn("javascript", self.request("/js/main.js")[2])
         self.assertIn("text/css", self.request("/css/app.css")[2])
+        self.assertIn(b"manifest.webmanifest", body)
+        self.assertIn("application/manifest+json", self.request("/manifest.webmanifest")[2])
 
     def test_files_outside_the_web_folder_are_not_served(self):
         for path in ("/../server.py", "/js/../../server.py", "/..%2fserver.py", "/media_helper.ps1",

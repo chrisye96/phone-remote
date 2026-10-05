@@ -23,6 +23,5 @@ export function initButtons() {
       if (btn.hasAttribute("data-repeat")) delay = setTimeout(() => { repeat = setInterval(fire, 130); }, 400);
     });
     ["pointerup", "pointercancel", "pointerleave"].forEach(t => btn.addEventListener(t, stop));
-    btn.addEventListener("contextmenu", e => e.preventDefault());
   });
 }

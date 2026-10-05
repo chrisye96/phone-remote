@@ -6,7 +6,7 @@
 
 在电脑上运行一个小程序，手机浏览器打开网页，就能遥控电脑上的视频播放：音量、播放暂停、快进快退、触控板、滚动、文字输入，以及 B 站、YouTube、浏览器和 AI 客户端的常用快捷键。
 
-Windows 和 macOS 通用，用 Python 编写。手机和电脑需要在同一个 Wi-Fi 下。
+Windows 和 macOS 通用，用 Python 编写。手机和电脑需要在同一个 Wi-Fi 下。手机上不用安装任何东西：iPhone、iPad、Android 手机和平板都可以，用自带的浏览器打开即可。
 
 ## 运行
 
@@ -30,7 +30,7 @@ python3 -m venv .venv
 
 第一次在 Mac 上运行，需要在 系统设置 > 隐私与安全性 > 辅助功能 里给"终端"授权（用打包好的应用时，授权的是 "PhoneRemote"）。没有授权时，二维码页面顶部会显示操作步骤。
 
-启动后没有窗口，程序在任务栏右下角的托盘里运行（Mac 上是菜单栏），并弹出二维码页面，用手机相机扫码即可。
+启动后没有窗口，程序在任务栏右下角的托盘里运行（Mac 上是菜单栏），并弹出二维码页面，用手机相机扫码即可。想下次像 App 一样打开，可以把页面添加到主屏幕：Safari 里点 分享 > 添加到主屏幕，Android 的 Chrome 里点 菜单 > 添加到主屏幕。
 
 右键托盘图标可以：显示二维码、打开或关闭开机自动启动（默认关）、重新配对、切换语言、退出。“关于”一项显示当前运行的版本号，点它会打开本项目的主页；版本号也显示在二维码页面底部，以及手机上的设置里（右上角的齿轮）。出问题时看日志 `%APPDATA%\PhoneRemote\phone-remote.log`。
 
@@ -94,7 +94,7 @@ macOS：运行 `sh scripts/build-macos.sh`，会在 `dist/` 里生成 `PhoneRemo
 
 每台电脑各运行一份本程序。先扫其中一台的二维码打开遥控器，然后点顶部的电脑名称：
 
-- **添加电脑…**：粘贴另一台电脑二维码页面上的网址（用相机扫它的二维码，长按识别出的链接选“拷贝链接”），可以顺便起个名字。
+- **添加电脑…**：粘贴另一台电脑二维码页面上的网址（用相机扫它的二维码，复制识别出的链接；没有“复制”按钮就长按链接），可以顺便起个名字。
 - 点名称切换到那台电脑。
 - **改名…**、**移除**：针对当前这台。
 
@@ -171,4 +171,4 @@ docs/              重构计划
 
 图标来自 [Tabler Icons](https://tabler.io/icons)（MIT 协议），只把用到的几十个合成进了 `src/phone_remote/web/icons.svg`，运行时不依赖外网。增减图标见 `scripts/build-icons.py`。
 
-logo 画在 `src/phone_remote/logo.py` 里：48 像素以上用完整版，16 和 32 像素用只有一道信号弧的简化版。`scripts/build-logo.py` 由它生成所有文件：`web/` 里的 favicon 和主屏幕图标、`docs/logo.svg`、Windows 图标 `scripts/phone-remote.ico`。托盘图标在程序启动时由同一个模块画出来。
+logo 画在 `src/phone_remote/logo.py` 里：48 像素以上用完整版，16 和 32 像素用只有一道信号弧的简化版。`scripts/build-logo.py` 由它生成所有文件：`web/` 里的 favicon 和主屏幕图标（iOS 一个；Android 四个，列在 `web/manifest.webmanifest` 里，其中两个铺满整个方形，由桌面裁成它自己的形状）、`docs/logo.svg`、Windows 图标 `scripts/phone-remote.ico`。托盘图标在程序启动时由同一个模块画出来。
