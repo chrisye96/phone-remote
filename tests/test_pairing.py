@@ -47,6 +47,30 @@ class PairPageTest(unittest.TestCase):
         self.assertIn("/js/pair.js", page)
         self.assertIn("icons.svg#copy", page)
 
+    def test_says_how_to_allow_control_only_when_it_is_missing(self):
+        self.assertNotIn("Accessibility", pairing.pair_page(self.URL))
+        page = pairing.pair_page(self.URL, needs_permission=True)
+        self.assertIn("Privacy &amp; Security &gt; Accessibility", page)
+        self.assertNotRegex(page, r"__[A-Z]+__")
+
+    def test_the_permission_steps_come_in_english_first_and_then_in_chinese(self):
+        # Whatever language is chosen: on a first start nobody has found the language switch yet
+        for code in i18n.LANGUAGES:
+            i18n.set_language(code)
+            self.addCleanup(i18n.set_language, i18n.DEFAULT)
+            page = pairing.pair_page(self.URL, needs_permission=True)
+            english, chinese = page.index("Privacy &amp; Security &gt; Accessibility"), page.index("隐私与安全性 &gt; 辅助功能")
+            self.assertLess(english, chinese)
+            self.assertLess(page.index("</div>", english), chinese)  # one whole block after the other, not line by line
+
+    def test_the_permission_steps_name_the_app_to_allow(self):
+        import sys
+        self.assertIn("turn on Terminal", pairing.pair_page(self.URL, needs_permission=True))
+        with mock.patch.object(sys, "frozen", True, create=True):
+            page = pairing.pair_page(self.URL, needs_permission=True)
+        self.assertIn("turn on PhoneRemote", page)
+        self.assertIn("把 PhoneRemote 打开", page)
+
     def test_url_is_escaped(self):
         page = pairing.pair_page('http://x/#"><script>alert(1)</script>')
         self.assertNotIn("<script>alert(1)</script>", page)
