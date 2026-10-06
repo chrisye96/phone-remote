@@ -3,6 +3,7 @@
 import { send, token } from "./api.js";
 import { commands } from "./buttons.js";
 import { t } from "./i18n.js";
+import { onPress } from "./press.js";
 
 const playButtons = document.querySelectorAll(".playbtn");
 const nowCard = document.getElementById("nowcard");
@@ -126,7 +127,8 @@ export function initMedia() {
   track.addEventListener("pointerup", e => { if (dragging !== null) { const pos = trackPos(e); dragging = null; seekTo(pos); } });
   track.addEventListener("pointercancel", () => { dragging = null; render(); });
   document.querySelectorAll("button[data-rel]").forEach(b => {
-    b.addEventListener("pointerdown", () => { b.classList.add("on"); seekTo(localPos() + Number(b.dataset.rel)); });
+    b.addEventListener("pointerdown", () => b.classList.add("on"));
+    onPress(b, () => seekTo(localPos() + Number(b.dataset.rel)));
     ["pointerup", "pointercancel", "pointerleave"].forEach(t => b.addEventListener(t, () => b.classList.remove("on")));
   });
 }

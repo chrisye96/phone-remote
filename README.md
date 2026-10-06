@@ -78,7 +78,7 @@ Key colours show what a key does: blue for playback and the main action, cyan fo
 
 ### Site shortcuts
 
-The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens the site in the computer's browser. Tap "+ Add" and enter an address (`bilibili.com` is enough). Leave the name empty to use the page's own title; the dot takes its colour from the site's theme colour or icon. Hold a shortcut to edit or delete it. They are stored under `shortcuts` in the configuration file.
+The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens the site in the computer's browser. Tap "+ Add" and enter an address (`bilibili.com` is enough). Leave the name empty to use the page's own title; the dot takes its colour from the site's theme colour or icon. Hold a shortcut to edit or delete it (from a keyboard, the menu key or Shift+F10 does the same). They are stored under `shortcuts` in the configuration file.
 
 ### Tablets, and holding the phone sideways
 
@@ -89,6 +89,10 @@ The page rearranges itself to use the screen it is on:
 - **Upright tablet**: the touchpad across the top and the keys in two columns under it.
 
 If you would rather steer the pointer with your left thumb, open Settings (the gear) and move the touchpad to the left; it applies whenever the screen is wide.
+
+### Keyboards and screen readers
+
+Every key, the navigation and the settings also work from a keyboard, a switch, or a screen reader such as TalkBack or VoiceOver: each has a spoken name, and the chosen screen and tab are announced. The touchpad and dragging the progress bar still need a finger; the scroll keys and the Back and Fwd keys do the same jobs.
 
 ### Controlling more than one computer
 
