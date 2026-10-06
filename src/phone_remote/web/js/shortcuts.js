@@ -40,12 +40,12 @@ function tile(item, index) {
     btn.classList.add("on");
     timer = setTimeout(() => { held = true; btn.classList.remove("on"); openSheet(index); }, LONG_PRESS);
   });
-  btn.addEventListener("pointerup", () => {
-    clearTimeout(timer);
-    btn.classList.remove("on");
-    if (!held) send({ a: "open", i: index }).then(ok => { if (ok) toast(t("Opened {name} on the computer", { name: item.name })); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(t => btn.addEventListener(t, () => { clearTimeout(timer); btn.classList.remove("on"); }));
+  // A click and not pointerup, so that a keyboard or a screen reader can open it too
+  btn.addEventListener("click", () => {
+    if (held) { held = false; return; }   // the hold already opened the editing sheet
+    send({ a: "open", i: index }).then(ok => { if (ok) toast(t("Opened {name} on the computer", { name: item.name })); });
   });
-  ["pointercancel", "pointerleave"].forEach(t => btn.addEventListener(t, () => { clearTimeout(timer); btn.classList.remove("on"); }));
   return btn;
 }
 

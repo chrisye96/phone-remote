@@ -90,6 +90,10 @@ The page rearranges itself to use the screen it is on:
 
 If you would rather steer the pointer with your left thumb, open Settings (the gear) and move the touchpad to the left; it applies whenever the screen is wide.
 
+### Keyboards and screen readers
+
+Every key, the navigation and the settings also work from a keyboard, a switch, or a screen reader such as TalkBack or VoiceOver: each has a spoken name, and the chosen screen and tab are announced. The touchpad and dragging the progress bar still need a finger; the scroll keys and the Back and Fwd keys do the same jobs.
+
 ### Controlling more than one computer
 
 Run the program on each computer. Scan one computer's QR code to open the remote, then tap the computer's name at the top:
