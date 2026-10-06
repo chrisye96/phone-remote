@@ -167,9 +167,7 @@ Run the tests by double-clicking `run-tests.bat`.
 
 ## Support
 
-Phone Remote is free. If it is useful to you, you can buy me a coffee:
-
-<a href="https://buymeacoffee.com/chrisye"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="40"></a>
+Phone Remote is free. If it is useful to you, you can [support the project](https://buymeacoffee.com/chrisye).
 
 ## Icons
 

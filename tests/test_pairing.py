@@ -35,11 +35,11 @@ class PairPageTest(unittest.TestCase):
 
     def test_support_link_shows_only_when_one_is_set(self):
         with mock.patch.object(pairing, "SUPPORT_URL", ""):
-            self.assertNotIn("Buy me a coffee", pairing.pair_page(self.URL))
+            self.assertNotIn("Support this project", pairing.pair_page(self.URL))
         with mock.patch.object(pairing, "SUPPORT_URL", "https://example.com/tip?a=1&b=2"):
             page = pairing.pair_page(self.URL)
         self.assertIn('href="https://example.com/tip?a=1&amp;b=2"', page)
-        self.assertIn("Buy me a coffee", page)
+        self.assertIn("Support this project", page)
 
     def test_address_can_be_copied_with_one_click(self):
         page = pairing.pair_page(self.URL)

@@ -167,9 +167,7 @@ docs/              重构计划
 
 ## 支持
 
-手机遥控器是免费的。如果它对你有用，可以请我喝杯咖啡：
-
-<a href="https://buymeacoffee.com/chrisye"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="40"></a>
+手机遥控器是免费的。如果它对你有用，可以[支持一下这个项目](https://buymeacoffee.com/chrisye)。
 
 ## 图标
 
