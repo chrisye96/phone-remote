@@ -78,7 +78,7 @@ Key colours show what a key does: blue for playback and the main action, cyan fo
 
 ### Site shortcuts
 
-The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens the site in the computer's browser. Tap "+ Add" and enter an address (`bilibili.com` is enough). Leave the name empty to use the page's own title; the dot takes its colour from the site's theme colour or icon. Hold a shortcut to edit or delete it. They are stored under `shortcuts` in the configuration file.
+The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens the site in the computer's browser. Tap "+ Add" and enter an address (`bilibili.com` is enough). Leave the name empty to use the page's own title; the dot takes its colour from the site's theme colour or icon. Hold a shortcut to edit or delete it (from a keyboard, the menu key or Shift+F10 does the same). They are stored under `shortcuts` in the configuration file.
 
 ### Tablets, and holding the phone sideways
 
