@@ -17,7 +17,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="css/app.css">
 <!-- Keeps the English text from flashing before js/i18n.js swaps in another language -->
-<script>try { if (localStorage.lang === "zh") document.documentElement.className = "translating"; } catch (e) {}</script>
+<script>try { if ((localStorage.lang || navigator.language).slice(0, 2) !== "en") document.documentElement.className = "translating"; } catch (e) {}</script>
 </head>
 <body data-screen="play">
 

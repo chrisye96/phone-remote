@@ -160,7 +160,10 @@ const TABLES = {
   },
 };
 
-export const lang = TABLES[store.get("lang")] ? store.get("lang") : "en";
+// The language chosen in Settings. Before anyone has chosen, the phone's own language if there is a table for it.
+// The line at the top of index.html that hides the page until it is translated asks the same question.
+const wanted = (store.get("lang") || navigator.language || "").slice(0, 2);
+export const lang = TABLES[wanted] ? wanted : "en";
 const table = TABLES[lang] || {};
 
 // Translates one piece of text; {name} style placeholders are filled in from values

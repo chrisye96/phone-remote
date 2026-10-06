@@ -38,7 +38,7 @@ To run it in a terminal window instead, which makes its output visible: `.venv\S
 
 ### Language
 
-The interface is English by default and can be switched to Chinese. There are two separate settings:
+The interface comes in English and Chinese. The first time, each side starts in the language of the device it runs on (Chinese where the system is set to Chinese, English everywhere else); after that it keeps what you choose. There are two separate settings:
 
 - **The remote on the phone**: tap the gear in the top right corner and choose under Language. Each phone remembers its own choice.
 - **The tray menu and QR page on the computer**: Language in the tray menu. In terminal mode, set `language` to `zh` in the configuration file.

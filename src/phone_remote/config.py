@@ -101,8 +101,9 @@ def load():
         except ValueError:
             saved = {}
     config.port = config.saved_port = int(saved.get("port", DEFAULT_PORT))
-    if saved.get("language") in i18n.LANGUAGES:
-        config.language = saved["language"]
+    # Nothing saved yet means a first start: begin in the computer's own language. It is saved below,
+    # so from then on only the tray menu (or editing the file) changes it.
+    config.language = saved["language"] if saved.get("language") in i18n.LANGUAGES else i18n.system_language()
     config.check_updates = saved.get("check_updates") is not False
     for name, enabled in saved.get("features", {}).items():
         if name in FEATURES:
