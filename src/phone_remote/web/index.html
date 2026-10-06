@@ -13,6 +13,8 @@
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- Android home screen name and icons. It has no start_url on purpose: the icon must keep the #token it was added with. -->
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="css/app.css">
 <!-- Keeps the English text from flashing before js/i18n.js swaps in another language -->
 <script>try { if (localStorage.lang === "zh") document.documentElement.className = "translating"; } catch (e) {}</script>
@@ -324,7 +326,7 @@
     <div id="devadd">
       <label>Address shown on that computer's QR page<input id="devurl" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="192.168.1.5:8765/#code"></label>
       <p id="deverror" class="error"></p>
-      <p class="hint">Scan that computer's QR code with your camera, hold the link it finds and choose Copy Link, then paste it here. The address is stored only on this device.</p>
+      <p class="hint">Scan that computer's QR code with your camera and copy the link it finds (hold the link if there is no Copy button), then paste it here. The address is stored only on this device.</p>
     </div>
     <label>Name<input id="devname" type="text" maxlength="16" autocomplete="off" placeholder="Leave empty to use the computer's own name"></label>
     <div class="row r12">

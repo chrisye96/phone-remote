@@ -141,8 +141,8 @@ const TABLES = {
     "Add and switch": "添加并切换",
     "Address shown on that computer's QR page": "那台电脑二维码页面上的网址",
     "192.168.1.5:8765/#code": "192.168.1.5:8765/#配对码",
-    "Scan that computer's QR code with your camera, hold the link it finds and choose Copy Link, then paste it here. The address is stored only on this device.":
-      "用相机扫那台电脑的二维码，长按识别出的链接选“拷贝链接”，再粘贴到这里。网址只保存在这台设备上。",
+    "Scan that computer's QR code with your camera and copy the link it finds (hold the link if there is no Copy button), then paste it here. The address is stored only on this device.":
+      "用相机扫那台电脑的二维码，复制识别出的链接（没有“复制”按钮就长按链接），再粘贴到这里。网址只保存在这台设备上。",
     "Leave empty to use the computer's own name": "留空则用电脑自己的名字",
     "Incomplete address: it should look like 192.168.1.5:8765/#code, including the part after #": "网址不完整：要像 192.168.1.5:8765/#配对码 这样，# 后面的也要带上",
     "This computer is already added": "这台电脑已经添加过了",

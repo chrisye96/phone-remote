@@ -46,7 +46,6 @@ function tile(item, index) {
     if (!held) send({ a: "open", i: index }).then(ok => { if (ok) toast(t("Opened {name} on the computer", { name: item.name })); });
   });
   ["pointercancel", "pointerleave"].forEach(t => btn.addEventListener(t, () => { clearTimeout(timer); btn.classList.remove("on"); }));
-  btn.addEventListener("contextmenu", e => e.preventDefault());
   return btn;
 }
 

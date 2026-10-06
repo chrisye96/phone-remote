@@ -19,6 +19,7 @@ STATIC_TYPES = {
     ".js": "text/javascript; charset=utf-8",
     ".svg": "image/svg+xml",
     ".png": "image/png",
+    ".webmanifest": "application/manifest+json",
 }
 LOCAL_ADDRESSES = ("127.0.0.1", "::1")
 MAX_BODY = 65536     # bytes; room for the longest text the phone may send, in any script
