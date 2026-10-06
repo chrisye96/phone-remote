@@ -3,6 +3,7 @@
 import { active } from "./api.js";
 import { label } from "./devices.js";
 import { lang, t } from "./i18n.js";
+import { choose } from "./press.js";
 import { store } from "./store.js";
 
 const sheet = document.getElementById("setsheet");
@@ -13,7 +14,7 @@ const versionLine = document.getElementById("setversion");
 const side = () => (store.get("side") === "left" ? "left" : "right");
 
 function mark(choices, value) {
-  choices.querySelectorAll("button").forEach(b => b.classList.toggle("sel", b.dataset.value === value));
+  choose(choices.querySelectorAll("button"), "value", value);
 }
 function applySide() {
   document.body.classList.toggle("lefty", side() === "left");

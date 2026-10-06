@@ -13,6 +13,8 @@
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- Android home screen name and icons. It has no start_url on purpose: the icon must keep the #token it was added with. -->
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="css/app.css">
 <!-- Keeps the English text from flashing before js/i18n.js swaps in another language -->
 <script>try { if (localStorage.lang === "zh") document.documentElement.className = "translating"; } catch (e) {}</script>
@@ -20,7 +22,7 @@
 <body data-screen="play">
 
 <header><span id="dot"></span><span id="status">Connecting…</span><select id="device" aria-label="Switch computer"></select><span id="vol" data-feature="volume_display"></span><button id="gear" aria-label="Settings"><svg class="ic"><use href="icons.svg#settings"/></svg></button></header>
-<div id="toast"></div>
+<div id="toast" role="status"></div>
 
 <!--
   The text in this file is English. js/i18n.js holds the other languages, keyed by the English text,
@@ -54,8 +56,8 @@
   <div class="padrow" data-feature="touchpad">
     <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg><span>Slide to move, tap to click<br>Hold, then slide to drag<br>Two fingers: tap to right-click, slide to scroll</span></div>
     <div class="rocker col">
-      <button data-scroll="250" data-repeat><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
-      <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
+      <button data-scroll="250" data-repeat aria-label="Scroll up"><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
+      <button data-scroll="-250" data-repeat aria-label="Scroll down"><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
     </div>
   </div>
 
@@ -85,9 +87,9 @@
       </div>
       <div class="row r31">
         <div class="rocker c-vol">
-          <button data-k="down" data-repeat><svg class="ic"><use href="icons.svg#minus"/></svg>Player vol</button>
+          <button data-k="down" data-repeat aria-label="Player volume down"><svg class="ic"><use href="icons.svg#minus"/></svg>Player vol</button>
           <button data-k="m"><svg class="ic"><use href="icons.svg#volume-off"/></svg>Mute</button>
-          <button data-k="up" data-repeat><svg class="ic"><use href="icons.svg#plus"/></svg>Player vol</button>
+          <button data-k="up" data-repeat aria-label="Player volume up"><svg class="ic"><use href="icons.svg#plus"/></svg>Player vol</button>
         </div>
         <button data-k="e"><svg class="ic"><use href="icons.svg#star"/></svg>Favorite</button>
       </div>
@@ -161,8 +163,8 @@
   <div class="padrow" data-feature="touchpad">
     <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg><span>Slide to move, tap to click<br>Hold, then slide to drag<br>Two fingers: tap to right-click, slide to scroll</span></div>
     <div class="rocker col">
-      <button data-scroll="250" data-repeat><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
-      <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
+      <button data-scroll="250" data-repeat aria-label="Scroll up"><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
+      <button data-scroll="-250" data-repeat aria-label="Scroll down"><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
     </div>
   </div>
 
@@ -213,8 +215,8 @@
   <div class="padrow" data-feature="touchpad">
     <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg><span>Slide to move, tap to click<br>Hold, then slide to drag<br>Two fingers: tap to right-click, slide to scroll</span></div>
     <div class="rocker col">
-      <button data-scroll="250" data-repeat><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
-      <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
+      <button data-scroll="250" data-repeat aria-label="Scroll up"><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
+      <button data-scroll="-250" data-repeat aria-label="Scroll down"><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
     </div>
   </div>
   <div class="pair">
@@ -257,8 +259,8 @@
   <div class="padrow roomy-only" data-feature="touchpad">
     <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg><span>Slide to move, tap to click<br>Hold, then slide to drag<br>Two fingers: tap to right-click, slide to scroll</span></div>
     <div class="rocker col">
-      <button data-scroll="250" data-repeat><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
-      <button data-scroll="-250" data-repeat><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
+      <button data-scroll="250" data-repeat aria-label="Scroll up"><svg class="ic"><use href="icons.svg#chevron-up"/></svg></button>
+      <button data-scroll="-250" data-repeat aria-label="Scroll down"><svg class="ic"><use href="icons.svg#chevron-down"/></svg></button>
     </div>
   </div>
   <div class="label" data-feature="windows">Tap a window to bring it to the front</div>
@@ -303,12 +305,12 @@
 </nav>
 
 <!-- Add or edit a site shortcut -->
-<div id="sheet" class="sheet" hidden>
+<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheettitle" hidden>
   <form id="sheetform">
     <h3 id="sheettitle">Add shortcut</h3>
     <label>Address<input id="sheeturl" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="bilibili.com"></label>
     <label>Name<input id="sheetname" type="text" maxlength="12" autocomplete="off" placeholder="Leave empty to use the page's own title"></label>
-    <p id="sheeterror" class="error"></p>
+    <p id="sheeterror" class="error" role="alert"></p>
     <div class="row r12">
       <button type="button" id="sheetcancel">Cancel</button>
       <button type="submit" class="primary" id="sheetsave">Save</button>
@@ -318,13 +320,13 @@
 </div>
 
 <!-- Add another computer, or rename the current one (then only the name field shows) -->
-<div id="devsheet" class="sheet" hidden>
+<div id="devsheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="devtitle" hidden>
   <form id="devform">
     <h3 id="devtitle">Add computer</h3>
     <div id="devadd">
       <label>Address shown on that computer's QR page<input id="devurl" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="192.168.1.5:8765/#code"></label>
-      <p id="deverror" class="error"></p>
-      <p class="hint">Scan that computer's QR code with your camera, hold the link it finds and choose Copy Link, then paste it here. The address is stored only on this device.</p>
+      <p id="deverror" class="error" role="alert"></p>
+      <p class="hint">Scan that computer's QR code with your camera and copy the link it finds (hold the link if there is no Copy button), then paste it here. The address is stored only on this device.</p>
     </div>
     <label>Name<input id="devname" type="text" maxlength="16" autocomplete="off" placeholder="Leave empty to use the computer's own name"></label>
     <div class="row r12">
@@ -335,9 +337,9 @@
 </div>
 
 <!-- Settings, opened from the gear in the header. Each choice takes effect as soon as it is tapped. -->
-<div id="setsheet" class="sheet" hidden>
+<div id="setsheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="settitle" hidden>
   <form id="setform">
-    <h3>Settings</h3>
+    <h3 id="settitle">Settings</h3>
     <div class="field">
       <div class="flabel">Language</div>
       <div class="seg" id="setlang"><button type="button" data-value="en">English</button><button type="button" data-value="zh">中文</button></div>

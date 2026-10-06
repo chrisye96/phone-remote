@@ -6,7 +6,7 @@
 
 Run a small program on your computer, open a web page on your phone, and control what is playing on the computer: volume, play and pause, seeking, a touchpad, scrolling, text input, and the usual shortcuts for Bilibili, YouTube, browsers and AI chat apps.
 
-Works on Windows and macOS, written in Python. The phone and the computer need to be on the same Wi-Fi. Nothing is installed on the phone.
+Works on Windows and macOS, written in Python. The phone and the computer need to be on the same Wi-Fi. Nothing is installed on the phone: an iPhone, an iPad, or an Android phone or tablet all work, in the browser they already have.
 
 ## Running it
 
@@ -28,9 +28,9 @@ python3 -m venv .venv
 .venv/bin/python -m phone_remote
 ```
 
-The first time on a Mac, allow "Terminal" under System Settings > Privacy & Security > Accessibility (with the packaged app, allow "PhoneRemote" instead).
+The first time on a Mac, allow "Terminal" under System Settings > Privacy & Security > Accessibility (with the packaged app, allow "PhoneRemote" instead). While that is missing, the QR page shows the steps at the top.
 
-There is no window. The program runs in the system tray at the bottom right of the taskbar (the menu bar on a Mac) and opens a page with a QR code. Scan it with your phone's camera.
+There is no window. The program runs in the system tray at the bottom right of the taskbar (the menu bar on a Mac) and opens a page with a QR code. Scan it with your phone's camera. To open the remote like an app next time, add the page to your home screen: Share > Add to Home Screen in Safari, or the menu > Add to Home screen in Chrome on Android.
 
 Right-click the tray icon to show the QR code again, turn starting at login on or off (off by default), re-pair, change the language, or quit. The About item shows the version you are running and opens this project's page; the version is also at the bottom of the QR page, and on the phone in Settings (the gear in the top right corner). If something goes wrong, look at the log in `%APPDATA%\PhoneRemote\phone-remote.log`.
 
@@ -78,7 +78,7 @@ Key colours show what a key does: blue for playback and the main action, cyan fo
 
 ### Site shortcuts
 
-The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens the site in the computer's browser. Tap "+ Add" and enter an address (`bilibili.com` is enough). Leave the name empty to use the page's own title; the dot takes its colour from the site's theme colour or icon. Hold a shortcut to edit or delete it. They are stored under `shortcuts` in the configuration file.
+The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens the site in the computer's browser. Tap "+ Add" and enter an address (`bilibili.com` is enough). Leave the name empty to use the page's own title; the dot takes its colour from the site's theme colour or icon. Hold a shortcut to edit or delete it (from a keyboard, the menu key or Shift+F10 does the same). They are stored under `shortcuts` in the configuration file.
 
 ### Tablets, and holding the phone sideways
 
@@ -90,11 +90,15 @@ The page rearranges itself to use the screen it is on:
 
 If you would rather steer the pointer with your left thumb, open Settings (the gear) and move the touchpad to the left; it applies whenever the screen is wide.
 
+### Keyboards and screen readers
+
+Every key, the navigation and the settings also work from a keyboard, a switch, or a screen reader such as TalkBack or VoiceOver: each has a spoken name, and the chosen screen and tab are announced. The touchpad and dragging the progress bar still need a finger; the scroll keys and the Back and Fwd keys do the same jobs.
+
 ### Controlling more than one computer
 
 Run the program on each computer. Scan one computer's QR code to open the remote, then tap the computer's name at the top:
 
-- **Add computer…**: paste the address from the other computer's QR page (scan its QR code with the camera, hold the link it finds and choose Copy Link). You can give it a name at the same time.
+- **Add computer…**: paste the address from the other computer's QR page (scan its QR code with the camera and copy the link it finds; hold the link if there is no Copy button). You can give it a name at the same time.
 - Tap a name to switch to that computer.
 - **Rename…** and **Remove** apply to the current one.
 
@@ -171,4 +175,4 @@ Phone Remote is free. If it is useful to you, you can buy me a coffee:
 
 Icons come from [Tabler Icons](https://tabler.io/icons) (MIT License). Only the few dozen in use are bundled into `src/phone_remote/web/icons.svg`, so nothing is fetched from the internet at run time. To add or remove icons, see `scripts/build-icons.py`.
 
-The logo is drawn in `src/phone_remote/logo.py`: a larger version for 48 px and up, and a simpler one with a single signal arc for 16 and 32 px. `scripts/build-logo.py` writes every file from it: the favicons and home screen icons in `web/`, `docs/logo.svg`, and the Windows icon `scripts/phone-remote.ico`. The tray icon is drawn from the same module when the program starts.
+The logo is drawn in `src/phone_remote/logo.py`: a larger version for 48 px and up, and a simpler one with a single signal arc for 16 and 32 px. `scripts/build-logo.py` writes every file from it: the favicons and home screen icons in `web/` (one for iOS, and for Android the four listed in `web/manifest.webmanifest`, two of them filled to the corners so the launcher can cut them to its own shape), `docs/logo.svg`, and the Windows icon `scripts/phone-remote.ico`. The tray icon is drawn from the same module when the program starts.

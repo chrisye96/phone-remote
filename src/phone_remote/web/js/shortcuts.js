@@ -12,7 +12,8 @@ const saveButton = document.getElementById("sheetsave"), deleteButton = document
 const LONG_PRESS = 550;
 let shortcuts = [], max = 4, editing = null;   // editing：正在改第几个，null 表示新增
 
-function openSheet(index) {
+// focus puts the cursor in the address box; without it a finger's hold does not bring up the on-screen keyboard
+function openSheet(index, focus = index === null) {
   editing = index;
   const item = index === null ? { url: "", name: "" } : shortcuts[index];
   title.textContent = index === null ? t("Add shortcut") : t("Edit shortcut");
@@ -21,7 +22,7 @@ function openSheet(index) {
   error.textContent = "";
   deleteButton.hidden = index === null;
   sheet.hidden = false;
-  if (index === null) urlInput.focus();
+  if (focus) urlInput.focus();
 }
 function closeSheet() {
   sheet.hidden = true;
@@ -34,19 +35,27 @@ function tile(item, index) {
   btn.style.setProperty("--site", item.color);
   btn.appendChild(document.createElement("em"));
   btn.appendChild(document.createTextNode(item.name));
-  let timer = null, held = false;
+  let timer = 0, held = false;   // timer is set for as long as a finger is down
+  function edit() {
+    held = !!timer;   // a finger is still down, and the click it makes on lifting must not open the site
+    clearTimeout(timer);
+    btn.classList.remove("on");
+    openSheet(index, !held);
+  }
   btn.addEventListener("pointerdown", () => {
     held = false;
     btn.classList.add("on");
-    timer = setTimeout(() => { held = true; btn.classList.remove("on"); openSheet(index); }, LONG_PRESS);
+    timer = setTimeout(edit, LONG_PRESS);
   });
-  btn.addEventListener("pointerup", () => {
-    clearTimeout(timer);
-    btn.classList.remove("on");
-    if (!held) send({ a: "open", i: index }).then(ok => { if (ok) toast(t("Opened {name} on the computer", { name: item.name })); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(t => btn.addEventListener(t, () => { clearTimeout(timer); timer = 0; btn.classList.remove("on"); }));
+  // What a hold is to a keyboard (the menu key, or Shift+F10) and to a screen reader's own long press.
+  // Android sends it for a finger's hold as well, which then simply edits a moment sooner.
+  btn.addEventListener("contextmenu", edit);
+  // A click and not pointerup, so that a keyboard or a screen reader can open it too
+  btn.addEventListener("click", () => {
+    if (held) { held = false; return; }   // the hold already opened the editing sheet
+    send({ a: "open", i: index }).then(ok => { if (ok) toast(t("Opened {name} on the computer", { name: item.name })); });
   });
-  ["pointercancel", "pointerleave"].forEach(t => btn.addEventListener(t, () => { clearTimeout(timer); btn.classList.remove("on"); }));
-  btn.addEventListener("contextmenu", e => e.preventDefault());
   return btn;
 }
 

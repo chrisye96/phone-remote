@@ -74,6 +74,7 @@ def main():
 
     use_tray = tray.available() and not args.console
     server.tray_mode = use_tray
+    server.has_permission = platform.has_permission
     log.info("started on port %d, tray=%s", config.port, use_tray)
     print(t("Phone Remote is running. Open this address on your phone, or scan the QR code that just opened:"))
     print("  " + url)

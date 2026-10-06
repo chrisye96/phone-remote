@@ -11,7 +11,8 @@
   --keyh:clamp(42px, 6.6dvh, 52px); --gap:8px;
 }
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
-html { height:100%; background:var(--bg); }
+/* overscroll-behavior stops pull-to-refresh on Android. Chrome reads it from body, Firefox only from html. */
+html { height:100%; background:var(--bg); overscroll-behavior:none; }
 body { margin:0 auto; height:100%; height:100dvh; max-width:520px; overflow:hidden; overscroll-behavior:none;
        background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
        display:flex; flex-direction:column; padding:calc(8px + env(safe-area-inset-top)) 14px 0; }
@@ -36,7 +37,8 @@ button.c-nav { background:var(--nav-bg); } .c-nav .ic { color:var(--nav-ic); }
 button.c-exit { background:var(--exit-bg); } .c-exit .ic { color:var(--exit-ic); }
 button.big, button.primary { font-size:14px; display:flex; align-items:center; justify-content:center; gap:7px; }
 .big .ic, .primary .ic { margin:0; }
-button.primary { background:var(--play); color:#fff; } button.primary .ic { width:18px; height:18px; }
+/* Darker than --play, which white text does not stand out from enough (3.2:1; this is 4.8:1) */
+button.primary { background:#3f6bdb; color:#fff; } button.primary .ic { width:18px; height:18px; }
 
 /* 胶囊键：一对相关的按键连成一个，中间一道分隔线 */
 .rocker { display:flex; background:var(--key); border-radius:14px; border-top:1px solid rgba(255,255,255,.14); box-shadow:0 2px 0 rgba(0,0,0,.45); overflow:hidden; }
@@ -57,7 +59,7 @@ button.primary { background:var(--play); color:#fff; } button.primary .ic { widt
 .group, .card, .compose { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:9px; flex:none; display:flex; flex-direction:column; gap:var(--gap); }
 .group:empty, .row:empty { display:none; }
 .gtitle { font-size:11px; color:var(--dim); margin:0 3px -3px; letter-spacing:.5px; display:flex; }
-.gtitle small { margin-left:auto; font-size:10px; opacity:.7; letter-spacing:0; }
+.gtitle small { margin-left:auto; font-size:10px; opacity:.8; letter-spacing:0; }
 .label { font-size:11px; color:var(--dim); margin:1px 3px -4px; letter-spacing:.5px; flex:none; }
 /* Wrappers that only become boxes on bigger screens; on a phone their children lay out as if they were not there */
 .pair, .sitepanel { display:contents; }
@@ -108,7 +110,7 @@ body.notimeline [data-rel] { opacity:.4; }
 /* 输入 */
 .compose { padding:10px; }
 textarea { font:inherit; font-size:16px; color:var(--text); background:transparent; border:0; padding:2px 4px; height:46px; resize:none; outline:none; user-select:text; -webkit-user-select:text; }
-textarea::placeholder, input::placeholder { color:#6f7888; }
+textarea::placeholder, input::placeholder { color:#8690a2; }
 /* While typing, the text box covers the screen down to the top of the on-screen keyboard (js/text.js keeps --vvh and --vvt current) */
 .compose.expanded { position:fixed; z-index:9; left:0; right:0; top:var(--vvt, 0px); height:var(--vvh, 100dvh); border:0; border-radius:0;
                     padding:calc(10px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left)); }
@@ -165,7 +167,7 @@ nav button.on { filter:none; transform:none; }
 .sheet button:disabled { opacity:.45; }
 
 /* Computer switcher in the header: a native menu that looks like plain text */
-#device { font:inherit; color:var(--text); background:transparent; border:0; outline:none; padding:0; max-width:46%; text-overflow:ellipsis; }
+#device { font:inherit; color:var(--text); background:transparent; border:0; padding:0; max-width:46%; text-overflow:ellipsis; align-self:stretch; }
 #device option { color:#000; }
 
 /* Gear in the header that opens Settings */

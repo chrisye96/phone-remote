@@ -115,12 +115,19 @@ class ServerTest(unittest.TestCase):
         self.assertIn(b"js/main.js", body)
         self.assertIn("javascript", self.request("/js/main.js")[2])
         self.assertIn("text/css", self.request("/css/app.css")[2])
+        self.assertIn(b"manifest.webmanifest", body)
+        self.assertIn("application/manifest+json", self.request("/manifest.webmanifest")[2])
 
     def test_files_outside_the_web_folder_are_not_served(self):
         for path in ("/../server.py", "/js/../../server.py", "/..%2fserver.py", "/media_helper.ps1",
                      "/js/missing.js", "/js"):
             with self.subTest(path=path):
                 self.assertEqual(self.request(path)[0], 404)
+
+    def test_pair_page_says_when_the_program_may_not_control_the_computer(self):
+        self.assertNotIn(b"Accessibility", self.request("/pair")[1])
+        self.server.has_permission = lambda: False
+        self.assertIn(b"Accessibility", self.request("/pair")[1])
 
     def test_pair_page_shows_the_phone_url_to_this_computer(self):
         status, body, _ = self.request("/pair")

@@ -1,5 +1,6 @@
 // 底部导航和网站分页，记住上次的选择
 import { store } from "./api.js";
+import { choose, onPress } from "./press.js";
 
 const enterHandlers = {};
 
@@ -7,14 +8,15 @@ const enterHandlers = {};
 export function onEnter(screen, fn) { enterHandlers[screen] = fn; }
 
 function pick(selector, attr, value, storeKey) {
-  document.querySelectorAll(selector).forEach(b => b.classList.toggle("sel", b.dataset[attr] === value));
+  choose(document.querySelectorAll(selector), attr, value);
   store.set(storeKey, value);
 }
 
 export function go(screen) {
   document.body.dataset.screen = screen;
   pick("nav button", "go", screen, "screen");
-  if (document.activeElement) document.activeElement.blur();
+  // Puts the on-screen keyboard away. A keyboard user who just pressed a navigation button keeps their place.
+  if (document.activeElement && !document.activeElement.closest("nav")) document.activeElement.blur();
   if (enterHandlers[screen]) enterHandlers[screen]();
 }
 
@@ -35,8 +37,8 @@ export function setSite(site) {
 }
 
 export function initNav() {
-  document.querySelectorAll("nav button").forEach(b => b.addEventListener("pointerdown", () => go(b.dataset.go)));
-  document.querySelectorAll(".tabs button[data-site]").forEach(b => b.addEventListener("pointerdown", () => setSite(b.dataset.site)));
+  document.querySelectorAll("nav button").forEach(b => onPress(b, () => go(b.dataset.go)));
+  document.querySelectorAll(".tabs button[data-site]").forEach(b => onPress(b, () => setSite(b.dataset.site)));
   // 网址里可以带 ?screen=browse&site=bili 直接打开某一页
   const query = new URLSearchParams(location.search);
   const screen = query.get("screen") || store.get("screen") || "";
