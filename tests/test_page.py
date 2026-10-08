@@ -1,4 +1,5 @@
 """The phone page for people who do not use it by touch and sight: screen readers, keyboards, switches."""
+import base64
 import json
 import re
 import shutil
@@ -41,6 +42,27 @@ console.log(JSON.stringify(counts));""" % json.dumps([events for events, _ in PR
         result = subprocess.run(["node", "--input-type=module", "-"], input=script.encode("utf-8"),
                                 capture_output=True, check=True)
         self.assertEqual(json.loads(result.stdout), [count for _, count in PRESS_CASES])
+
+    @unittest.skipUnless(shutil.which("node"), "needs Node.js to run the page's JavaScript")
+    def test_bundled_reader_reads_the_qr_code_the_computer_shows(self):
+        # Adding a computer from a photo depends on web/vendor/jsQR.js understanding what pairing.py draws
+        import io
+
+        import segno
+        from PIL import Image
+
+        from phone_remote.pairing import phone_url
+
+        url = phone_url(8765, "0123456789abcdef0123456789abcdef")
+        drawn = io.BytesIO()
+        segno.make(url, error="m").save(drawn, kind="png", scale=6, border=4)
+        image = Image.open(drawn).convert("RGBA").rotate(7, expand=True, fillcolor="white")  # held a little crooked
+        script = ((WEB / "vendor" / "jsQR.js").read_text(encoding="utf-8") + """
+const pixels = new Uint8ClampedArray(Buffer.from(%s, "base64"));
+const found = module.exports(pixels, %d, %d);
+console.log(JSON.stringify(found && found.data));""" % (json.dumps(base64.b64encode(image.tobytes()).decode()), *image.size))
+        result = subprocess.run(["node", "-"], input=script.encode("utf-8"), capture_output=True, check=True)
+        self.assertEqual(json.loads(result.stdout), url)
 
 
 if __name__ == "__main__":

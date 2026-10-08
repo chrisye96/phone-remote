@@ -98,7 +98,7 @@ macOS：运行 `sh scripts/build-macos.sh`，会在 `dist/` 里生成 `PhoneRemo
 
 每台电脑各运行一份本程序。先扫其中一台的二维码打开遥控器，然后点顶部的电脑名称：
 
-- **添加电脑…**：粘贴另一台电脑二维码页面上的网址（用相机扫它的二维码，复制识别出的链接；没有“复制”按钮就长按链接），可以顺便起个名字。
+- **添加电脑…**：拍下另一台电脑屏幕上的二维码，或者手动输入二维码下面显示的网址，可以顺便起个名字。（直接用相机 App 扫那个码，打开的会是另一个独立的遥控器：浏览器把每台电脑的页面当成互不相干的网站。）
 - 点名称切换到那台电脑。
 - **改名…**、**移除**：针对当前这台。
 
@@ -152,7 +152,7 @@ src/phone_remote/
     base.py
     windows/       input.py  windows.py  media.py  audio.py
     macos/         input.py  windows.py  media.py
-  web/             手机页面：index.html、css/、js/（按功能分模块）、icons.svg
+  web/             手机页面：index.html、css/、js/（按功能分模块）、icons.svg、vendor/
 tests/             自动测试，不碰真实的键盘鼠标
 scripts/           打包脚本、图标合成脚本、logo 生成脚本
 docs/              重构计划
@@ -169,8 +169,10 @@ docs/              重构计划
 
 手机遥控器是免费的。如果它对你有用，可以[支持一下这个项目](https://buymeacoffee.com/chrisye)。
 
-## 图标
+## 图标和附带的代码
 
 图标来自 [Tabler Icons](https://tabler.io/icons)（MIT 协议），只把用到的几十个合成进了 `src/phone_remote/web/icons.svg`，运行时不依赖外网。增减图标见 `scripts/build-icons.py`。
+
+添加电脑时从照片里识别二维码，用的是 [jsQR](https://github.com/cozmo/jsQR) 1.4.0（Apache 2.0 协议），原样放在 `src/phone_remote/web/vendor/` 里，许可证文件在旁边。只有点了那个按钮，页面才会加载它。
 
 logo 画在 `src/phone_remote/logo.py` 里：48 像素以上用完整版，16 和 32 像素用只有一道信号弧的简化版。`scripts/build-logo.py` 由它生成所有文件：`web/` 里的 favicon 和主屏幕图标（iOS 一个；Android 四个，列在 `web/manifest.webmanifest` 里，其中两个铺满整个方形，由桌面裁成它自己的形状）、`docs/logo.svg`、Windows 图标 `scripts/phone-remote.ico`。托盘图标在程序启动时由同一个模块画出来。
