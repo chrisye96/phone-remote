@@ -3,6 +3,10 @@
 The code is written in English; other languages are looked up here by the English text.
 The phone page has its own table in web/js/i18n.js.
 """
+import locale
+import subprocess
+import sys
+
 LANGUAGES = {"en": "English", "zh": "中文"}
 DEFAULT = "en"
 
@@ -16,7 +20,7 @@ _TABLES = {
         "Language": "语言",
         "Quit": "退出",
         "About (v%s)": "关于（v%s）",
-        "Buy me a coffee": "请我喝杯咖啡",
+        "Support this project": "支持这个项目",
         "Update available: v%s (opens the download page)": "有新版本 v%s（点击打开下载页）",
         "A newer version is available: v%s": "有新版本可用：v%s",
         # console
@@ -57,6 +61,29 @@ _TABLES = {
 }
 
 language = DEFAULT
+
+
+def _supported(name):
+    """The language of a locale name such as zh_CN or zh-Hans_US, if there is a table for it; English otherwise."""
+    code = (name or "").strip()[:2].lower()
+    return code if code in LANGUAGES else DEFAULT
+
+
+def system_language():
+    """The language the computer itself is set to, for the first start, before anyone has chosen one."""
+    try:
+        if sys.platform == "win32":
+            import ctypes
+            name = locale.windows_locale.get(ctypes.windll.kernel32.GetUserDefaultUILanguage())
+        elif sys.platform == "darwin":
+            # An app opened from the Finder is given no LANG, so ask the system settings instead
+            name = subprocess.run(["defaults", "read", "-g", "AppleLocale"],
+                                  capture_output=True, text=True, timeout=2).stdout
+        else:
+            name = locale.getlocale()[0]
+    except (OSError, ValueError, AttributeError, subprocess.SubprocessError):
+        name = None
+    return _supported(name)
 
 
 def set_language(code):

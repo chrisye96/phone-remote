@@ -67,7 +67,7 @@ def run(show_qr, on_quit, on_reset, on_language, check_updates=True):
                          pystray.Menu(*[language_item(code, name) for code, name in i18n.LANGUAGES.items()])),
         pystray.Menu.SEPARATOR,
         pystray.MenuItem(lambda item: t("About (v%s)") % __version__, lambda icon, item: webbrowser.open(HOMEPAGE)),
-        pystray.MenuItem(lambda item: t("Buy me a coffee"), lambda icon, item: webbrowser.open(SUPPORT_URL),
+        pystray.MenuItem(lambda item: t("Support this project"), lambda icon, item: webbrowser.open(SUPPORT_URL),
                          visible=bool(SUPPORT_URL)),
         pystray.MenuItem(lambda item: t("Quit"), quit_app),
     )

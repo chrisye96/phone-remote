@@ -39,14 +39,15 @@ class ConfigTest(unittest.TestCase):
         self.assertNotEqual(loaded.token, old)
         self.assertEqual(config.load().token, loaded.token)
 
-    def test_language_is_english_until_changed_and_then_remembered(self):
-        loaded = config.load()
-        self.assertEqual(loaded.language, "en")
-        loaded.language = "zh"
-        config.save(loaded)
-        self.assertEqual(config.load().language, "zh")
-        (self.data / "config.json").write_text('{"language": "klingon"}', encoding="utf-8")
-        self.assertEqual(config.load().language, "en")
+    def test_language_starts_as_the_computers_own_and_a_choice_is_remembered(self):
+        with mock.patch.object(config.i18n, "system_language", return_value="zh"):
+            loaded = config.load()
+            self.assertEqual(loaded.language, "zh")
+            loaded.language = "en"  # chosen in the tray menu
+            config.save(loaded)
+            self.assertEqual(config.load().language, "en")
+            (self.data / "config.json").write_text('{"language": "klingon"}', encoding="utf-8")
+            self.assertEqual(config.load().language, "zh")
 
     def test_legacy_token_next_to_the_program_is_adopted(self):
         Path("token.txt").write_text("oldtoken12345678", encoding="utf-8")

@@ -1,12 +1,14 @@
 // Computer switcher in the header: pick a paired computer, add another one, rename or remove the current one
 import { active, addDevice, devices, parseDevice, removeDevice, renameActive, switchDevice } from "./api.js";
 import { t } from "./i18n.js";
+import { readQr } from "./qr.js";
 
 const select = document.getElementById("device");
 const sheet = document.getElementById("devsheet"), form = document.getElementById("devform");
 const title = document.getElementById("devtitle"), addFields = document.getElementById("devadd");
 const urlInput = document.getElementById("devurl"), nameInput = document.getElementById("devname");
 const error = document.getElementById("deverror"), saveButton = document.getElementById("devsave");
+const photoButton = document.getElementById("devphoto"), photoInput = document.getElementById("devfile");
 let adding = false;   // the sheet either adds a computer or renames the active one
 
 // The name the user gave, else the computer's own name, else its address
@@ -32,7 +34,7 @@ function openSheet(add) {
   saveButton.textContent = add ? t("Add and switch") : t("Save");
   saveButton.disabled = add;
   sheet.hidden = false;
-  (add ? urlInput : nameInput).focus();
+  (add ? photoButton : nameInput).focus();   // not the address box: that would cover the photo button with the on-screen keyboard
 }
 function closeSheet() {
   sheet.hidden = true;
@@ -49,6 +51,23 @@ export function initDevices() {
     else if (choice) switchDevice(choice);
   });
   urlInput.addEventListener("input", () => { error.textContent = ""; saveButton.disabled = !urlInput.value.trim(); });
+  // The photo fills in the address box, as if it had been typed, and the rest of the sheet carries on from there
+  photoButton.addEventListener("click", () => photoInput.click());
+  photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    photoInput.value = "";   // so that taking the same photo again still counts as a change
+    if (!file) return;
+    error.textContent = "";
+    photoButton.disabled = true;
+    photoButton.textContent = t("Reading the photo…");
+    readQr(file).catch(() => null).then(text => {
+      photoButton.disabled = false;
+      photoButton.textContent = t("Take a photo of its QR code");
+      if (!text) error.textContent = t("No QR code found in the photo: move closer so the code fills most of it, and try again");
+      else if (!parseDevice(text)) error.textContent = t("That QR code is not from a Phone Remote QR page");
+      else { urlInput.value = text; saveButton.disabled = false; }
+    });
+  });
   form.addEventListener("submit", e => {
     e.preventDefault();
     const alias = nameInput.value.trim();

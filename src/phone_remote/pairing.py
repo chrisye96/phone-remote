@@ -100,7 +100,7 @@ def pair_page(url, tray_mode=False, needs_permission=False):
              '<a href="%s" target="_blank" rel="noopener">GitHub</a>' % HOMEPAGE]
     if SUPPORT_URL:
         about.append('<a href="%s" target="_blank" rel="noopener">%s</a>'
-                     % (html.escape(SUPPORT_URL, quote=True), html.escape(t("Buy me a coffee"))))
+                     % (html.escape(SUPPORT_URL, quote=True), html.escape(t("Support this project"))))
     page = _PAIR_PAGE.replace("__LANG__", i18n.language).replace("__ABOUT__", " · ".join(about))
     page = page.replace("__WARN__", _permission_notice() if needs_permission else "")
     for mark, text in texts.items():
