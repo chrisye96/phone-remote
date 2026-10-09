@@ -98,7 +98,7 @@ Every key, the navigation and the settings also work from a keyboard, a switch, 
 
 Run the program on each computer. Scan one computer's QR code to open the remote, then tap the computer's name at the top:
 
-- **Add computer…**: paste the address from the other computer's QR page (scan its QR code with the camera and copy the link it finds; hold the link if there is no Copy button). You can give it a name at the same time.
+- **Add computer…**: take a photo of the QR code on the other computer's screen, or type the address shown under it. You can give it a name at the same time. (Scanning that code with the camera app would only open a second, separate remote: a browser keeps each computer's page apart from the others.)
 - Tap a name to switch to that computer.
 - **Rename…** and **Remove** apply to the current one.
 
@@ -152,7 +152,7 @@ src/phone_remote/
     base.py
     windows/       input.py  windows.py  media.py  audio.py
     macos/         input.py  windows.py  media.py
-  web/             the phone page: index.html, css/, js/ (one module per feature), icons.svg
+  web/             the phone page: index.html, css/, js/ (one module per feature), icons.svg, vendor/
 tests/             automated tests; they never touch the real keyboard or mouse
 scripts/           build script, icon sprite and logo scripts
 docs/              refactoring plan
@@ -169,8 +169,10 @@ Run the tests by double-clicking `run-tests.bat`.
 
 Phone Remote is free. If it is useful to you, you can [support the project](https://buymeacoffee.com/chrisye).
 
-## Icons
+## Icons and bundled code
 
 Icons come from [Tabler Icons](https://tabler.io/icons) (MIT License). Only the few dozen in use are bundled into `src/phone_remote/web/icons.svg`, so nothing is fetched from the internet at run time. To add or remove icons, see `scripts/build-icons.py`.
+
+Reading a QR code from a photo, to add another computer, is done by [jsQR](https://github.com/cozmo/jsQR) 1.4.0 (Apache License 2.0), copied unchanged into `src/phone_remote/web/vendor/` next to its licence. The page fetches it only when that button is used.
 
 The logo is drawn in `src/phone_remote/logo.py`: a larger version for 48 px and up, and a simpler one with a single signal arc for 16 and 32 px. `scripts/build-logo.py` writes every file from it: the favicons and home screen icons in `web/` (one for iOS, and for Android the four listed in `web/manifest.webmanifest`, two of them filled to the corners so the launcher can cut them to its own shape), `docs/logo.svg`, and the Windows icon `scripts/phone-remote.ico`. The tray icon is drawn from the same module when the program starts.

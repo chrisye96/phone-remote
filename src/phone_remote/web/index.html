@@ -324,9 +324,12 @@
   <form id="devform">
     <h3 id="devtitle">Add computer</h3>
     <div id="devadd">
+      <!-- One photo, not a live camera: a page served over plain HTTP is not allowed the camera itself (js/qr.js) -->
+      <button type="button" id="devphoto" class="big">Take a photo of its QR code</button>
+      <input id="devfile" type="file" accept="image/*" capture="environment" hidden>
       <label>Address shown on that computer's QR page<input id="devurl" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="192.168.1.5:8765/#code"></label>
       <p id="deverror" class="error" role="alert"></p>
-      <p class="hint">Scan that computer's QR code with your camera and copy the link it finds (hold the link if there is no Copy button), then paste it here. The address is stored only on this device.</p>
+      <p class="hint">Take a photo of the QR code on that computer's screen, or type the address shown under it. The address is stored only on this device.</p>
     </div>
     <label>Name<input id="devname" type="text" maxlength="16" autocomplete="off" placeholder="Leave empty to use the computer's own name"></label>
     <div class="row r12">

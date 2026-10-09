@@ -145,8 +145,13 @@ const TABLES = {
     "Add and switch": "添加并切换",
     "Address shown on that computer's QR page": "那台电脑二维码页面上的网址",
     "192.168.1.5:8765/#code": "192.168.1.5:8765/#配对码",
-    "Scan that computer's QR code with your camera and copy the link it finds (hold the link if there is no Copy button), then paste it here. The address is stored only on this device.":
-      "用相机扫那台电脑的二维码，复制识别出的链接（没有“复制”按钮就长按链接），再粘贴到这里。网址只保存在这台设备上。",
+    "Take a photo of its QR code": "拍下那台电脑的二维码",
+    "Reading the photo…": "正在识别照片…",
+    "No QR code found in the photo: move closer so the code fills most of it, and try again":
+      "照片里没找到二维码：靠近一些，让二维码占满大部分画面，再拍一次",
+    "That QR code is not from a Phone Remote QR page": "这个二维码不是手机遥控器二维码页面上的",
+    "Take a photo of the QR code on that computer's screen, or type the address shown under it. The address is stored only on this device.":
+      "拍下那台电脑屏幕上的二维码，或者手动输入二维码下面显示的网址。网址只保存在这台设备上。",
     "Leave empty to use the computer's own name": "留空则用电脑自己的名字",
     "Incomplete address: it should look like 192.168.1.5:8765/#code, including the part after #": "网址不完整：要像 192.168.1.5:8765/#配对码 这样，# 后面的也要带上",
     "This computer is already added": "这台电脑已经添加过了",
