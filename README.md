@@ -45,7 +45,7 @@ The interface comes in English and Chinese. The first time, each side starts in 
 
 ### Updates
 
-Once a day the program asks GitHub for the version number of the latest release. When there is a newer one, the tray menu gains an "Update available" item that opens the [releases page](https://github.com/chrisye96/phone-remote/releases/latest); download the new file there (`PhoneRemote.exe`, or the zip for your Mac) and replace the old one. Nothing is downloaded or installed automatically. If you run from source, `git pull` instead.
+Once a day the program asks GitHub for the version number of the latest release. When there is a newer one, the tray menu gains an "Update available" item that opens the [releases page](https://github.com/chrisye96/phone-remote/releases/latest); download the new file there (`PhoneRemote.exe`, or the zip for your Mac) and replace the old one. If the new file ends up under another name or in another folder instead, Start at login in its tray menu shows as off, because the old entry still starts the old file: click it once to point it at the new one. Nothing is downloaded or installed automatically. If you run from source, `git pull` instead.
 
 That one request is the only time the program contacts the internet on its own. To turn it off, set `check_updates` to `false` in the configuration file.
 

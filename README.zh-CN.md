@@ -45,7 +45,7 @@ python3 -m venv .venv
 
 ### 更新
 
-程序每天向 GitHub 问一次最新发布版的版本号。有新版本时，托盘菜单里会多出一项“有新版本”，点它会打开[发布页](https://github.com/chrisye96/phone-remote/releases/latest)，在那里下载新的文件（`PhoneRemote.exe`，或者对应你那台 Mac 的 zip）替换旧的即可。程序不会自动下载或安装任何东西。从源码运行的话用 `git pull`。
+程序每天向 GitHub 问一次最新发布版的版本号。有新版本时，托盘菜单里会多出一项“有新版本”，点它会打开[发布页](https://github.com/chrisye96/phone-remote/releases/latest)，在那里下载新的文件（`PhoneRemote.exe`，或者对应你那台 Mac 的 zip）替换旧的即可。如果新文件换了名字或放到了别的文件夹，它的托盘菜单里“开机自动启动”会显示为未打开，因为原来那一项启动的还是旧文件：点一下就改成启动新的。程序不会自动下载或安装任何东西。从源码运行的话用 `git pull`。
 
 这是程序唯一会主动访问互联网的地方。不想要的话，把配置文件里的 `check_updates` 改成 `false`。
 
