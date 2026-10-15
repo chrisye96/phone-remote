@@ -145,9 +145,14 @@ class DispatcherTest(unittest.TestCase):
     def test_seek_windows_and_focus_pass_through(self):
         dispatcher, platform, _ = make()
         dispatcher.handle({"a": "seek", "to": 61.5})
+        dispatcher.handle({"a": "seek", "to": 30, "title": "Video"})
+        dispatcher.handle({"a": "seek", "to": 30, "title": 7})  # nonsense is left out
+        dispatcher.handle({"a": "seek", "to": 30, "title": ""})  # with play_state off the phone has no title
         dispatcher.handle({"a": "focus", "id": 7})
         self.assertEqual(dispatcher.handle({"a": "windows"})[0]["title"], "Video")
-        self.assertEqual(platform.calls, [("media_seek", 61.5), ("focus_window", 7)])
+        self.assertEqual(platform.calls, [("media_seek", 61.5, None), ("media_seek", 30, "Video"),
+                                          ("media_seek", 30, None), ("media_seek", 30, None),
+                                          ("focus_window", 7)])
 
     def test_playpause_uses_system_media_control_when_possible(self):
         dispatcher, platform, _ = make()

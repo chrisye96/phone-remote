@@ -24,5 +24,5 @@ class MacPlatform(Platform):
     def media_state(self):
         return self._media.state()
 
-    def media_seek(self, seconds):
+    def media_seek(self, seconds, title=None):
         self._media.seek(seconds)
