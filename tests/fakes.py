@@ -41,5 +41,5 @@ class FakePlatform(Platform):
         self.calls.append(("media_toggle", play, title))
         return self.can_toggle
 
-    def media_seek(self, seconds):
-        self.calls.append(("media_seek", seconds))
+    def media_seek(self, seconds, title=None):
+        self.calls.append(("media_seek", seconds, title))
