@@ -4,6 +4,7 @@ import datetime
 import sys
 import unittest
 from types import SimpleNamespace
+from unittest import mock
 
 from phone_remote.platforms.base import empty_media_state
 
@@ -48,12 +49,14 @@ class FakeSession:
         self._info.playback_status = media.Status.PAUSED
 
 
-def read(session, watcher=None, current=None, sessions=None):
-    """What the watcher shows; current is what Windows calls current, sessions all it knows of."""
+def read(session, watcher=None, current=None, sessions=None, front=""):
+    """What the watcher shows; current is what Windows calls current, sessions all it knows of,
+    front the program whose window is in front."""
     manager = SimpleNamespace(get_current_session=lambda: current or session,
                               get_sessions=lambda: sessions or [session])
     state = empty_media_state()
-    asyncio.run((watcher or media.MediaWatcher())._read_session(manager, state))
+    with mock.patch.object(media, "front_app", lambda: front):
+        asyncio.run((watcher or media.MediaWatcher())._read_session(manager, state))
     return state
 
 
@@ -120,9 +123,9 @@ class SeveralSessionsTest(unittest.TestCase):
         self.song = FakeSession("Song", playing=False, duration=200, app="Spotify.exe")
         self.sessions = [self.song, self.video]
 
-    def show(self):
+    def show(self, front=""):
         # Windows calls the idle Spotify current, as it often does once nothing plays
-        return read(None, self.watcher, current=self.song, sessions=self.sessions)
+        return read(None, self.watcher, current=self.song, sessions=self.sessions, front=front)
 
     def test_a_paused_video_stays_shown_when_windows_calls_another_app_current(self):
         self.show()
@@ -143,6 +146,24 @@ class SeveralSessionsTest(unittest.TestCase):
         self.video.pause()
         self.song._info.playback_status = media.Status.PLAYING
         self.assertEqual(self.show()["title"], "Song")
+
+    def test_bringing_a_window_forward_shows_its_paused_media(self):
+        # Spotify played and was paused; then its window was minimized and the browser's restored
+        self.video.pause()
+        self.song._info.playback_status = media.Status.PLAYING
+        self.show(front="Spotify")
+        self.song.pause()
+        self.assertEqual(self.show(front="chrome")["title"], "Video")
+        self.assertEqual(self.show(front="Spotify")["title"], "Song")  # and back again
+
+    def test_a_window_left_in_front_does_not_take_over(self):
+        # The browser stayed in front while Spotify was played and paused from the phone
+        self.show(front="chrome")
+        self.video.pause()
+        self.song._info.playback_status = media.Status.PLAYING
+        self.show(front="chrome")
+        self.song.pause()
+        self.assertEqual(self.show(front="chrome")["title"], "Song")
 
     def test_a_seek_meant_for_something_else_is_dropped(self):
         # The phone worked out the position from the song it was showing; the video is current now
