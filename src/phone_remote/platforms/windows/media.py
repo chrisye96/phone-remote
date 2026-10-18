@@ -9,9 +9,10 @@ import asyncio
 import datetime
 import threading
 
-from ...mediakind import classify
+from ...mediakind import classify, readable
 from ..base import empty_media_state
 from . import audio
+from .windows import front_app
 
 try:
     from winrt.windows.media.control import (
@@ -30,6 +31,7 @@ class MediaWatcher:
         self._loop = None
         self._session = None
         self._app = None  # the app the phone was last shown
+        self._front = None  # the program whose window was in front at the last poll
         self._stopping = False
 
     def start(self):
@@ -115,6 +117,16 @@ class MediaWatcher:
         # another app current (an idle Spotify, say), and the phone would jump to that and send its
         # seeks and presses there. Only when the shown app has gone does Windows' choice count.
         sessions = list(manager.get_sessions())
+        # Bringing a window forward shows its paused media. Only when the front window changes, so
+        # a browser left in front does not take over from music just paused from the phone.
+        # ponytail: matched by program name, so an app whose session id hides it (Firefox) never matches
+        front = front_app()
+        if front != self._front:
+            self._front = front
+            for s in sessions:
+                # "chrome.exe", "Chrome" or a profile's "Chrome.Profile1" all belong to chrome
+                if front and readable(s.source_app_user_model_id).partition(".")[0].lower() == front.lower():
+                    self._app = s.source_app_user_model_id
         playing = [s for s in sessions if s.get_playback_info().playback_status == Status.PLAYING]
         shown = [s for s in sessions if s.source_app_user_model_id == self._app]
         first = [s for s in shown if s in playing] + playing + shown
