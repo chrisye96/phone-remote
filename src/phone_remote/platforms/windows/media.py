@@ -9,9 +9,10 @@ import asyncio
 import datetime
 import threading
 
-from ...mediakind import classify
+from ...mediakind import classify, readable
 from ..base import empty_media_state
 from . import audio
+from .windows import front_app
 
 try:
     from winrt.windows.media.control import (
@@ -29,6 +30,8 @@ class MediaWatcher:
         self._state = empty_media_state()
         self._loop = None
         self._session = None
+        self._app = None  # the app the phone was last shown
+        self._front = None  # the program whose window was in front at the last poll
         self._stopping = False
 
     def start(self):
@@ -50,15 +53,23 @@ class MediaWatcher:
         asyncio.run_coroutine_threadsafe(self._toggle(self._session, play, title), self._loop)
         return True
 
+    @staticmethod
+    async def _holds(session, title):
+        """Whether the session still holds what the phone is showing (None skips the check).
+
+        A browser has one session for all its tabs, and moves it to another tab (say a paused show in
+        the background) when the front tab's video goes away; another app can also become the one
+        shown. The phone has not seen that yet, so ask again instead of trusting the last poll.
+        """
+        if title is None:
+            return True
+        props = await session.try_get_media_properties_async()
+        return (props.title or "") == title
+
     async def _toggle(self, session, play, title):
         try:
-            if title is not None:
-                # A browser has one session for all its tabs, and moves it to another tab (say a paused
-                # show in the background) when the front tab's video goes away. The phone has not seen
-                # that yet, so ask again what the session holds right now instead of trusting the last poll.
-                props = await session.try_get_media_properties_async()
-                if (props.title or "") != title:
-                    return
+            if not await self._holds(session, title):
+                return
             if play is None:
                 await session.try_toggle_play_pause_async()
             elif play:
@@ -68,18 +79,19 @@ class MediaWatcher:
         except OSError:
             pass
 
-    def seek(self, seconds):
+    def seek(self, seconds, title=None):
         if self._loop and self._session:
-            asyncio.run_coroutine_threadsafe(self._seek(seconds), self._loop)
+            asyncio.run_coroutine_threadsafe(self._seek(self._session, seconds, title), self._loop)
 
-    async def _seek(self, seconds):
-        duration = self._state["dur"]
-        if self._session and duration > 0:
-            target = max(0, min(duration - 1, seconds))
-            try:
-                await self._session.try_change_playback_position_async(int(target * 10_000_000))
-            except OSError:
-                pass
+    async def _seek(self, session, seconds, title):
+        # The position was worked out from what the phone shows, so it is wrong for anything else
+        try:
+            duration = session.get_timeline_properties().end_time.total_seconds()
+            if duration > 0 and await self._holds(session, title):
+                target = max(0, min(duration - 1, seconds))
+                await session.try_change_playback_position_async(int(target * 10_000_000))
+        except OSError:
+            pass
 
     async def _run(self):
         self._loop = asyncio.get_running_loop()
@@ -101,15 +113,28 @@ class MediaWatcher:
             await asyncio.sleep(POLL_SECONDS)
 
     async def _read_session(self, manager, state):
-        # 有正在播放的就用它，否则用系统当前的那个
-        session = manager.get_current_session()
-        for candidate in manager.get_sessions():
-            if candidate.get_playback_info().playback_status == Status.PLAYING:
-                session = candidate
-                break
+        # Something playing comes first. Once it pauses, keep showing it: Windows then often calls
+        # another app current (an idle Spotify, say), and the phone would jump to that and send its
+        # seeks and presses there. Only when the shown app has gone does Windows' choice count.
+        sessions = list(manager.get_sessions())
+        # Bringing a window forward shows its paused media. Only when the front window changes, so
+        # a browser left in front does not take over from music just paused from the phone.
+        # ponytail: matched by program name, so an app whose session id hides it (Firefox) never matches
+        front = front_app()
+        if front != self._front:
+            self._front = front
+            for s in sessions:
+                # "chrome.exe", "Chrome" or a profile's "Chrome.Profile1" all belong to chrome
+                if front and readable(s.source_app_user_model_id).partition(".")[0].lower() == front.lower():
+                    self._app = s.source_app_user_model_id
+        playing = [s for s in sessions if s.get_playback_info().playback_status == Status.PLAYING]
+        shown = [s for s in sessions if s.source_app_user_model_id == self._app]
+        first = [s for s in shown if s in playing] + playing + shown
+        session = first[0] if first else manager.get_current_session()
         self._session = session
         if not session:
             return
+        self._app = session.source_app_user_model_id
         info = session.get_playback_info()
         status = info.playback_status
         state["playing"] = {Status.PLAYING: True, Status.PAUSED: False, Status.STOPPED: False}.get(status)

@@ -92,7 +92,10 @@ class Dispatcher:
             self.platform.press([], "space")
 
     def _do_seek(self, msg):
-        self.platform.media_seek(float(msg.get("to", 0)))
+        # The phone adds what it is showing, so a position worked out for one thing is not applied to another.
+        # An empty title is no check: with play_state off the phone is sent none (see _do_state).
+        title = msg.get("title")
+        self.platform.media_seek(float(msg.get("to", 0)), title if isinstance(title, str) and title else None)
 
     def _do_timer(self, msg):
         self.timer.set(float(msg.get("min", 0)))

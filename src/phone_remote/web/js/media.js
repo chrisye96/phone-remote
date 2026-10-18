@@ -7,7 +7,8 @@ import { onPress } from "./press.js";
 
 const playButtons = document.querySelectorAll(".playbtn");
 const nowCard = document.getElementById("nowcard");
-const nowBox = document.getElementById("now"), volBox = document.getElementById("vol");
+// The volume shows in the status line, and on an upright phone in the progress line instead (css/app.css)
+const nowBox = document.getElementById("now"), volBoxes = document.querySelectorAll(".vol");
 const nowTitle = document.getElementById("nowtitle"), nowApp = document.getElementById("nowapp");
 const kindIcon = document.getElementById("nowkind");
 const KINDS = { music: { icon: "music", label: "Music" }, video: { icon: "movie", label: "Video" } };
@@ -80,7 +81,8 @@ function applyState(state) {
   media.app = state.app || "";
   if (newVideo) setPos(state.pos);
   else if (now > media.holdPos && Math.abs(state.pos - localPos()) > 2 && (moved || state.playing === media.playing)) setPos(state.pos);
-  volBox.textContent = state.vol === null || state.vol === undefined ? "" : state.muted ? t("Muted") : t("Volume {n}", { n: state.vol });
+  const volText = state.vol === null || state.vol === undefined ? "" : state.muted ? t("Muted") : t("Volume {n}", { n: state.vol });
+  volBoxes.forEach(box => { box.textContent = volText; });
   stateListeners.forEach(fn => fn(state));
   render();
 }
@@ -96,7 +98,7 @@ function seekTo(pos) {
   pos = Math.max(0, Math.min(media.dur - 1, pos));
   setPos(pos);
   media.holdPos = performance.now() + 2500;
-  send({ a: "seek", to: pos });
+  send({ a: "seek", to: pos, title: media.title });   // the computer drops it if it now shows something else
   render();
 }
 function trackPos(e) {

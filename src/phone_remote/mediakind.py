@@ -35,7 +35,7 @@ BROWSERS = [("msedge", "Edge"), ("chrome", "Chrome"), ("firefox", "Firefox"), ("
             ("brave", "Brave"), ("vivaldi", "Vivaldi"), ("thebrowsercompany", "Arc")]  # not "arc": too many names contain it
 
 
-def _readable(app_id):
+def readable(app_id):
     # "SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify" -> "Spotify", "C:\\x\\foo.exe" -> "foo"
     name = app_id.rsplit("!", 1)[-1].replace("/", "\\").rsplit("\\", 1)[-1]
     return name[:-4] if name.lower().endswith(".exe") else name
@@ -52,4 +52,4 @@ def classify(app_id, artist="", album=""):
             # ponytail: in a browser an album only comes with music sites (Spotify, YouTube Music);
             # anything else there is mostly video. Podcasts land on the wrong side.
             return ("music" if album else "video"), name
-    return ("music" if artist or album else ""), _readable(app_id or "")
+    return ("music" if artist or album else ""), readable(app_id or "")

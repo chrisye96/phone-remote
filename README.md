@@ -67,7 +67,7 @@ Releases are built the same way by GitHub Actions: pushing a tag such as `v0.5.0
 
 - **Play**: what is playing (an icon for music or video, the title and artist, and the app playing it), a draggable progress bar, touchpad, Fullscreen / Exit / OK, and four sets of keys for general use, Bilibili, YouTube and music.
 - **Browse**: touchpad, browser back and forward, reload, zoom, tab switching, and shortcuts to your usual sites.
-- **Type**: type or dictate on the phone and send the text to whatever input has focus on the computer. Tapping the text box makes it fill the screen, so long text is easy to write; line breaks are kept (they are typed as Shift+Enter, because plain Enter would send a half-written message in most chat boxes), up to 10,000 characters. Below it are editing keys (Enter, New line, Backspace, Select all, Undo, Tab, Address bar) and control keys named after what they are, since each means something different from one program to the next: Up, Down, Shift+Tab, Esc, Ctrl+C. "New AI chat" sends Ctrl/Cmd+Shift+O, which starts a new conversation in ChatGPT.
+- **Type**: type or dictate on the phone and send the text to whatever input has focus on the computer. Tapping the text box makes it fill the screen, so long text is easy to write; line breaks are kept (they are typed as Shift+Enter, because plain Enter would send a half-written message in most chat boxes), up to 10,000 characters. While it fills the screen, the backspace key beside the send buttons deletes on the computer, so a mistake that was already sent can be fixed without closing the keyboard. Below it are editing keys (Enter, New line, Backspace, Select all, Undo, Tab, Address bar) and control keys named after what they are, since each means something different from one program to the next: Up, Down, Shift+Tab, Esc, Ctrl+C. "New AI chat" sends Ctrl/Cmd+Shift+O, which starts a new conversation in ChatGPT.
 - **Windows**: lists the windows open on the computer; tap one to bring it to the front. Maximize and minimize are here too. "To other screen" (Windows only) moves the current window to the next monitor, for example sending a video to a TV that is plugged in as a second screen. On a Mac the list shows apps.
 
 The touchpad works like a laptop's: slide to move the pointer, tap to click, tap with two fingers to right-click, slide with two fingers to scroll (a quick flick keeps scrolling and slows to a stop). To drag, rest a finger on it until the border turns solid, then slide; lifting the finger lets go.
@@ -84,6 +84,7 @@ The Sites row on the Browse screen holds up to 4 shortcuts; tapping one opens th
 
 The page rearranges itself to use the screen it is on:
 
+- **Phone held upright**: the four screen tabs sit in the top line beside the computer's name (as icons, the current one with its name too), the volume shows at the end of the progress line, and the foot of the screen holds only the playback bar, so the touchpad gets as much height as possible.
 - **Phone held sideways**: navigation down the left edge, keys in the middle, the touchpad on the right over the full height.
 - **Tablet held sideways**: the same three columns with larger keys. There is room to show the general keys and one site's keys together, and the site shortcuts on the Play screen.
 - **Upright tablet**: the touchpad across the top and the keys in two columns under it.

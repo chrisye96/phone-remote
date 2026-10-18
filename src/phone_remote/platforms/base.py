@@ -67,5 +67,9 @@ class Platform:
         """
         return False
 
-    def media_seek(self, seconds):
-        """跳到指定秒数；做不到就什么都不做。"""
+    def media_seek(self, seconds, title=None):
+        """跳到指定秒数；做不到就什么都不做。
+
+        title is what the phone is showing, as for media_toggle: the seek is dropped when something
+        else has become current since. None skips that check.
+        """

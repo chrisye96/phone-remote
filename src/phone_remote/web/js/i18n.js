@@ -109,6 +109,7 @@ const TABLES = {
     "Select all": "全选",
     "Undo": "撤销",
     "Dictate on PC": "电脑听写",
+    "Backspace on PC": "电脑退格",
     "New AI chat": "AI 新对话",
     "Editing": "编辑",
     "Control": "控制",
