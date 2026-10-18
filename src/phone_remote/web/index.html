@@ -21,7 +21,7 @@
 </head>
 <body data-screen="play">
 
-<header><span id="dot"></span><span id="status">Connecting…</span><select id="device" aria-label="Switch computer"></select><span id="vol" data-feature="volume_display"></span><button id="gear" aria-label="Settings"><svg class="ic"><use href="icons.svg#settings"/></svg></button></header>
+<header><span id="dot"></span><span id="status">Connecting…</span><select id="device" aria-label="Switch computer"></select><span id="vol" class="vol" data-feature="volume_display"></span><button id="gear" aria-label="Settings"><svg class="ic"><use href="icons.svg#settings"/></svg></button></header>
 <div id="toast" role="status"></div>
 
 <!--
@@ -51,7 +51,7 @@
   <div class="card" id="nowcard" hidden>
     <!-- What kind of thing is playing (music or video), its title and artist, and the app playing it -->
     <div id="now" data-feature="play_state"><svg class="ic" id="nowkind" role="img" hidden><use href=""/></svg><span id="nowtitle"></span><small id="nowapp"></small></div>
-    <div id="prog" data-feature="progress"><span id="cur">0:00</span><div id="track"><div id="fill"></div><div id="knob"></div></div><span id="total">0:00</span></div>
+    <div id="prog" data-feature="progress"><span id="cur">0:00</span><div id="track"><div id="fill"></div><div id="knob"></div></div><span id="total">0:00</span><span class="vol" data-feature="volume_display"></span></div>
   </div>
   <div class="padrow" data-feature="touchpad">
     <div class="pad"><svg class="ic"><use href="icons.svg#hand-finger"/></svg><span>Slide to move, tap to click<br>Hold, then slide to drag<br>Two fingers: tap to right-click, slide to scroll</span></div>
@@ -208,6 +208,7 @@
     <textarea id="text" enterkeyhint="enter" autocomplete="off" placeholder="Type here, or tap the mic on your keyboard to dictate"></textarea>
     <div class="row r12">
       <button id="closeText" class="expanded-only">Close</button>
+      <button class="c-exit expanded-only" data-k="backspace" data-repeat aria-label="Backspace on PC"><svg class="ic"><use href="icons.svg#backspace"/></svg></button>
       <button id="sendText">Type only</button>
       <button id="sendEnter" class="primary"><svg class="ic"><use href="icons.svg#send"/></svg>Type and press Enter</button>
     </div>

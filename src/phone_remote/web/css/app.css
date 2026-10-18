@@ -23,7 +23,9 @@ body { margin:0 auto; height:100%; height:100dvh; max-width:520px; overflow:hidd
 header { display:flex; align-items:center; gap:7px; height:26px; flex:none; font-size:12px; color:var(--dim); }
 #dot { width:8px; height:8px; border-radius:50%; background:var(--dim); }
 #dot.ok { background:var(--ok); } #dot.bad { background:var(--bad); }
-#vol { margin-left:auto; color:var(--vol-ic); font-weight:600; font-variant-numeric:tabular-nums; }
+.vol { color:var(--vol-ic); font-weight:600; font-variant-numeric:tabular-nums; }
+#vol { margin-left:auto; }
+#prog .vol { display:none; }   /* the copy in the progress line, shown on an upright phone */
 
 /* 按键：顶部一道高光、底部一道阴影，看起来是凸起可按的 */
 button { font:inherit; color:var(--text); background:var(--key); border:0; border-top:1px solid rgba(255,255,255,.14); border-radius:14px;
@@ -113,10 +115,13 @@ textarea { font:inherit; font-size:16px; color:var(--text); background:transpare
 textarea::placeholder, input::placeholder { color:#8690a2; }
 /* While typing, the text box covers the screen down to the top of the on-screen keyboard (js/text.js keeps --vvh and --vvt current) */
 .compose.expanded { position:fixed; z-index:9; left:0; right:0; top:var(--vvt, 0px); height:var(--vvh, 100dvh); border:0; border-radius:0;
-                    padding:calc(10px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left)); }
+                    padding:calc(var(--keyh) + 14px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left)); }
 .compose.expanded textarea { flex:1; height:auto; background:var(--bg); border:1px solid var(--play); border-radius:14px; padding:10px 12px; line-height:1.5; }
 .compose.expanded .expanded-only { display:block; }
-.compose.expanded .row { grid-template-columns:1fr 1.2fr 2fr; }
+/* Close sits in the top corner, leaving the row beside the keyboard to Backspace on the computer and the two ways to send */
+.compose.expanded #closeText { position:absolute; top:calc(8px + env(safe-area-inset-top)); right:max(12px, env(safe-area-inset-right)); width:auto; padding:0 18px; }
+.compose.expanded .row { grid-template-columns:56px 1fr 1.6fr; }
+.compose [data-k="backspace"] .ic { width:24px; height:24px; margin:0 auto; }
 
 /* 窗口列表 */
 #winlist { flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; gap:6px; border-radius:14px; }
@@ -188,6 +193,52 @@ nav button.on { filter:none; transform:none; }
 /* Parts that only some layouts show. Kept after every other plain rule so that those cannot switch them back on. */
 .roomy-only { display:none; }
 .expanded-only:not(.compose.expanded *) { display:none; }
+
+/* ---- Phone held upright: height goes to the touchpad ----
+   Keys are 44 px, the smallest a finger hits reliably. The four screen tabs move up into the status line,
+   so the foot of the screen holds only the playback bar. The header is display:contents, so its parts sit
+   straight on the page's grid beside the tabs. */
+@media (orientation:portrait) and (max-width:699px) {
+  :root { --keyh:44px; --gap:6px; }
+  body { display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; grid-template-rows:44px minmax(0,1fr) auto;
+         column-gap:6px; padding:calc(4px + env(safe-area-inset-top)) 12px 0; }
+  header { display:contents; }
+  #dot { grid-area:1 / 1; align-self:center; }
+  #status, #vol { display:none; }   /* a lost connection still turns the dot red and shows a message */
+  #device { grid-area:1 / 2; max-width:none; min-width:0; font-size:14px; font-weight:600; }
+  nav { grid-area:1 / 3; align-self:center; gap:2px; margin:0; padding:0; border:1px solid var(--line); border-radius:14px; }
+  /* Icons only, the current screen also shows its name */
+  nav button { flex:none; width:44px; height:42px; font-size:0; border-radius:13px; }
+  nav .ic { margin:0 auto; }
+  nav button.sel { width:auto; padding:0 10px; font-size:12px; display:flex; align-items:center; gap:5px; }
+  nav button.sel .ic { margin:0; }
+  #gear { grid-area:1 / 4; width:40px; height:44px; margin:0; }
+  #gear .ic { width:20px; height:20px; }
+  .screen { grid-column:1 / -1; grid-row:2; gap:6px; padding:4px 0 6px; }
+  #toast { top:calc(56px + env(safe-area-inset-top)); }
+
+  .group, .compose { padding:6px; border-radius:16px; }
+  .tabs button { height:26px; }
+  .rocker.col { width:44px; }
+
+  /* Now playing: title, then the progress line with the volume at its end */
+  .card { padding:5px 10px 3px; gap:0; border-radius:14px; }
+  #now { font-size:13px; }
+  #track { height:20px; }
+  #track::before, #fill { top:8px; height:4px; }
+  #knob { top:3px; width:14px; height:14px; margin-left:-7px; }
+  #prog .vol { display:inline; }
+  /* Without a timeline the line stays for the volume alone */
+  body.notimeline #prog { display:flex; }
+  body.notimeline #prog > :not(.vol) { visibility:hidden; }
+
+  .bar { grid-column:1 / -1; grid-row:3; grid-template-columns:96px 1fr 48px; margin-bottom:max(8px, env(safe-area-inset-bottom)); }
+  .bar .rocker button, .bar .mute { height:48px; }
+  .seek { height:56px; grid-template-columns:1fr 56px 1fr; border-radius:28px; }
+  .seek button { height:48px; border-radius:24px; }
+  .seek .playbtn { width:50px; height:50px; box-shadow:0 0 0 4px rgba(56,225,208,.2); }
+  .playbtn .ic { width:24px; height:24px; }
+}
 
 /* ---- Tablets, either way up: enough room to show more at once ---- */
 @media (min-width:700px) and (min-height:600px) {
@@ -263,7 +314,9 @@ nav button.on { filter:none; transform:none; }
   #winlist { grid-column:3; grid-row:2 / -1; margin-bottom:0; }
   body.lefty #type .compose, body.lefty #winlist { grid-column:1; }
   /* The expanded text box: buttons beside it, since the keyboard leaves little height */
-  .compose.expanded { flex-direction:row; }
-  .compose.expanded .row { grid-template-columns:1fr; width:190px; align-content:start; }
+  .compose.expanded { flex-direction:row; padding-top:calc(10px + env(safe-area-inset-top)); }
+  .compose.expanded #closeText { position:static; padding:0 2px; }
+  .compose.expanded .row { grid-template-columns:1fr 1fr; width:190px; align-content:start; }
+  #sendText, #sendEnter { grid-column:1 / -1; }
 }
 #sheetdelete { display:flex; align-items:center; justify-content:center; gap:7px; font-size:13px; } #sheetdelete .ic { margin:0; width:18px; height:18px; }
