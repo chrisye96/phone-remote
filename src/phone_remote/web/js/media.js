@@ -98,7 +98,7 @@ function seekTo(pos) {
   pos = Math.max(0, Math.min(media.dur - 1, pos));
   setPos(pos);
   media.holdPos = performance.now() + 2500;
-  send({ a: "seek", to: pos });
+  send({ a: "seek", to: pos, title: media.title });   // the computer drops it if it now shows something else
   render();
 }
 function trackPos(e) {
