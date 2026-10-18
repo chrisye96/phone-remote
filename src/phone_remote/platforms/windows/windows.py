@@ -43,6 +43,12 @@ def _app_name(hwnd):
     return os.path.splitext(os.path.basename(buf.value))[0] if ok else ""
 
 
+def front_app():
+    """The program whose window is in front, as list_windows names it ("" when there is none)."""
+    front = user32.GetForegroundWindow()
+    return _app_name(front) if front else ""
+
+
 def list_windows():
     """任务栏上能看到的窗口，按从前到后的顺序。"""
     found = []
