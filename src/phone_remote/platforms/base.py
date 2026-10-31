@@ -22,6 +22,9 @@ class Platform:
         """是否已经有模拟按键鼠标的权限。"""
         return True
 
+    def show_error(self, title, text):
+        """Tell someone who has no terminal in front of them, with the system's own dialog."""
+
     # 输入
     def press(self, mods, name):
         """按一次键。mods 是修饰键名列表，name 是 keys.KEYS 或 keys.SYSTEM_KEYS 里的名字。"""
