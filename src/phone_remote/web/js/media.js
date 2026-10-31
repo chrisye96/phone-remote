@@ -92,7 +92,7 @@ export function pollState() {
   send({ a: "state" }).then(state => { if (state && typeof state === "object") applyState(state); });
 }
 
-// 跳转：进度条拖动和 ±30 秒都换算成绝对位置发给电脑
+// Seeking: dragging the progress bar and the Back and Fwd keys all become an absolute position for the computer
 function seekTo(pos) {
   if (!media.dur) return;
   pos = Math.max(0, Math.min(media.dur - 1, pos));

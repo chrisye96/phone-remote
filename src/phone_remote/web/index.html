@@ -33,6 +33,7 @@
   data-mac      the combination to use on a Mac when it differs
   data-cmd      a command that is not a key press, such as playpause
   data-rel      seconds to jump relative to the current position
+  data-step     direction of a jump whose length is chosen in Settings (backward / forward); js/settings.js sets its data-rel
   data-repeat   repeats while held
   data-only     only shown on this system (win / mac)
   data-feature  the feature switch it belongs to; removed when the switch is off
@@ -134,8 +135,8 @@
       <div class="gtitle roomy-only">General</div>
       <div class="row r211">
         <div class="rocker c-play" data-feature="progress">
-          <button data-rel="-30"><svg class="ic"><use href="icons.svg#rewind-backward-30"/></svg>Back 30s</button>
-          <button data-rel="30"><svg class="ic"><use href="icons.svg#rewind-forward-30"/></svg>Fwd 30s</button>
+          <button data-rel="-15" data-step="backward"><svg class="ic"><use href="icons.svg#rewind-backward-15"/></svg><span>Back 15s</span></button>
+          <button data-rel="15" data-step="forward"><svg class="ic"><use href="icons.svg#rewind-forward-15"/></svg><span>Fwd 15s</span></button>
         </div>
         <button data-rel="90" data-feature="progress"><svg class="ic"><use href="icons.svg#player-skip-forward"/></svg>Skip intro</button>
         <button id="timer" data-feature="sleep_timer"><svg class="ic"><use href="icons.svg#hourglass"/></svg><span>Sleep timer</span></button>
@@ -352,6 +353,10 @@
       <div class="flabel">Touchpad side when the screen is wide</div>
       <div class="seg" id="setside"><button type="button" data-value="left">Left</button><button type="button" data-value="right">Right</button></div>
       <p class="hint">Right suits steering the pointer with your right thumb.</p>
+    </div>
+    <div class="field" data-feature="progress">
+      <div class="flabel">Back and Fwd jump on the General tab</div>
+      <div class="seg" id="setseek"><button type="button" data-value="5">5s</button><button type="button" data-value="10">10s</button><button type="button" data-value="15">15s</button><button type="button" data-value="30">30s</button></div>
     </div>
     <p class="hint" id="setversion"></p>
     <button type="submit" class="primary">Done</button>

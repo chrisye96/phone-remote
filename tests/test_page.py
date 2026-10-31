@@ -19,6 +19,12 @@ PRESS_CASES = [
 ]
 
 
+def seek_steps():
+    """The jump lengths offered in Settings."""
+    page = (WEB / "index.html").read_text(encoding="utf-8")
+    return re.findall(r'data-value="(\d+)"', re.search(r'id="setseek".*', page).group())
+
+
 class PageTest(unittest.TestCase):
     def test_every_button_has_a_name_a_screen_reader_can_say(self):
         page = (WEB / "index.html").read_text(encoding="utf-8")
@@ -42,6 +48,40 @@ console.log(JSON.stringify(counts));""" % json.dumps([events for events, _ in PR
         result = subprocess.run(["node", "--input-type=module", "-"], input=script.encode("utf-8"),
                                 capture_output=True, check=True)
         self.assertEqual(json.loads(result.stdout), [count for _, count in PRESS_CASES])
+
+    def test_every_seek_step_on_offer_has_its_icons(self):
+        # The number is drawn into the icon, so a step without one would leave the key blank
+        icons = (WEB / "icons.svg").read_text(encoding="utf-8")
+        for step in seek_steps():
+            for direction in ("backward", "forward"):
+                with self.subTest(step=step, direction=direction):
+                    self.assertIn('id="rewind-%s-%s"' % (direction, step), icons)
+
+    @unittest.skipUnless(shutil.which("node"), "needs Node.js to run the page's JavaScript")
+    def test_general_tab_jumps_by_the_step_chosen_in_settings(self):
+        # What is stored on the phone -> seconds the key jumps; 15 unless a step on offer was chosen
+        cases = [(None, "15"), ("5", "5"), ("10", "10"), ("15", "15"), ("30", "30"), ("7", "15"), ("", "15")]
+        module = (WEB / "js" / "settings.js").read_text(encoding="utf-8")
+        module = re.sub(r"^import .*$", "", module, flags=re.M).replace("export ", "")
+        script = ("""function jump(stored, direction) {
+  const use = { setAttribute(name, value) { this.href = value; } }, span = {};
+  const key = { dataset: { step: direction }, querySelector: selector => (selector === "use" ? use : span) };
+  const children = %s.map(value => ({ dataset: { value } }));
+  const document = { getElementById: () => ({ children, querySelectorAll: () => children }), querySelectorAll: () => [key] };
+  const store = { get: () => stored }, choose = () => {}, t = (text, values) => text.replace("{n}", values.n);
+""" % json.dumps(seek_steps()) + module + """
+  applySeekStep();
+  return [String(key.dataset.rel), use.href, span.textContent];   // a real dataset holds strings
+}
+console.log(JSON.stringify(%s.flatMap(stored => [jump(stored, "backward"), jump(stored, "forward")])));"""
+                  % json.dumps([stored for stored, _ in cases]))
+        result = subprocess.run(["node", "--input-type=module", "-"], input=script.encode("utf-8"),
+                                capture_output=True, check=True)
+        expected = []
+        for _, step in cases:
+            expected.append(["-" + step, "icons.svg#rewind-backward-" + step, "Back %ss" % step])
+            expected.append([step, "icons.svg#rewind-forward-" + step, "Fwd %ss" % step])
+        self.assertEqual(json.loads(result.stdout), expected)
 
     @unittest.skipUnless(shutil.which("node"), "needs Node.js to run the page's JavaScript")
     def test_bundled_reader_reads_the_qr_code_the_computer_shows(self):
