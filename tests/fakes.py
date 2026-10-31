@@ -10,6 +10,9 @@ class FakePlatform(Platform):
         self.media = empty_media_state()
         self.can_toggle = True
 
+    def show_error(self, title, text):
+        self.calls.append(("show_error", title, text))
+
     def press(self, mods, name):
         self.calls.append(("press", mods, name))
 
