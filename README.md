@@ -91,6 +91,8 @@ The page rearranges itself to use the screen it is on:
 
 If you would rather steer the pointer with your left thumb, open Settings (the gear) and move the touchpad to the left; it applies whenever the screen is wide.
 
+The Back and Fwd keys on the General tab jump 15 seconds. To change that, pick 5, 10, 15 or 30 seconds in Settings. The keys on the Bilibili, YouTube and Music tabs are not affected.
+
 ### Keyboards and screen readers
 
 Every key, the navigation and the settings also work from a keyboard, a switch, or a screen reader such as TalkBack or VoiceOver: each has a spoken name, and the chosen screen and tab are announced. The touchpad and dragging the progress bar still need a finger; the scroll keys and the Back and Fwd keys do the same jobs.
@@ -124,7 +126,7 @@ Every feature can be turned off on its own. The first run creates a configuratio
 | `text_input` | Text input |
 | `windows` | Window list and switching |
 | `play_state` | Shows whether something is playing or paused, and its title |
-| `progress` | Progress bar, dragging to seek, ±30 seconds |
+| `progress` | Progress bar, dragging to seek, the Back and Fwd keys |
 | `volume_display` | Shows the volume level |
 | `sleep_timer` | Sleep timer |
 | `open_sites` | Site shortcuts |

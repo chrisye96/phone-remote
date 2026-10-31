@@ -91,6 +91,8 @@ macOS：运行 `sh scripts/build-macos.sh`，会在 `dist/` 里生成 `PhoneRemo
 
 如果你习惯用左手拇指控制指针，在设置（齿轮）里把触控板换到左边，横屏时生效。
 
+通用页的前进和后退键每次跳 15 秒，可以在设置里改成 5、10、15 或 30 秒。Bilibili、YouTube 和音乐页的按键不受影响。
+
 ### 键盘和读屏
 
 所有按键、导航和设置也可以用键盘、开关控制或读屏（TalkBack、VoiceOver）操作：每个按键都有能读出来的名称，当前所在的页面和分页也会读出来。触控板和拖动进度条仍然需要手指，滚动键和快进快退键可以代替它们。
@@ -124,7 +126,7 @@ macOS：运行 `sh scripts/build-macos.sh`，会在 `dist/` 里生成 `PhoneRemo
 | `text_input` | 文字输入 |
 | `windows` | 窗口列表和切换 |
 | `play_state` | 显示正在播放还是暂停，以及标题 |
-| `progress` | 进度条、拖动跳转、±30 秒 |
+| `progress` | 进度条、拖动跳转、前进和后退键 |
 | `volume_display` | 显示音量数值 |
 | `sleep_timer` | 定时暂停 |
 | `open_sites` | 网页快捷方式 |
