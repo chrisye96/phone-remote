@@ -87,11 +87,12 @@ class Handler(BaseHTTPRequestHandler):
 
     def allow_lan_origin(self):
         # A remote page served by another paired computer may send commands here. Only pages that
-        # themselves come from a private address are let in, so a website on the internet cannot
-        # even try; the signature still guards /api either way.
+        # themselves come from a private address or a computer's .local name are let in, so a website
+        # on the internet cannot even try; the signature still guards /api either way.
         origin = self.headers.get("Origin", "")
         try:
-            private = ipaddress.ip_address(urlsplit(origin).hostname or "").is_private
+            host = urlsplit(origin).hostname or ""
+            private = host.endswith(".local") or ipaddress.ip_address(host).is_private
         except ValueError:
             private = False
         if private:
@@ -131,7 +132,7 @@ class Handler(BaseHTTPRequestHandler):
         else:
             body = b""
             self.close_connection = True  # 没读的内容不能留在连接里
-        if self.path != "/api":
+        if self.path not in ("/api", "/prove"):
             return self.reply(404)
         if not body and length:
             return self.reply(400)  # too large to read, so there is nothing to check a signature against
@@ -147,6 +148,10 @@ class Handler(BaseHTTPRequestHandler):
         if not guard.fresh(sent, signature):
             # Signed correctly but too old, or already used. Tell the phone our clock so it can retry.
             return self.reply(401, json.dumps({"now": int(time.time() * 1000)}).encode(), "application/json")
+        if self.path == "/prove":
+            # The phone has shown it holds the token; before it moves to a new address, this computer has to
+            # show the same. "prove" is not a time, so this signature can never pass as a command.
+            return self.reply(200, sign(self.server.token, "prove", body).encode())
         try:
             result = self.server.dispatcher.handle(json.loads(body))
         except FeatureDisabled:

@@ -46,6 +46,13 @@ export function addDevice(found, alias) {
   switchDevice(found.url);
 }
 export function renameActive(alias) { active.alias = alias; saveDevices(); }
+// Puts the active computer under a new address, in place of any older entry for that address
+export function moveActive(url) {
+  devices = devices.filter(d => d === active || d.url !== url);
+  active.url = url;
+  store.set("active", url);
+  saveDevices();
+}
 export function removeDevice(url) {
   devices = devices.filter(d => d.url !== url);
   saveDevices();
@@ -69,13 +76,23 @@ let refused = "";      // set once the computer rejects our signature; trying ag
 
 // The token is never sent. Each command carries the time and a signature over time and body,
 // so someone listening on the network can neither learn the token nor replay what they heard.
-function post(body) {
+function post(body, address = active.url + "/api") {
   const sent = lastSent = Math.max(Date.now() + clockOffset, lastSent + 1);   // never the same twice
-  return fetch(active.url + "/api", {
+  return fetch(address, {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-Auth": sent + "." + hmacSha256(token, sent + "\n" + body) },
     body,
   });
+}
+
+// Whether the computer at this address is the active one: only a holder of the token can sign the random value
+// sent here. The time limit keeps a late answer from moving the page while someone is using it.
+const PROVE_TIMEOUT = 3000;
+export function proves(url) {
+  const value = Array.from(crypto.getRandomValues(new Uint8Array(16)), n => n.toString(16).padStart(2, "0")).join("");
+  const answer = post(value, url + "/prove").then(r => (r.ok ? r.text() : "")).catch(() => "");
+  const late = new Promise(done => setTimeout(done, PROVE_TIMEOUT, ""));
+  return Promise.race([answer, late]).then(proof => proof === hmacSha256(token, "prove\n" + value));
 }
 
 export function send(data) {

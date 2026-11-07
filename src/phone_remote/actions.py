@@ -7,6 +7,7 @@ import webbrowser
 from . import __version__, siteinfo
 from .config import MAX_SHORTCUTS
 from .keys import parse_combo
+from .pairing import local_name
 from .timer import SleepTimer
 
 # 指令 -> 它属于哪个功能开关；不在表里的是核心功能，不能关
@@ -67,8 +68,8 @@ class Dispatcher:
         pass
 
     def _do_hello(self, msg):
-        return {"platform": self.platform.name, "host": socket.gethostname(), "version": __version__,
-                "features": self.features,
+        return {"platform": self.platform.name, "host": socket.gethostname(), "local": local_name(),
+                "version": __version__, "features": self.features,
                 "shortcuts": self.shortcuts, "max_shortcuts": MAX_SHORTCUTS}
 
     def _do_state(self, msg):

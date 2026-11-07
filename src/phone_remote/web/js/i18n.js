@@ -168,6 +168,11 @@ const TABLES = {
     "30s": "30 秒",
     "Done": "完成",
     "Phone Remote {v} on {name}": "{name} 上的手机遥控器 {v}",
+    // an old home screen icon
+    "Keep this icon working": "让这个图标一直能用",
+    "The router can give this computer a new address, and then this icon stops opening. Open the address that stays the same, add that page to your home screen, then delete this icon.": "路由器可能给这台电脑换地址，到时这个图标就打不开了。打开不会变的新地址，把那个页面添加到主屏幕，再删掉这个图标。",
+    "Later": "以后再说",
+    "Open new address": "打开新地址",
   },
 };
 

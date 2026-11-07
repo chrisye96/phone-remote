@@ -7,6 +7,7 @@ import { initMedia } from "./media.js";
 import { initNav, setSite } from "./nav.js";
 import { initSettings } from "./settings.js";
 import { initShortcuts, renderShortcuts } from "./shortcuts.js";
+import { settleAddress } from "./stable.js";
 import { initText } from "./text.js";
 import { initTimer } from "./timer.js";
 import { initTouchpads } from "./touchpad.js";
@@ -41,6 +42,7 @@ function applyEnvironment(info) {
   renderShortcuts(info.shortcuts || [], info.max_shortcuts);
   const selected = document.querySelector(".tabs button.sel");
   setSite(selected ? selected.dataset.site : "any");
+  settleAddress(info.local);
 }
 
 let connected = false;

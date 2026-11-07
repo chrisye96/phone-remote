@@ -184,6 +184,11 @@ class DispatcherTest(unittest.TestCase):
         self.assertFalse(hello["features"]["windows"])
         self.assertTrue(hello["features"]["touchpad"])
 
+    def test_hello_gives_the_address_that_survives_an_ip_change(self):
+        dispatcher = Dispatcher(FakePlatform(), dict.fromkeys(FEATURES, True))
+        with mock.patch("socket.gethostname", return_value="Dianna"):
+            self.assertEqual(dispatcher.handle({"a": "hello"})["local"], "dianna.local")
+
 
 class FeatureSwitchTest(unittest.TestCase):
     def test_disabled_feature_blocks_its_actions(self):
