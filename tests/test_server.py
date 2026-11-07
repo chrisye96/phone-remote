@@ -153,8 +153,35 @@ class ServerTest(unittest.TestCase):
         with urllib.request.urlopen(request) as r:
             self.assertEqual(r.headers["Access-Control-Allow-Origin"], peer)
 
+    def test_page_from_a_computers_local_name_may_call_the_api(self):
+        status, _, _ = self.request("/api", {"a": "ping"}, origin="http://dianna.local:8765")
+        self.assertEqual(status, 204)
+        preflight = urllib.request.Request(self.base + "/api", method="OPTIONS", headers={"Origin": "http://Dianna.local:8765"})
+        with urllib.request.urlopen(preflight) as r:
+            self.assertEqual(r.headers["Access-Control-Allow-Origin"], "http://Dianna.local:8765")
+
+    def test_computer_proves_it_holds_the_token(self):
+        status, body, _ = self.request("/prove", b"random-value")
+        self.assertEqual(status, 200)
+        self.assertEqual(body.decode(), sign(TOKEN, "prove", b"random-value"))
+
+    def test_proof_answers_only_a_signed_request(self):
+        self.assertEqual(self.request("/prove", b"random-value", token="wrong")[0], 403)
+        self.assertEqual(self.request("/prove", b"random-value", token=None)[0], 403)
+
+    def test_proof_cannot_be_replayed_as_a_command(self):
+        sent = "prove"
+        body = b'{"a": "click"}'
+        proof = self.request("/prove", body)[1].decode()
+        request = urllib.request.Request(self.base + "/api", body, {"X-Auth": sent + "." + proof})
+        with self.assertRaises(urllib.error.HTTPError) as refused:
+            urllib.request.urlopen(request)
+        refused.exception.close()
+        self.assertEqual(refused.exception.code, 401)
+        self.assertEqual(self.platform.calls, [])
+
     def test_page_from_the_internet_may_not_call_the_api(self):
-        for origin in ("https://evil.example", "http://8.8.8.8", "null", ""):
+        for origin in ("https://evil.example", "http://8.8.8.8", "null", "", "http://dianna.local.evil.example"):
             with self.subTest(origin=origin):
                 preflight = urllib.request.Request(self.base + "/api", method="OPTIONS", headers={"Origin": origin})
                 with urllib.request.urlopen(preflight) as r:

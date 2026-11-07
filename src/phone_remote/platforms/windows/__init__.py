@@ -25,6 +25,7 @@ class WindowsPlatform(Platform):
     mouse_scroll = staticmethod(_input.mouse_scroll)
     list_windows = staticmethod(_windows.list_windows)
     focus_window = staticmethod(_windows.focus_window)
+    show_error = staticmethod(_windows.show_error)
 
     def media_state(self):
         return self._media.state()

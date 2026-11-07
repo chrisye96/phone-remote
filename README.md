@@ -91,6 +91,8 @@ The page rearranges itself to use the screen it is on:
 
 If you would rather steer the pointer with your left thumb, open Settings (the gear) and move the touchpad to the left; it applies whenever the screen is wide.
 
+The Back and Fwd keys on the General tab jump 15 seconds. To change that, pick 5, 10, 15 or 30 seconds in Settings. The keys on the Bilibili, YouTube and Music tabs are not affected.
+
 ### Keyboards and screen readers
 
 Every key, the navigation and the settings also work from a keyboard, a switch, or a screen reader such as TalkBack or VoiceOver: each has a spoken name, and the chosen screen and tab are announced. The touchpad and dragging the progress bar still need a finger; the scroll keys and the Back and Fwd keys do the same jobs.
@@ -112,7 +114,7 @@ The name defaults to the computer's own host name. The list is kept in the phone
 - **Re-pair.** Choose Re-pair in the tray menu (`--reset-pairing` in terminal mode) to switch to a new pairing code at once. Every phone paired before stops working and has to scan again. Do this if you lose a phone or someone else has seen the QR code.
 - **Commands are not encrypted.** Someone capturing traffic on the same network can see which keys you press and what you type. That is fine at home or on your own phone hotspot. On office, dorm or cafe Wi-Fi, do not type passwords on the Type screen.
 
-When the computer moves to another network, such as a phone hotspot, its address changes. Right-click the tray icon, choose Show QR code and scan again. If Windows treats the network as "Public", the firewall may block the phone; allow the program when prompted, or set the network to "Private".
+The QR code holds the computer's IP address, which a router can change at any time. So when the page opens in a browser, it checks whether the phone can also reach the computer by name (such as `http://dianna.local:8765`) and moves there if it can, bringing this phone's settings along. Add the page to your home screen after that and the icon keeps working when the IP address changes. On networks where the name does not work, the page stays on the IP address and nothing else changes. An icon added before this feature keeps its old address, because a page cannot change its own icon; it offers the new address once, and after adding that one you can delete the old icon. If the page cannot be opened at all, right-click the tray icon, choose Show QR code and scan again. If Windows treats the network as "Public", the firewall may block the phone; allow the program when prompted, or set the network to "Private".
 
 ## Feature switches
 
@@ -124,7 +126,7 @@ Every feature can be turned off on its own. The first run creates a configuratio
 | `text_input` | Text input |
 | `windows` | Window list and switching |
 | `play_state` | Shows whether something is playing or paused, and its title |
-| `progress` | Progress bar, dragging to seek, ±30 seconds |
+| `progress` | Progress bar, dragging to seek, the Back and Fwd keys |
 | `volume_display` | Shows the volume level |
 | `sleep_timer` | Sleep timer |
 | `open_sites` | Site shortcuts |

@@ -11,7 +11,8 @@ from pathlib import Path
 OUTLINE = """
 device-tv world keyboard app-window volume volume-2 volume-off maximize arrows-minimize check
 chevron-up chevron-down chevron-left chevron-right hand-finger message-2 thumb-up star minus plus
-rewind-backward-30 rewind-forward-30 rewind-backward-10 rewind-forward-10 hourglass badge-cc space
+rewind-backward-30 rewind-forward-30 rewind-backward-15 rewind-forward-15 rewind-backward-10 rewind-forward-10
+rewind-backward-5 rewind-forward-5 hourglass badge-cc space
 arrow-up arrow-down arrow-left arrow-right refresh zoom-in zoom-out x send corner-down-left
 arrow-bar-down backspace select-all arrow-back-up arrow-bar-to-right microphone message-plus link
 switch-horizontal layout-grid screen-share arrows-maximize rectangle trash player-skip-forward

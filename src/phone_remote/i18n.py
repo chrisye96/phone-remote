@@ -25,6 +25,11 @@ _TABLES = {
         "A newer version is available: v%s": "有新版本可用：v%s",
         # console
         "Port %d is already in use. Phone Remote is probably running already.": "端口 %d 已被占用，程序可能已经在运行。",
+        "Port %d is blocked or reserved on this computer, so Phone Remote could not start.":
+            "端口 %d 在这台电脑上被禁用或保留了，手机遥控器无法启动。",
+        "To use another port, change the port number in this file to one between 1024 and 49151, "
+        "then start Phone Remote again and scan the new QR code: %s":
+            "要换一个端口，请把这个文件里的端口号改成 1024 到 49151 之间的数字，然后重新启动手机遥控器，再扫一次新的二维码：%s",
         "Phone Remote is running. Open this address on your phone, or scan the QR code that just opened:":
             "手机遥控器已启动。手机打开这个网址（或扫电脑上弹出的二维码）：",
         "No permission to control this computer yet. Open System Settings > Privacy & Security > Accessibility,":

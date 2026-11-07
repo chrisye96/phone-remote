@@ -8,10 +8,13 @@ dwmapi = ctypes.windll.dwmapi
 HWND = ctypes.c_void_p
 ENUM_PROC = ctypes.WINFUNCTYPE(ctypes.c_bool, HWND, ctypes.c_void_p)
 KEYUP = 0x0002
+MB_ICONERROR = 0x10
+MB_SETFOREGROUND = 0x10000
 
 for _fn in ("IsWindowVisible", "IsWindow", "IsIconic", "SetForegroundWindow",
             "BringWindowToTop", "GetWindowTextLengthW"):
     getattr(user32, _fn).argtypes = [HWND]
+user32.MessageBoxW.argtypes = [HWND, ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint]
 user32.GetForegroundWindow.restype = HWND
 user32.GetWindow.restype = HWND
 user32.GetWindow.argtypes = [HWND, ctypes.c_uint]
@@ -94,3 +97,7 @@ def focus_window(hwnd):
         user32.BringWindowToTop(hwnd)
         user32.SetForegroundWindow(hwnd)
         user32.AttachThreadInput(ours, theirs, False)
+
+
+def show_error(title, text):
+    user32.MessageBoxW(None, text, title, MB_ICONERROR | MB_SETFOREGROUND)

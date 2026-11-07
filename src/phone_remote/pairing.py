@@ -1,6 +1,7 @@
 """配对：算出手机要打开的网址，并生成电脑上显示的二维码页面。"""
 import html
 import json
+import re
 import socket
 import sys
 
@@ -27,6 +28,16 @@ def lan_ip():
 
 def phone_url(port, token):
     return "http://%s:%d/#%s" % (lan_ip(), port, token)
+
+
+def local_name():
+    """The computer's name on the local network, which stays the same when the router gives it a new IP address.
+
+    The phone tries this name itself and keeps using the IP address if it gets no answer, so a name that
+    only looks right does no harm. Empty when the name cannot be part of an address at all.
+    """
+    name = socket.gethostname().split(".")[0].lower()
+    return name + ".local" if re.fullmatch(r"[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?", name) else ""
 
 
 _PAIR_PAGE = """<!doctype html><html lang="__LANG__"><meta charset="utf-8"><title>__TITLE__</title>

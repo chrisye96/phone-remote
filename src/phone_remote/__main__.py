@@ -34,6 +34,7 @@ def main():
     logging.basicConfig(filename=config.data_dir / "phone-remote.log", level=logging.INFO,
                         format="%(asctime)s %(levelname)s %(message)s", encoding="utf-8")
     pair_url = "http://127.0.0.1:%d/pair" % config.port
+    config_file = config.data_dir / "config.json"
 
     def show_qr():
         webbrowser.open(pair_url)
@@ -64,6 +65,18 @@ def main():
         dispatcher = Dispatcher(platform, config.features, shortcuts=config.shortcuts,
                                 on_change=lambda: config_module.save(config))
         server = make_server(config.port, config.token, dispatcher, current_url)
+    except PermissionError as error:
+        # The system refused the port (Windows reserves ranges of its own, which can change at a reboot), so no
+        # other copy is involved and no QR page exists to open. Without a terminal print goes nowhere, hence the
+        # dialog, shown at login as well: that is when a newly reserved port first gets in the way.
+        log.error("port %d was refused: %s", config.port, error)
+        problem = t("Port %d is blocked or reserved on this computer, so Phone Remote could not start.") % config.port
+        remedy = t("To use another port, change the port number in this file to one between 1024 and 49151, "
+                   "then start Phone Remote again and scan the new QR code: %s") % config_file
+        print(problem + "\n" + remedy)
+        if not args.console:
+            platform.show_error(t("Phone Remote"), problem + "\n\n" + remedy)
+        return
     except OSError:
         # 端口被占用，多半是已经有一个在运行了，那就只把二维码页面打开
         log.warning("port %d is in use, assuming another instance is running", config.port)
@@ -82,7 +95,7 @@ def main():
         log.warning("no accessibility permission")
         print("\n" + t("No permission to control this computer yet. Open System Settings > Privacy & Security > Accessibility,"))
         print(t("turn on the app that runs this program, then start it again."))
-    print("\n" + t("Feature switches are in this file: %s") % (config.data_dir / "config.json"))
+    print("\n" + t("Feature switches are in this file: %s") % config_file)
 
     platform.start()
     if not quiet:

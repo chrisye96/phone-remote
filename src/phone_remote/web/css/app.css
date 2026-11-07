@@ -28,19 +28,20 @@ header { display:flex; align-items:center; gap:7px; height:26px; flex:none; font
 #prog .vol { display:none; }   /* the copy in the progress line, shown on an upright phone */
 
 /* 按键：顶部一道高光、底部一道阴影，看起来是凸起可按的 */
-button { font:inherit; color:var(--text); background:var(--key); border:0; border-top:1px solid rgba(255,255,255,.14); border-radius:14px;
+button, a.button { font:inherit; color:var(--text); background:var(--key); border:0; border-top:1px solid rgba(255,255,255,.14); border-radius:14px;
          height:var(--keyh); min-width:0; font-size:12px; line-height:1.15; padding:0 2px; box-shadow:0 2px 0 rgba(0,0,0,.45); touch-action:manipulation;
          transition:transform .08s, filter .08s; }
+a.button { text-decoration:none; }
 button.on { filter:brightness(1.35); transform:translateY(1px) scale(.98); }
 button.c-play { background:var(--play-bg); } .c-play .ic { color:var(--play-ic); }
 button.c-vol { background:var(--vol-bg); } .c-vol .ic { color:var(--vol-ic); }
 button.c-ok { background:var(--confirm-bg); } .c-ok .ic { color:var(--confirm-ic); }
 button.c-nav { background:var(--nav-bg); } .c-nav .ic { color:var(--nav-ic); }
 button.c-exit { background:var(--exit-bg); } .c-exit .ic { color:var(--exit-ic); }
-button.big, button.primary { font-size:14px; display:flex; align-items:center; justify-content:center; gap:7px; }
+button.big, button.primary, a.primary { font-size:14px; display:flex; align-items:center; justify-content:center; gap:7px; }
 .big .ic, .primary .ic { margin:0; }
 /* Darker than --play, which white text does not stand out from enough (3.2:1; this is 4.8:1) */
-button.primary { background:#3f6bdb; color:#fff; } button.primary .ic { width:18px; height:18px; }
+button.primary, a.primary { background:#3f6bdb; color:#fff; } button.primary .ic { width:18px; height:18px; }
 
 /* 胶囊键：一对相关的按键连成一个，中间一道分隔线 */
 .rocker { display:flex; background:var(--key); border-radius:14px; border-top:1px solid rgba(255,255,255,.14); box-shadow:0 2px 0 rgba(0,0,0,.45); overflow:hidden; }
