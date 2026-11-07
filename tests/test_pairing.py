@@ -79,5 +79,18 @@ class PairPageTest(unittest.TestCase):
         self.assertRegex(pairing.phone_url(8765, "tok"), r"^http://[\d.]+:8765/#tok$")
 
 
+class LocalNameTest(unittest.TestCase):
+    def test_name_that_works_in_an_address(self):
+        for computer, expected in (("Dianna", "dianna.local"), ("DESKTOP-4K2", "desktop-4k2.local"),
+                                   ("Chriss-MacBook.local", "chriss-macbook.local"), ("mac.lan", "mac.local")):
+            with self.subTest(computer=computer), mock.patch("socket.gethostname", return_value=computer):
+                self.assertEqual(pairing.local_name(), expected)
+
+    def test_no_name_when_it_cannot_be_part_of_an_address(self):
+        for computer in ("", "小明的电脑", "my_pc", "-pc", "pc-", "x" * 64):
+            with self.subTest(computer=computer), mock.patch("socket.gethostname", return_value=computer):
+                self.assertEqual(pairing.local_name(), "")
+
+
 if __name__ == "__main__":
     unittest.main()

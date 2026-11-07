@@ -341,6 +341,18 @@
   </form>
 </div>
 
+<!-- Shown once, on a home screen icon that still holds the IP address (js/stable.js) -->
+<div id="stablesheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="stabletitle" hidden>
+  <form>
+    <h3 id="stabletitle">Keep this icon working</h3>
+    <p class="hint">The router can give this computer a new address, and then this icon stops opening. Open the address that stays the same, add that page to your home screen, then delete this icon.</p>
+    <div class="row r12">
+      <button type="button" id="stablelater">Later</button>
+      <a id="stablelink" class="button primary" target="_blank" rel="noopener">Open new address</a>
+    </div>
+  </form>
+</div>
+
 <!-- Settings, opened from the gear in the header. Each choice takes effect as soon as it is tapped. -->
 <div id="setsheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="settitle" hidden>
   <form id="setform">
