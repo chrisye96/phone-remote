@@ -1,4 +1,4 @@
-"""What starting does when the port cannot be had: who is told what, and whether the QR page opens."""
+"""What starting does: what the log records, and when the port cannot be had, who is told what and whether the QR page opens."""
 import contextlib
 import errno
 import io
@@ -12,7 +12,7 @@ from unittest import mock
 
 from fakes import FakePlatform
 from phone_remote import __main__ as app
-from phone_remote import i18n
+from phone_remote import __version__, i18n
 from phone_remote.server import make_server
 
 PORT = 8765
@@ -20,7 +20,7 @@ PORT = 8765
 REFUSED = PermissionError(errno.EACCES, "forbidden by its access permissions")
 
 
-class PortFailureTest(unittest.TestCase):
+class StartTest(unittest.TestCase):
     def setUp(self):
         folder = tempfile.TemporaryDirectory()
         self.addCleanup(folder.cleanup)
@@ -44,6 +44,29 @@ class PortFailureTest(unittest.TestCase):
             app.main()
         return output.getvalue()
 
+
+class StartLogTest(StartTest):
+    # When a phone stops reaching the computer, the log has to show whether its address changed, and which
+    # version was running; it is often all there is to go on from the computer the remote is used with.
+    def started_line(self, name):
+        with mock.patch.object(app, "make_server"), mock.patch.object(app.update, "newer_version", return_value=None), \
+                mock.patch.object(app, "lan_ip", return_value="10.0.0.177"), \
+                mock.patch.object(app, "local_name", return_value=name), \
+                self.assertLogs("phone_remote", "INFO") as logs:
+            self.start(PORT, "--console", "--background")
+        return next(line for line in logs.output if "started" in line)
+
+    def test_start_records_version_address_and_name(self):
+        line = self.started_line("dianna.local")
+        self.assertIn("v" + __version__, line)
+        self.assertIn("10.0.0.177:%d" % PORT, line)
+        self.assertIn("dianna.local", line)
+
+    def test_start_says_when_there_is_no_usable_name(self):
+        self.assertIn("no .local name", self.started_line(""))
+
+
+class PortFailureTest(StartTest):
     def start_refused(self, *flags):
         with mock.patch("socketserver.TCPServer.server_bind", side_effect=REFUSED):
             return self.start(PORT, *flags)

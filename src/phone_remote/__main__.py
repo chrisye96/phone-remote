@@ -7,11 +7,12 @@ import logging
 import threading
 import webbrowser
 
+from . import __version__
 from . import config as config_module
 from . import i18n, tray, update
 from .actions import Dispatcher
 from .i18n import t
-from .pairing import phone_url
+from .pairing import lan_ip, local_name, phone_url
 from .platforms import get_platform
 from .server import make_server
 
@@ -88,7 +89,9 @@ def main():
     use_tray = tray.available() and not args.console
     server.tray_mode = use_tray
     server.has_permission = platform.has_permission
-    log.info("started on port %d, tray=%s", config.port, use_tray)
+    # The address and version answer the first questions when a phone stops reaching this computer
+    log.info("started v%s on %s:%d (%s), tray=%s", __version__, lan_ip(), config.port,
+             local_name() or "no .local name", use_tray)
     print(t("Phone Remote is running. Open this address on your phone, or scan the QR code that just opened:"))
     print("  " + url)
     if not platform.has_permission():
