@@ -2,7 +2,7 @@
 
 # Phone Remote
 
-**English** | [中文](README.zh-CN.md)
+**English** | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md)
 
 Run a small program on your computer, open a web page on your phone, and control what is playing on the computer: volume, play and pause, seeking, a touchpad, scrolling, text input, and the usual shortcuts for Bilibili, YouTube, browsers and AI chat apps.
 
